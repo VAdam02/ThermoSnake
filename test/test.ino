@@ -6,7 +6,7 @@
 #include "DHT.h"
 
 #define DHTTYPE DHT11   // DHT 11 
-#define DHTPIN 8
+#define DHTPIN 13
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -72,7 +72,7 @@ void setup()
   
   // Not all the characters will fit on the display. This is normal.
   // Library will draw what it can and the rest will be clipped.
-  display.write("32.5C");
+  display.write("29.7C");
   
 
   display.display();

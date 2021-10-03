@@ -53,7 +53,7 @@ void setup()
   */
   
   int a = 0;
-  char c = 'A';
+  char c = 'B';
   drawChar(a, 1, c, 6);
   a = 6 * 6 + a;
   drawChar(a, 1, c, 5);
@@ -128,6 +128,23 @@ void drawChar(byte x, byte y, char c, byte fsize)
     drawOuterQuarterCircle(x+4*fsize, y+fsize, fsize, 0);
     drawQuarterCircle(x, y, fsize, 3); //TopLeft  round
     drawOuterQuarterCircle(x, y, fsize, 3);
+  }
+  else if (c == 'B' || c == 'b')
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    drawSquare(x+1*fsize, y, 3*fsize, fsize); //Top line
+    drawQuarterCircle(x+4*fsize, y, fsize, 0); //TopRight  round
+    drawOuterQuarterCircle(x+4*fsize, y+fsize, fsize, 0);
+    drawSquare(x+4*fsize, y+1*fsize, fsize, fsize); //Right top pill
+    drawQuarterCircle(x+4*fsize, y+2*fsize, fsize, 1); //Middle round
+    drawOuterQuarterCircle(x+4*fsize, y+2*fsize, fsize, 1);
+    drawSquare(x+1*fsize, y+2*fsize, 3*fsize, fsize); //Middle line
+    drawQuarterCircle(x+4*fsize, y+2*fsize, fsize, 0); //Middle round 2
+    drawOuterQuarterCircle(x+4*fsize, y+3*fsize, fsize, 0);
+    drawSquare(x+4*fsize, y+3*fsize, fsize, fsize); //Right bottom pill
+    drawQuarterCircle(x+4*fsize, y+4*fsize, fsize, 1); //Bottom round
+    drawOuterQuarterCircle(x+4*fsize, y+4*fsize, fsize, 1);
+    drawSquare(x+1*fsize, y+4*fsize, 3*fsize, fsize); //Bottom line
   }
   else if (c == 'R' || c == 'r')
   {
