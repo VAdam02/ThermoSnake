@@ -6,7 +6,7 @@
 #include "DHT.h"
 
 #define DHTTYPE DHT11   // DHT 11 
-#define DHTPIN 13
+#define DHTPIN 2
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
