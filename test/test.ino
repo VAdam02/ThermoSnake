@@ -22,8 +22,19 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 DHT dht(DHTPIN, DHTTYPE);
 
+#define LENGTH 30
+
+float temp[LENGTH];
+float hum[LENGTH];
+
 void setup()
 {
+  for (int i = 0; i < LENGTH; i++)
+  {
+    temp[i] = 0;
+    hum[i] = 0;
+  }
+  
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -85,20 +96,69 @@ void setup()
 
 void loop()
 {
-  delay(2000);
+  delay(1000);
 
   display.clearDisplay();
-  display.setTextSize(2);      // Normal 1:1 pixel scale
+  display.setTextSize(1);      // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE); // Draw white text
   display.setCursor(0, 0);     // Start at top-left corner
   display.cp437(true);         // Use full 256 char 'Code Page 437' font
+
+  for (int i = 1; i < LENGTH; i++)
+  {
+    temp[i-1] = temp[i];
+    hum[i-1] = hum[i];
+  }
   
   // Not all the characters will fit on the display. This is normal.
   // Library will draw what it can and the rest will be clipped.
   String asd = "Temp ";
   asd += String(dht.readTemperature());
+  temp[LENGTH-1] = dht.readTemperature();
+  
+  float avg = 0;
+  for (int i = 0; i < LENGTH; i++)
+  {
+    avg += temp[i];
+  }
+  avg /= LENGTH;
+
+  float avg2 = 0;
+  for (int i = 0; i < LENGTH; i++)
+  {
+    avg2 += abs(temp[i] - avg);
+  }
+  avg2 /= LENGTH;
+  
+  asd += "\nAvgTemp ";
+  asd += String(avg);
+  asd += " ";
+  asd += String(avg2);
+
+
+  
   asd += "\nHum ";
   asd += String(dht.readHumidity());
+  hum[LENGTH-1] = dht.readHumidity();
+  
+  avg = 0;
+  for (int i = 0; i < LENGTH; i++)
+  {
+    avg += hum[i];
+  }
+  avg /= LENGTH;
+
+  avg2 = 0;
+  for (int i = 0; i < LENGTH; i++)
+  {
+    avg2 += abs(hum[i] - avg);
+  }
+  avg2 /= LENGTH;
+  
+  asd += "\nAvgHum ";
+  asd += String(avg);
+  asd += " ";
+  asd += String(avg2);
   
   display.print(asd);
   display.display();
