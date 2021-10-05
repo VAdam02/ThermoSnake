@@ -109,7 +109,138 @@ void Graphics::drawChar(int time, byte x, byte y, char c, byte fsize)
     y += (fsize) - step;
   }
   
-  drawSquare(x, y, 5*fsize, 5*fsize);
+  if (c == 'A' || c == 'a')
+  {
+    drawSquare(x, y+fsize, fsize, 4*fsize); //Left pill
+    drawSquare(x+4*fsize, y+fsize, fsize, 4*fsize); //Right pill
+    drawSquare(x+fsize, y+2*fsize, 3*fsize, fsize); //Bottom line
+    drawSquare(x+fsize, y, 3*fsize, fsize); //Top line
+    drawQuarterCircle(x+4*fsize, y, fsize, 0); //TopRight  round
+    drawOuterQuarterCircle(x+3*fsize, y+fsize, fsize, 0);
+    drawQuarterCircle(x, y, fsize, 3); //TopLeft  round
+    drawOuterQuarterCircle(x+fsize, y+fsize, fsize, 3);
+  }
+  else if (c == 'B' || c == 'b')
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    drawSquare(x+1*fsize, y, 3*fsize, fsize); //Top line
+    drawQuarterCircle(x+4*fsize, y, fsize, 0); //TopRight  round
+    drawOuterQuarterCircle(x+3*fsize, y+fsize, fsize, 0);
+    drawSquare(x+4*fsize, y+1*fsize, fsize, fsize); //Right top pill
+    drawQuarterCircle(x+4*fsize, y+2*fsize, fsize, 1); //Middle round
+    drawOuterQuarterCircle(x+3*fsize, y+fsize, fsize, 1);
+    drawSquare(x+1*fsize, y+2*fsize, 3*fsize, fsize); //Middle line
+    drawQuarterCircle(x+4*fsize, y+2*fsize, fsize, 0); //Middle round 2
+    drawOuterQuarterCircle(x+3*fsize, y+3*fsize, fsize, 0);
+    drawSquare(x+4*fsize, y+3*fsize, fsize, fsize); //Right bottom pill
+    drawQuarterCircle(x+4*fsize, y+4*fsize, fsize, 1); //Bottom round
+    drawOuterQuarterCircle(x+3*fsize, y+3*fsize, fsize, 1);
+    drawSquare(x+1*fsize, y+4*fsize, 3*fsize, fsize); //Bottom line
+  }
+  else if (c == 'C' || c == 'c')
+  {
+    drawSquare(x+4*fsize, y+1*fsize, fsize, fsize); //RightTop pill
+    drawQuarterCircle(x+4*fsize, y, fsize, 0); //TopRight  round
+    drawOuterQuarterCircle(x+3*fsize, y+fsize, fsize, 0);
+    drawSquare(x+1*fsize, y, 3*fsize, fsize); //Top line
+    drawQuarterCircle(x, y, fsize, 3); //TopLeft  round
+    drawOuterQuarterCircle(x+fsize, y+fsize, fsize, 3);
+    drawSquare(x, y+fsize, fsize, 3*fsize); //Left pill
+    drawQuarterCircle(x, y+4*fsize, fsize, 2); //BottomLeft  round
+    drawOuterQuarterCircle(x+fsize, y+3*fsize, fsize, 2);
+    drawSquare(x+1*fsize, y+4*fsize, 3*fsize, fsize); //Bottom line
+    drawQuarterCircle(x+4*fsize, y+4*fsize, fsize, 1); //Bottom round
+    drawOuterQuarterCircle(x+3*fsize, y+3*fsize, fsize, 1);
+    drawSquare(x+4*fsize, y+3*fsize, fsize, fsize); //RightBottom pill
+  }
+  else if (c == 'D' || c == 'd')
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    drawSquare(x+1*fsize, y, 3*fsize, fsize); //Top line
+    drawQuarterCircle(x+4*fsize, y, fsize, 0); //TopRight  round
+    drawOuterQuarterCircle(x+3*fsize, y+fsize, fsize, 0);
+    drawSquare(x+4*fsize, y+fsize, fsize, 3*fsize); //Right pill
+    drawQuarterCircle(x+4*fsize, y+4*fsize, fsize, 1); //Bottom round
+    drawOuterQuarterCircle(x+3*fsize, y+3*fsize, fsize, 1);
+    drawSquare(x+1*fsize, y+4*fsize, 3*fsize, fsize); //Bottom line
+  }
+  else if (c == 'E' || c == 'e')
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    drawSquare(x+1*fsize, y, 4*fsize, fsize); //Top line
+    drawSquare(x+1*fsize, y+2*fsize, 4*fsize, fsize); //Middle line
+    drawSquare(x+1*fsize, y+4*fsize, 4*fsize, fsize); //Bottom line
+  }
+  else if (c == 'F' || c == 'f')
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    drawSquare(x+1*fsize, y, 4*fsize, fsize); //Top line
+    drawSquare(x+1*fsize, y+2*fsize, 3*fsize, fsize); //Middle line
+  }
+  else if (c == 'G' || c == 'g')
+  {
+    
+    if (fsize > 1) { drawQuarterCircle(x+4*fsize, y, fsize, 0); } //TopRight  round
+    else { drawSquare(x+4*fsize, y, fsize, fsize); } //Top line
+    
+    drawSquare(x+1*fsize, y, 3*fsize, fsize); //Top line
+    drawQuarterCircle(x, y, fsize, 3); //TopLeft  round
+    drawOuterQuarterCircle(x+fsize, y+fsize, fsize, 3);
+    drawSquare(x, y+fsize, fsize, 3*fsize); //Left pill
+    drawQuarterCircle(x, y+4*fsize, fsize, 2); //BottomLeft  round
+    drawOuterQuarterCircle(x+fsize, y+3*fsize, fsize, 2);
+    drawSquare(x+1*fsize, y+4*fsize, 3*fsize, fsize); //Bottom line
+    drawQuarterCircle(x+4*fsize, y+4*fsize, fsize, 1); //Bottom round
+    drawOuterQuarterCircle(x+3*fsize, y+3*fsize, fsize, 1);
+    drawSquare(x+4*fsize, y+2*fsize, fsize, 2*fsize); //RightBottom pill
+    drawSquare(x+3*fsize, y+2*fsize, fsize, fsize); //Middle line
+  }
+  else if (c == 'H' || c == 'h')
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    drawSquare(x+fsize, y+2*fsize, 3*fsize, fsize); //MiddleLine
+    drawSquare(x+4*fsize, y, fsize, 5*fsize); //Right pill
+  }
+  else if (c == 'I' || c == 'i')
+  {
+    drawSquare(x+fsize, y, 3*fsize, fsize); //Top Line
+    drawSquare(x+2*fsize, y+fsize, fsize, 3*fsize); //Middle pill
+    drawSquare(x+fsize, y+4*fsize, 3*fsize, fsize); //Bottom Line
+  }
+  else if (c == 'J' || c == 'j')
+  {
+    drawSquare(x, y, 5*fsize, fsize); //Top line
+    drawSquare(x+4*fsize, y+1*fsize, fsize, 3*fsize); //Right pill
+    drawQuarterCircle(x+4*fsize, y+4*fsize, fsize, 1); //BottomRight  round
+    drawOuterQuarterCircle(x+3*fsize, y+3*fsize, fsize, 1);
+    drawSquare(x+fsize, y+4*fsize, 3*fsize, fsize); //Bottom line
+    drawQuarterCircle(x, y+4*fsize, fsize, 2); //BottomLeft  round
+    drawOuterQuarterCircle(x+fsize, y+3*fsize, fsize, 2);
+    drawSquare(x, y+3*fsize, fsize, fsize); //Right pill
+  }
+  else if (c == 'K' || c == 'k') //TODO
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    drawSquare(x+fsize, y+2*fsize, fsize, fsize); //Middle line
+    //drawDiagonal(x+fsize, y+3*fsize-1, 4, 4, fsize, true); //Top pill
+    //drawDiagonal(x+fsize, y+2*fsize, 4, -4, fsize, true); //Bottom pill
+  }
+  else if (c == 'L' || c == 'l')
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    drawSquare(x+fsize, y+4*fsize, 3*fsize, fsize); //Bottom line
+  }
+  else if (c == 'M' || c == 'm') //TODO
+  {
+    drawSquare(x, y, fsize, 5*fsize); //Left pill
+    //drawDiagonal(x, y, 3, -3, fsize, true); //Left line
+    //drawDiagonal(x+2*fsize, y+2*fsize, 3, 3, fsize, true); //Right line
+    drawSquare(x+4*fsize, y, fsize, 5*fsize); //Right pill
+  }
+  else
+  {
+    drawSquare(x, y, 5*fsize, 5*fsize);
+  }
 }
 
 int  Graphics::roundUp(double a)
