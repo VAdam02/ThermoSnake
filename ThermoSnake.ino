@@ -11,8 +11,8 @@ void setup()
   int fsize = 1;
   oled.drawText(time, 0, 1, "abcdefghijklm", fsize);
   oled.drawText(time, 0, 1+1*6*fsize, "nopqrstuvwxyz", fsize);
-  oled.drawText(time, 0, 1+2*6*fsize, "0123456789*.:", fsize);
-  oled.drawText(time, 0, 1+3*6*fsize, "% ", fsize);
+  oled.drawText(time, 0, 1+2*6*fsize, "0123456789.*%", fsize);
+  oled.drawText(time, 0, 1+3*6*fsize, ": ", fsize);
   oled.show();
   
   delay(3000);
