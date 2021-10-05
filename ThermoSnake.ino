@@ -64,7 +64,11 @@ void loop()
 
   
   int a = 0;
+<<<<<<< Updated upstream
   char c = 'R';
+=======
+  char c = '4';
+>>>>>>> Stashed changes
   drawChar(time, a, 1, c, 6);
   a = 6 * 6 + a;
   drawChar(time, a, 1, c, 5);
