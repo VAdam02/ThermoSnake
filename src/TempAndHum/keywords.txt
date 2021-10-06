@@ -1,0 +1,6 @@
+begin   KEYWORD0
+refresh KEYWORD1
+getCurrentTemperature   KEYWORD2
+getTemperature  KEYWORD3
+getHumidity KEYWORD4
+getCurrentHumidity   KEYWORD5
