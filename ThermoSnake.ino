@@ -25,7 +25,7 @@ void loop()
   oled.clear();
 
   int a = 0;
-  char c = '9';
+  char c = ' ';
   oled.drawChar(time, a, 1, c, 6);
   a = 6 * 6 + a;
   oled.drawChar(time, a, 1, c, 5);

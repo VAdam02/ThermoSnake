@@ -509,6 +509,35 @@ void Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
     drawQuarterCircle(x+3*fsize, y+4*fsize, fsize, 1); //BottomRight round
     drawOuterQuarterCircle(x+2*fsize, y+3*fsize, fsize, 1);
   }
+  else if (c == '.')
+  {
+    drawSquare(x+2*fsize, y+4*fsize, fsize, fsize); //Dot
+  }
+  else if (c == '*')
+  {
+    drawQuarterCircle(x+2*fsize, y+2*fsize, fsize, 1); //MiddleBottomRight round
+    drawSquare(x+2*fsize, y+fsize, fsize, fsize); //TopRight pill
+    drawQuarterCircle(x+2*fsize, y, fsize, 0); //TopRight  round
+    drawSquare(x+fsize, y, fsize, fsize); //Top line
+    drawQuarterCircle(x, y, fsize, 3); //TopLeft  round
+    drawSquare(x, y+fsize, fsize, fsize); //TopLeft pill
+    drawQuarterCircle(x, y+2*fsize, fsize, 2); //MiddleBottomLeft  round
+    drawSquare(x+1*fsize, y+2*fsize, fsize, fsize); //Middle line
+  }
+  else if (c == '%') //TODO
+  {
+    drawSquare(x, y, fsize, fsize); //Left dot
+    drawSquare(x+4*fsize, y+4*fsize, fsize, fsize); //Right dot
+  }
+  else if (c == ':')
+  {
+    drawSquare(x, y+fsize, fsize, fsize); //Top dot
+    drawSquare(x, y+3*fsize, fsize, fsize); //Bottom dot
+  }
+  else if (c == ' ')
+  {
+    
+  }
   else
   {
     drawSquare(x, y, 5*fsize, 5*fsize);
