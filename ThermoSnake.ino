@@ -1,4 +1,4 @@
-int time = 0;
+long time = 1;
 
 void setup()
 {
@@ -7,6 +7,6 @@ void setup()
 
 void loop()
 {
-  delay(100);
-  time++;
+  delay(50);
+  time += 50;
 }
