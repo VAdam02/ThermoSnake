@@ -1,9 +1,10 @@
 begin	KEYWORD0
 show	KEYWORD1
 clear	KEYWORD2
-drawDiagonal	KEYWORD3
-drawQuarter	KEYWORD4
-drawOuterQuarterCircle	KEYWORD5
-drawSquare	KEYWORD6
-drawText	KEYWORD7
-drawChar	KEYWORD8
+getLocalTime	KEYWORD3
+drawDiagonal	KEYWORD4
+drawQuarter	KEYWORD5
+drawOuterQuarterCircle	KEYWORD6
+drawSquare	KEYWORD7
+drawText	KEYWORD8
+drawChar	KEYWORD9

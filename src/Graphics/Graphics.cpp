@@ -6,6 +6,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#define FONTSTEPSBYSIDE 60
+#define FONTTIMEBETWEENSTEPS 100 //4 * 60 * FONTTIMEBETWEENSTEPS = time needed for a round
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
 
@@ -34,6 +37,11 @@ void Graphics::show()
 void Graphics::clear()
 {
   display.clearDisplay();
+}
+
+int Graphics::getLocalTime(long time)
+{
+  return (int)((time/FONTTIMEBETWEENSTEPS) % (4*FONTSTEPSBYSIDE));
 }
 
 void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, float relativeY2, byte width, bool alignRight)
@@ -68,7 +76,6 @@ void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, byte direction
     else { display.drawPixel(x +(width/2-i), y +(width/2-j), WHITE); }
   }
 }
-
 void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight)
 {
   for (int i = 0; i < xwidth; i++)
@@ -76,19 +83,17 @@ void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight)
   display.drawPixel(x+i, y+j, WHITE);
 }
 
-void Graphics::drawText(int time, byte x, byte y, String text, byte fsize)
+void Graphics::drawText(long time, byte x, byte y, String text, byte fsize)
 {
   for (int i = 0; i < text.length(); i++)
   {
     drawChar(time, x + (i*fsize*6), y, text[i], fsize);
   }
 }
-void Graphics::drawChar(int time, byte x, byte y, char c, byte fsize)
+void Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
 {
-  time = time % (60*4);
-
-  byte side = time / 60;
-  byte step = round((double)(time-side * 60) * fsize /60);
+  byte side = getLocalTime(time) / FONTSTEPSBYSIDE;
+  byte step = round((double)(getLocalTime(time)-side * FONTSTEPSBYSIDE) * fsize /FONTSTEPSBYSIDE);
 
   if (side == 0)
   {
