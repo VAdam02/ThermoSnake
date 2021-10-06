@@ -83,14 +83,15 @@ void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight)
   display.drawPixel(x+i, y+j, WHITE);
 }
 
-void Graphics::drawText(long time, byte x, byte y, String text, byte fsize)
+int Graphics::drawText(long time, byte x, byte y, String text, byte fsize)
 {
   for (int i = 0; i < text.length(); i++)
   {
-    drawChar(time, x + (i*fsize*6), y, text[i], fsize);
+    x += drawChar(time, x, y, text[i], fsize);
   }
+  return x;
 }
-void Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
+int Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
 {
   byte side = getLocalTime(time) / FONTSTEPSBYSIDE;
   byte step = round((double)(getLocalTime(time)-side * FONTSTEPSBYSIDE) * fsize /FONTSTEPSBYSIDE);
@@ -511,7 +512,8 @@ void Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
   }
   else if (c == '.')
   {
-    drawSquare(x+2*fsize, y+4*fsize, fsize, fsize); //Dot
+    drawSquare(x, y+4*fsize, fsize, fsize); //Dot
+    return 2*fsize;
   }
   else if (c == '*')
   {
@@ -523,6 +525,7 @@ void Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
     drawSquare(x, y+fsize, fsize, fsize); //TopLeft pill
     drawQuarterCircle(x, y+2*fsize, fsize, 2); //MiddleBottomLeft  round
     drawSquare(x+1*fsize, y+2*fsize, fsize, fsize); //Middle line
+    return 4*fsize;
   }
   else if (c == '%') //TODO
   {
@@ -533,6 +536,7 @@ void Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
   {
     drawSquare(x, y+fsize, fsize, fsize); //Top dot
     drawSquare(x, y+3*fsize, fsize, fsize); //Bottom dot
+    return 2*fsize;
   }
   else if (c == ' ')
   {
@@ -542,6 +546,8 @@ void Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
   {
     drawSquare(x, y, 5*fsize, 5*fsize);
   }
+
+  return 6*fsize;
 }
 
 int  Graphics::roundUp(double a)

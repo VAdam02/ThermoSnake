@@ -18,8 +18,8 @@ class Graphics
     void drawQuarterCircle(byte x, byte y, byte width, byte direction);
     void drawOuterQuarterCircle(byte x, byte y, byte width, byte direction);
     void drawSquare(byte x, byte y, byte xwidth, byte yheight);
-    void drawText(long time, byte x, byte y, String text, byte fsize);
-    void drawChar(long time, byte x, byte y, char c, byte fsize);
+    int drawText(long time, byte x, byte y, String text, byte fsize);
+    int drawChar(long time, byte x, byte y, char c, byte fsize);
   private:
     int getLocalTime(long time);
     int roundUp(double a);
