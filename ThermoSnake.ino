@@ -10,7 +10,7 @@
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-int time = 0;
+long time = 1;
 
 void setup()
 {
@@ -37,6 +37,6 @@ void loop()
   display.print(asd);
   display.display();
   
-  delay(100);
-  time++;
+  delay(50);
+  time += 50;
 }
