@@ -7,6 +7,8 @@ long time = 1;
 void setup()
 {
   oled.begin();
+
+  noTone(4);
   
   int fsize = 1;
   oled.drawText(time, 0, 1, "abcdefghijklm", fsize);
@@ -23,7 +25,7 @@ void loop()
   oled.clear();
 
   int a = 0;
-  char c = 'P';
+  char c = '5';
   oled.drawChar(time, a, 1, c, 6);
   a = 6 * 6 + a;
   oled.drawChar(time, a, 1, c, 5);
