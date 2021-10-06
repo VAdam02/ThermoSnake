@@ -2,7 +2,7 @@
 
 Graphics oled;
 
-int time = 0;
+long time = 1;
 
 void setup()
 {
@@ -38,6 +38,6 @@ void loop()
   
   oled.show();
 
-  delay(100);
-  time++;
+  delay(50);
+  time += 50;
 }
