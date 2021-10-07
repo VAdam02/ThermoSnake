@@ -1,20 +1,25 @@
 #include "src/Graphics/Graphics.h"
+#include "src/TempAndHum/TempAndHum.h"
 
 Graphics oled;
+TempAndHum tempAndHum;
 
 long time = 1;
 
 void setup()
 {
   oled.begin();
+  tempAndHum.begin();
 }
 
 void loop()
 {
   oled.clear();
-  
-  oled.show();
+  tempAndHum.refresh(time);
 
+  //Code goes here
+
+  oled.show();
   delay(50);
   time += 50;
 }
