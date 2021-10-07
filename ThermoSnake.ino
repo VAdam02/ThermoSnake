@@ -18,28 +18,35 @@ void loop()
   oled.refresh(time);
   tempAndHum.refresh(time);
 
-  if ((time % exponentiation(2,14)) < exponentiation(2,13))
+  if ((time % (3*exponentiation(2,12))) < exponentiation(2,12))
   {
-    oled.drawText(time, 4, 2, numToString(tempAndHum.getTemperature(),1) + "*C", 4);
+    if (oled.getTargetPage() != 0)
+    oled.setPage(0);
+  }
+  else if ((time % (3*exponentiation(2,12))) < 2*exponentiation(2,12))
+  {
+    if (oled.getTargetPage() != 1)
+    oled.setPage(1);
   }
   else
   {
-    int x;
-    int fsize = 1;
-
-    float range;
-    float val = tempAndHum.getTemperature(&range);
-    x = oled.drawText(time, 0, 0, "Temp: ", fsize);
-    oled.drawText(time, x, 0, numToString(tempAndHum.getCurrentTemperature(), 2) + "*C", fsize);
-    x = oled.drawText(time, 0, 0+(fsize*6), "AvgTemp: ", fsize);
-    oled.drawText(time, x, 0+(fsize*6), numToString(val, 2) + "*C " + numToString(range, 2), fsize);
-
-    val = tempAndHum.getHumidity(&range);
-    x = oled.drawText(time, 0, 0+2*(fsize*6), "Hum: ", fsize);
-    oled.drawText(time, x, 0+2*(fsize*6), numToString(tempAndHum.getCurrentHumidity(), 2) + "%", fsize);
-    x = oled.drawText(time, 0, 0+3*(fsize*6), "AvgHum: ", fsize);
-    oled.drawText(time, x, 0+3*(fsize*6), numToString(val, 2) + "% " + numToString(range, 2), fsize);
+    if (oled.getTargetPage() != 2)
+    oled.setPage(2);
   }
+  
+  oled.drawText(0, time, 4, 2, numToString(tempAndHum.getTemperature(),1) + "*C", 4);
+  
+  int x;
+  int fsize = 2;
+
+  float range;
+  float val = tempAndHum.getTemperature(&range);
+  oled.drawText(1, time, 0, 0, "Temp: " + numToString(tempAndHum.getCurrentTemperature(), 2) + "*C", fsize);
+  oled.drawText(1, time, 0, 0+(fsize*6), "AvgTemp: " + numToString(val, 2) + "*C " + numToString(range, 2), fsize);
+
+  val = tempAndHum.getHumidity(&range);
+  oled.drawText(2, time, 0, 0+2*(fsize*6), "Hum: " + numToString(tempAndHum.getCurrentHumidity(), 2) + "%", fsize);
+  oled.drawText(2, time, 0, 0+3*(fsize*6), "AvgHum: " + numToString(val, 2) + "% " + numToString(range, 2), fsize);
   
   oled.show();
   delay(50);
