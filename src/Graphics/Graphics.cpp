@@ -88,12 +88,12 @@ void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight)
 byte curPage = 0;
 byte targetPage = 0;
 byte transitionX = 0;
-int lastTime = 0;
+int G_lastTime = 0;
 int delta = 0;
 
 void Graphics::setPage(byte page)
 {
-  lastTime = -1;
+  G_lastTime = -1;
   targetPage = page;
   transitionX = 0;
 }
@@ -110,23 +110,23 @@ void Graphics::refresh(long time)
 {
   if (curPage != targetPage)
   {
-    if (lastTime == -1)
+    if (G_lastTime == -1)
     {
-      lastTime = (time % 32768);
+      G_lastTime = (time % 32768);
       delta = 0;
     }
 
     //calculate deltatime
     int deltatime = (int)(time % 32768);
-    if (deltatime < lastTime)
+    if (deltatime < G_lastTime)
     {
-      lastTime = 0 - (32767 - lastTime);
+      G_lastTime = 0 - (32767 - G_lastTime);
     }
 
-    deltatime = deltatime - lastTime;
+    deltatime = deltatime - G_lastTime;
     delta += deltatime;
 
-    lastTime = (time % 32768);
+    G_lastTime = (time % 32768);
     //calculate deltatime
 
     transitionX = SCREEN_WIDTH * delta / PAGESWITCHTIME;
@@ -136,7 +136,7 @@ void Graphics::refresh(long time)
       if (curPage > targetPage) { curPage--; }
       else { curPage++; }
 
-      lastTime = (time % 32768);
+      G_lastTime = (time % 32768);
       delta = 0;
       transitionX = 0;
     }

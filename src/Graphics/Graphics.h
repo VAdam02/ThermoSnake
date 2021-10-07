@@ -29,7 +29,7 @@ class Graphics
     byte curPage;
     byte targetPage;
     byte transitionX;
-    int lastTime;
+    int G_lastTime;
     int getCurXByPageX(byte page, byte x);
     int roundUp(double a);
     int roundDown(double a);
