@@ -15,6 +15,7 @@ void setup()
 void loop()
 {
   oled.clear();
+  oled.refresh(time);
   tempAndHum.refresh(time);
 
   if ((time % exponentiation(2,14)) < exponentiation(2,13))
@@ -39,7 +40,7 @@ void loop()
     x = oled.drawText(time, 0, 0+3*(fsize*6), "AvgHum: ", fsize);
     oled.drawText(time, x, 0+3*(fsize*6), numToString(val, 2) + "% " + numToString(range, 2), fsize);
   }
-
+  
   oled.show();
   delay(50);
   time += 50;
