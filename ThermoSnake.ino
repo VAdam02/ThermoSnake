@@ -18,12 +18,12 @@ void loop()
   oled.refresh(time);
   tempAndHum.refresh(time);
 
-  if ((time % (3*exponentiation(2,12))) < exponentiation(2,12))
+  if ((time % (4*exponentiation(2,12))) < 2*exponentiation(2,12))
   {
     if (oled.getTargetPage() != 0)
     oled.setPage(0);
   }
-  else if ((time % (3*exponentiation(2,12))) < 2*exponentiation(2,12))
+  else if ((time % (4*exponentiation(2,12))) < 3*exponentiation(2,12))
   {
     if (oled.getTargetPage() != 1)
     oled.setPage(1);
@@ -34,19 +34,21 @@ void loop()
     oled.setPage(2);
   }
   
-  oled.drawText(0, time, 4, 2, numToString(tempAndHum.getTemperature(),1) + "*C", 4);
+  oled.drawText(0, time, 4, 7, numToString(tempAndHum.getTemperature(),1) + "*C", 4);
   
   int x;
-  int fsize = 2;
+  int fsize = 1;
 
   float range;
   float val = tempAndHum.getTemperature(&range);
   oled.drawText(1, time, 0, 0, "Temp: " + numToString(tempAndHum.getCurrentTemperature(), 2) + "*C", fsize);
-  oled.drawText(1, time, 0, 0+(fsize*6), "AvgTemp: " + numToString(val, 2) + "*C " + numToString(range, 2), fsize);
+  oled.drawText(1, time, 0, 0+(fsize*6), "Avg: " + numToString(val, 2) + "*C", fsize);
+  oled.drawText(1, time, 0, 0+2*(fsize*6), "Dif: " + numToString(range, 2), fsize);
 
   val = tempAndHum.getHumidity(&range);
-  oled.drawText(2, time, 0, 0+2*(fsize*6), "Hum: " + numToString(tempAndHum.getCurrentHumidity(), 2) + "%", fsize);
-  oled.drawText(2, time, 0, 0+3*(fsize*6), "AvgHum: " + numToString(val, 2) + "% " + numToString(range, 2), fsize);
+  oled.drawText(2, time, 0, 0, "Hum: " + numToString(tempAndHum.getCurrentHumidity(), 2) + "%", fsize);
+  oled.drawText(2, time, 0, 0+1*(fsize*6), "Avg: " + numToString(val, 2) + "%", fsize);
+  oled.drawText(2, time, 0, 0+2*(fsize*6), "Dif: " + numToString(range, 2), fsize);
   
   oled.show();
   delay(50);
