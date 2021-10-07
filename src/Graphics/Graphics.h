@@ -18,10 +18,19 @@ class Graphics
     void drawQuarterCircle(byte x, byte y, byte width, byte direction);
     void drawOuterQuarterCircle(byte x, byte y, byte width, byte direction);
     void drawSquare(byte x, byte y, byte xwidth, byte yheight);
-    int drawText(long time, byte x, byte y, String text, byte fsize);
-    int drawChar(long time, byte x, byte y, char c, byte fsize);
+    void setPage(byte page);
+    byte getCurPage();
+    byte getTargetPage();
+    void refresh(long time);
+    int drawText(byte page, long time, byte x, byte y, String text, byte fsize);
+    int drawChar(byte page, long time, byte x, byte y, char c, byte fsize);
   private:
     int getLocalTime(long time);
+    byte curPage;
+    byte targetPage;
+    byte transitionX;
+    int lastTime;
+    int getCurXByPageX(byte page, byte x);
     int roundUp(double a);
     int roundDown(double a);
 };

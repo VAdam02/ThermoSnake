@@ -9,6 +9,8 @@
 #define FONTSTEPSBYSIDE 60
 #define FONTTIMEBETWEENSTEPS 100 //4 * 60 * FONTTIMEBETWEENSTEPS = time needed for a round
 
+#define PAGESWITCHTIME 1024
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
 
@@ -83,16 +85,87 @@ void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight)
   display.drawPixel(x+i, y+j, WHITE);
 }
 
-int Graphics::drawText(long time, byte x, byte y, String text, byte fsize)
+byte curPage = 0;
+byte targetPage = 0;
+byte transitionX = 0;
+int lastTime = 0;
+int delta = 0;
+
+void Graphics::setPage(byte page)
+{
+  lastTime = -1;
+  targetPage = page;
+  transitionX = 0;
+}
+byte Graphics::getCurPage()
+{
+  return curPage;
+}
+byte Graphics::getTargetPage()
+{
+  return targetPage;
+}
+
+void Graphics::refresh(long time)
+{
+  if (curPage != targetPage)
+  {
+    if (lastTime == -1)
+    {
+      lastTime = (time % 32768);
+      delta = 0;
+    }
+
+    //calculate deltatime
+    int deltatime = (int)(time % 32768);
+    if (deltatime < lastTime)
+    {
+      lastTime = 0 - (32767 - lastTime);
+    }
+
+    deltatime = deltatime - lastTime;
+    delta += deltatime;
+
+    lastTime = (time % 32768);
+    //calculate deltatime
+
+    transitionX = SCREEN_WIDTH * delta / PAGESWITCHTIME;
+
+    if (delta > PAGESWITCHTIME)
+    {
+      curPage = targetPage;
+    }
+  }
+}
+
+int Graphics::getCurXByPageX(byte page, byte x)
+{
+  int curx = (page * SCREEN_WIDTH) - (curPage * SCREEN_WIDTH) + x;
+
+  if (curPage < targetPage) { curx -= transitionX; }
+  else if (curPage > targetPage) { curx += transitionX; }
+
+  if (curx > SCREEN_WIDTH)
+  {
+    return 255;
+  }
+
+  return curx;
+}
+
+int Graphics::drawText(byte page, long time, byte x, byte y, String text, byte fsize)
 {
   for (int i = 0; i < text.length(); i++)
   {
-    x += drawChar(time, x, y, text[i], fsize);
+    x += drawChar(page, time, x, y, text[i], fsize);
   }
   return x;
 }
-int Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
+int Graphics::drawChar(byte page, long time, byte x_, byte y_, char c, byte fsize)
 {
+  int x = x_;
+  int y = y_;
+
   byte side = getLocalTime(time) / FONTSTEPSBYSIDE;
   byte step = round((double)(getLocalTime(time)-side * FONTSTEPSBYSIDE) * fsize /FONTSTEPSBYSIDE);
 
@@ -115,6 +188,11 @@ int Graphics::drawChar(long time, byte x, byte y, char c, byte fsize)
     y += (fsize) - step;
   }
   
+  x = getCurXByPageX(page, x);
+
+  if (x > SCREEN_WIDTH) { return 0; }
+  if (x < -SCREEN_WIDTH) { return 0; }
+
   if (c == 'A' || c == 'a')
   {
     drawSquare(x, y+fsize, fsize, 4*fsize); //Left pill
