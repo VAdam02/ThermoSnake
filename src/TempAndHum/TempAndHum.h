@@ -20,7 +20,7 @@ class TempAndHum
     float TempAndHum::getHumidity(float* range);
     float TempAndHum::getHumidity();
   private:
-    int lastTime;
+    int DHT_lastTime;
     float temp[];
     float hum[];
 };
