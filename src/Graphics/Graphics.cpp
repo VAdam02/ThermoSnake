@@ -133,7 +133,12 @@ void Graphics::refresh(long time)
 
     if (delta > PAGESWITCHTIME)
     {
-      curPage = targetPage;
+      if (curPage > targetPage) { curPage--; }
+      else { curPage++; }
+
+      lastTime = (time % 32768);
+      delta = 0;
+      transitionX = 0;
     }
   }
 }
