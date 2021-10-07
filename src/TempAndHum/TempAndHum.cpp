@@ -24,20 +24,20 @@ void TempAndHum::begin()
   dht.begin();
 }
 
-int lastTime = 0;
+int DHT_lastTime = 0;
 void TempAndHum::refresh(long time)
 {
   //calculate deltatime
   int deltatime = (int)(time % 32768);
-  if (deltatime <= lastTime)
+  if (deltatime <= DHT_lastTime)
   {
-      lastTime = 0 - (32767 - lastTime);
+      DHT_lastTime = 0 - (32767 - DHT_lastTime);
   }
-  deltatime = deltatime - lastTime;
+  deltatime = deltatime - DHT_lastTime;
   //calculate deltatime
 
   if (deltatime < COOLDOWN) { return; }
-  lastTime = time % 32768;
+  DHT_lastTime = time % 32768;
 
   for (int i = 1; i < LENGTH; i++)
   {
