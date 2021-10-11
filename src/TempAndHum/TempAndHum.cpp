@@ -5,7 +5,7 @@
 #define DHTTYPE DHT11   // DHT 11 
 #define DHTPIN 17
 #define LENGTH 30
-#define COOLDOWN 1000
+#define COOLDOWN 2500
 
 DHT dht(DHTPIN, DHTTYPE);
 
