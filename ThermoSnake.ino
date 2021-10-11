@@ -7,6 +7,9 @@ void setup()
 
 void loop()
 {
-  delay(50);
-  time += 50;
+  unsigned long startTime = millis();
+
+  //Code goes here
+  
+  delay(50-(unsigned long)(millis() - startTime));
 }
