@@ -2,8 +2,6 @@
 
 Graphics oled;
 
-long time = 1;
-
 void setup()
 {
   oled.begin();
@@ -17,8 +15,6 @@ void loop()
 
   
   oled.show();
-  delay(50);
-  time += 50;
 }
 
 String numToString(double num, int decimals)
