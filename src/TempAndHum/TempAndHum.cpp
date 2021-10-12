@@ -25,19 +25,19 @@ void TempAndHum::begin()
 }
 
 int DHT_lastTime = 0;
-void TempAndHum::refresh(long time)
+void TempAndHum::refresh()
 {
   //calculate deltatime
-  int deltatime = (int)(time % 32768);
+  int deltatime = (int)(millis() % 32768);
   if (deltatime <= DHT_lastTime)
   {
       DHT_lastTime = 0 - (32767 - DHT_lastTime);
   }
   deltatime = deltatime - DHT_lastTime;
-  //calculate deltatime
 
   if (deltatime < COOLDOWN) { return; }
-  DHT_lastTime = time % 32768;
+  DHT_lastTime = millis() % 32768;
+  //calculate deltatime
 
   for (int i = 1; i < LENGTH; i++)
   {
@@ -45,7 +45,6 @@ void TempAndHum::refresh(long time)
     humidity[i-1] = humidity[i];
   }
 
-  //Serial.print(dht.readTemperature());
   humidity[LENGTH-1] = dht.readHumidity();
   temperature[LENGTH-1] = dht.readTemperature();
 }

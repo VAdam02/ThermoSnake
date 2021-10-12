@@ -12,7 +12,7 @@ class TempAndHum
   public:
     TempAndHum();
     void TempAndHum::begin();
-    void TempAndHum::refresh(long time);
+    void TempAndHum::refresh();
     float TempAndHum::getCurrentTemperature();
     float TempAndHum::getTemperature(float* range);
     float TempAndHum::getTemperature();
