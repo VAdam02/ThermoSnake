@@ -93,7 +93,7 @@ int delta = 0;
 
 void Graphics::setPage(byte page)
 {
-  G_lastTime = -1;
+  G_lastTime = (millis() % 32768);
   targetPage = page;
   transitionX = 0;
 }
@@ -106,16 +106,10 @@ byte Graphics::getTargetPage()
   return targetPage;
 }
 
-void Graphics::refresh(long time)
+void Graphics::refresh()
 {
   if (curPage != targetPage)
   {
-    if (G_lastTime == -1)
-    {
-      G_lastTime = (time % 32768);
-      delta = 0;
-    }
-
     //calculate deltatime
     int deltatime = (int)(millis() % 32768);
     if (deltatime <= G_lastTime)
@@ -123,21 +117,15 @@ void Graphics::refresh(long time)
         G_lastTime = 0 - (32767 - G_lastTime);
     }
     deltatime = deltatime - G_lastTime;
-
-    delta += deltatime;
-
-    G_lastTime = (millis() % 32768);
     //calculate deltatime
 
-    transitionX = SCREEN_WIDTH * delta / PAGESWITCHTIME;
+    transitionX = SCREEN_WIDTH * deltatime / PAGESWITCHTIME;
 
-    if (delta > PAGESWITCHTIME)
+    if (deltatime > PAGESWITCHTIME)
     {
       if (curPage > targetPage) { curPage--; }
       else { curPage++; }
-
-      G_lastTime = (millis() % 32768);
-      delta = 0;
+      
       transitionX = 0;
     }
   }
