@@ -125,7 +125,7 @@ void Graphics::refresh()
     {
       if (curPage > targetPage) { curPage--; }
       else { curPage++; }
-      
+      G_lastTime = (millis() % 32768);
       transitionX = 0;
     }
   }
