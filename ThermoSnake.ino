@@ -2,8 +2,6 @@
 
 TempAndHum tempAndHum;
 
-long time = 1;
-
 void setup()
 {
   Serial.begin(9600);
@@ -12,7 +10,7 @@ void setup()
 
 void loop()
 {
-  tempAndHum.refresh(time);
+  tempAndHum.refresh();
 
   Serial.print("\n");
   float range = 0;
@@ -29,7 +27,4 @@ void loop()
   Serial.print(val);
   Serial.print(" "); 
   Serial.print(range);
-  
-  delay(50);
-  time += 50;
 }
