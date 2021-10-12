@@ -1,5 +1,3 @@
-long time = 1;
-
 void setup()
 {
   
