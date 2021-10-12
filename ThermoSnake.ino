@@ -1,10 +1,13 @@
+#include "src/DelayManager/DelayManager.h"
 #include "src/TempAndHum/TempAndHum.h"
 
+DelayManager delayer;
 TempAndHum tempAndHum;
 
 void setup()
 {
   Serial.begin(9600);
+  delayer.begin();
   tempAndHum.begin();
 }
 
@@ -27,4 +30,6 @@ void loop()
   Serial.print(val);
   Serial.print(" "); 
   Serial.print(range);
+
+  delayer.sleepReamingOf(50);
 }
