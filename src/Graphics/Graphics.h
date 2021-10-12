@@ -21,7 +21,7 @@ class Graphics
     void setPage(byte page);
     byte getCurPage();
     byte getTargetPage();
-    void refresh(long time);
+    void refresh();
     int drawText(byte page, long time, byte x, byte y, String text, byte fsize);
     int drawChar(byte page, long time, byte x, byte y, char c, byte fsize);
   private:

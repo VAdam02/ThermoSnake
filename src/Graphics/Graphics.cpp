@@ -117,16 +117,16 @@ void Graphics::refresh(long time)
     }
 
     //calculate deltatime
-    int deltatime = (int)(time % 32768);
-    if (deltatime < G_lastTime)
+    int deltatime = (int)(millis() % 32768);
+    if (deltatime <= G_lastTime)
     {
-      G_lastTime = 0 - (32767 - G_lastTime);
+        G_lastTime = 0 - (32767 - G_lastTime);
     }
-
     deltatime = deltatime - G_lastTime;
+
     delta += deltatime;
 
-    G_lastTime = (time % 32768);
+    G_lastTime = (millis() % 32768);
     //calculate deltatime
 
     transitionX = SCREEN_WIDTH * delta / PAGESWITCHTIME;
@@ -136,7 +136,7 @@ void Graphics::refresh(long time)
       if (curPage > targetPage) { curPage--; }
       else { curPage++; }
 
-      G_lastTime = (time % 32768);
+      G_lastTime = (millis() % 32768);
       delta = 0;
       transitionX = 0;
     }
