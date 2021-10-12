@@ -1,20 +1,24 @@
+#include "src/DelayManager/DelayManager.h"
 #include "src/Graphics/Graphics.h"
 
+DelayManager delayer;
 Graphics oled;
 
 void setup()
 {
-  oled.begin();
   Serial.begin(9600);
+  delayer.begin();
+  oled.begin();
 }
 
 void loop()
 {
   oled.clear();
-  oled.refresh(time);
+  oled.refresh();
 
   
   oled.show();
+  delayer.sleepReamingOf(50);
 }
 
 String numToString(double num, int decimals)
