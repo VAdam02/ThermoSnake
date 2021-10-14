@@ -29,8 +29,8 @@ void Graphics::begin()
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever 
   }
-  display.clearDisplay();
-  display.show();
+  clear();
+  show();
 }
 
 void Graphics::show()
