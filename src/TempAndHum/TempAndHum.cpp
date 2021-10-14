@@ -4,8 +4,8 @@
 
 #define DHTTYPE DHT11   // DHT 11 
 #define DHTPIN 17
-#define LENGTH 30
-#define COOLDOWN 2500
+#define COOLDOWN 2000
+#define LENGTH 15 //30 seconds -> 30000 / COOLDOWN
 
 DHT dht(DHTPIN, DHTTYPE);
 

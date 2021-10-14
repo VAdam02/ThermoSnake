@@ -11,25 +11,33 @@ void setup()
   tempAndHum.begin();
 }
 
+unsigned int lastTime = 0;
 void loop()
 {
   tempAndHum.refresh();
 
-  Serial.print("\n");
-  float range = 0;
-  float val = tempAndHum.getTemperature(&range);
-  Serial.print(tempAndHum.getCurrentTemperature());
-  Serial.print(" "); 
-  Serial.print(val);
-  Serial.print(" "); 
-  Serial.print(range);
-  Serial.print(" ");
-  val = tempAndHum.getHumidity(&range);
-  Serial.print(tempAndHum.getCurrentHumidity());
-  Serial.print(" "); 
-  Serial.print(val);
-  Serial.print(" "); 
-  Serial.print(range);
+
+  unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
+  if (deltatime > 2500)
+  {
+    Serial.print("\n");
+    float range = 0;
+    float val = tempAndHum.getTemperature(&range);
+    Serial.print(tempAndHum.getCurrentTemperature());
+    Serial.print(" "); 
+    Serial.print(val);
+    Serial.print(" "); 
+    Serial.print(range);
+    Serial.print(" ");
+    val = tempAndHum.getHumidity(&range);
+    Serial.print(tempAndHum.getCurrentHumidity());
+    Serial.print(" "); 
+    Serial.print(val);
+    Serial.print(" "); 
+    Serial.print(range);
+
+    lastTime += 2000;
+  }
 
   delayer.sleepReamingOf(50);
 }
