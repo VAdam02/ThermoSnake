@@ -6,8 +6,6 @@ DelayManager delayer;
 Graphics oled;
 TempAndHum tempAndHum;
 
-long time = 1;
-
 void setup()
 {
   delayer.begin();
@@ -15,6 +13,7 @@ void setup()
   tempAndHum.begin();
 }
 
+unsigned int lastTime = 0;
 void loop()
 {
   oled.clear();

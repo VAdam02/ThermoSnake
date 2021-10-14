@@ -4,8 +4,8 @@
 
 #define DHTTYPE DHT11   // DHT 11 
 #define DHTPIN 17
-#define LENGTH 30
-#define COOLDOWN 1000
+#define COOLDOWN 2000
+#define LENGTH 15 //30 seconds -> 30000 / COOLDOWN
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -22,22 +22,16 @@ void TempAndHum::begin()
     humidity[i] = 0;
   }
   dht.begin();
+
+  DHT_lastTime = (unsigned int)(millis() % 65536);
 }
 
-int DHT_lastTime = 0;
-void TempAndHum::refresh(long time)
+unsigned int DHT_lastTime = 0;
+void TempAndHum::refresh()
 {
-  //calculate deltatime
-  int deltatime = (int)(time % 32768);
-  if (deltatime <= DHT_lastTime)
-  {
-      DHT_lastTime = 0 - (32767 - DHT_lastTime);
-  }
-  deltatime = deltatime - DHT_lastTime;
-  //calculate deltatime
-
+  unsigned int deltatime = (unsigned int)(millis() % 65536) - DHT_lastTime;
   if (deltatime < COOLDOWN) { return; }
-  DHT_lastTime = time % 32768;
+  DHT_lastTime += COOLDOWN;
 
   for (int i = 1; i < LENGTH; i++)
   {
@@ -45,7 +39,6 @@ void TempAndHum::refresh(long time)
     humidity[i-1] = humidity[i];
   }
 
-  //Serial.print(dht.readTemperature());
   humidity[LENGTH-1] = dht.readHumidity();
   temperature[LENGTH-1] = dht.readTemperature();
 }
