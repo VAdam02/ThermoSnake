@@ -7,9 +7,9 @@
 #include <Adafruit_SSD1306.h>
 
 #define FONTSTEPSBYSIDE 60
-#define FONTTIMEBETWEENSTEPS 100 //4 * 60 * FONTTIMEBETWEENSTEPS = time needed for a round
+#define FONTTIMEBETWEENSTEPS 100 //4 * FONTSTEPSBYSIDE * FONTTIMEBETWEENSTEPS = time needed for a round
 
-#define PAGESWITCHTIME 1024
+#define PAGESWITCHTIME 2048 //x * SCREEN_WIDTH
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -30,6 +30,7 @@ void Graphics::begin()
     for(;;); // Don't proceed, loop forever 
   }
   display.clearDisplay();
+  display.show();
 }
 
 void Graphics::show()
