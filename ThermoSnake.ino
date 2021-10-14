@@ -12,7 +12,7 @@ void setup()
 
 void loop()
 {
-  buzzer.refresh(time);
+  buzzer.refresh();
   
   delayer.sleepReamingOf(50);
 }

@@ -7,6 +7,7 @@ byte _pin = 2;
 bool taskActive = false;
 bool taskSound = false;
 unsigned int task[] = {100, 1, 1, 1};
+unsigned int Buzzer_lastTime = 0;
 
 void Buzzer::begin(byte pin)
 {
@@ -19,7 +20,6 @@ void Buzzer::begin(byte pin)
     Buzzer_lastTime = (unsigned int)(millis() % 65536);
 }
 
-unsigned int Buzzer_lastTime = 0;
 void Buzzer::refresh()
 {
     unsigned int deltatime = (unsigned int)(millis() % 65536) - Buzzer_lastTime;
