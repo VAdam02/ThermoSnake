@@ -1,6 +1,8 @@
+#include "src/DelayManager/DelayManager.h"
 #include "src/Graphics/Graphics.h"
 #include "src/TempAndHum/TempAndHum.h"
 
+DelayManager delayer;
 Graphics oled;
 TempAndHum tempAndHum;
 
@@ -8,6 +10,7 @@ long time = 1;
 
 void setup()
 {
+  delayer.begin();
   oled.begin();
   tempAndHum.begin();
 }
@@ -51,8 +54,7 @@ void loop()
   oled.drawText(2, time, 0, 0+2*(fsize*6), "Dif: " + numToString(range, 2), fsize);
   
   oled.show();
-  delay(50);
-  time += 50;
+  delayer.sleepReamingOf(50);
 }
 
 long exponentiation(long base, long exponent)
