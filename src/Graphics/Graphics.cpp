@@ -112,7 +112,7 @@ void Graphics::refresh()
   {
     unsigned int deltatime = (unsigned int)(millis() % 65536) - G_lastTime;
 
-    transitionX = SCREEN_WIDTH * deltatime / PAGESWITCHTIME;
+    transitionX = (unsigned long)SCREEN_WIDTH * deltatime / PAGESWITCHTIME;
 
     if (deltatime > PAGESWITCHTIME)
     {
