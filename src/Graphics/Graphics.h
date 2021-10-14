@@ -11,28 +11,28 @@ class Graphics
 {
   public:
     Graphics();
-    void begin();
-    void show();
-    void clear();
-    void drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, float relativeY2, byte width, bool alignRight);
-    void drawQuarterCircle(byte x, byte y, byte width, byte direction);
-    void drawOuterQuarterCircle(byte x, byte y, byte width, byte direction);
-    void drawSquare(byte x, byte y, byte xwidth, byte yheight);
-    void setPage(byte page);
-    byte getCurPage();
-    byte getTargetPage();
-    void refresh(long time);
-    int drawText(byte page, long time, byte x, byte y, String text, byte fsize);
-    int drawChar(byte page, long time, byte x, byte y, char c, byte fsize);
+    void Graphics::begin();
+    void Graphics::show();
+    void Graphics::clear();
+    void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, float relativeY2, byte width, bool alignRight);
+    void Graphics::drawQuarterCircle(byte x, byte y, byte width, byte direction);
+    void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, byte direction);
+    void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight);
+    void Graphics::setPage(byte page);
+    byte Graphics::getCurPage();
+    byte Graphics::getTargetPage();
+    void Graphics::refresh();
+    int Graphics::drawText(byte page, byte x, byte y, String text, byte fsize);
+    int Graphics::drawChar(byte page, byte x, byte y, char c, byte fsize);
   private:
-    int getLocalTime(long time);
+    unsigned int Graphics::getLocalTime(unsigned long time);
     byte curPage;
     byte targetPage;
     byte transitionX;
-    int G_lastTime;
-    int getCurXByPageX(byte page, byte x);
-    int roundUp(double a);
-    int roundDown(double a);
+    unsigned int G_lastTime;
+    int Graphics::getCurXByPageX(byte page, byte x);
+    int Graphics::roundUp(double a);
+    int Graphics::roundDown(double a);
 };
 
 #endif

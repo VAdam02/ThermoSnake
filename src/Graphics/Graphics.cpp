@@ -7,9 +7,9 @@
 #include <Adafruit_SSD1306.h>
 
 #define FONTSTEPSBYSIDE 60
-#define FONTTIMEBETWEENSTEPS 100 //4 * 60 * FONTTIMEBETWEENSTEPS = time needed for a round
+#define FONTTIMEBETWEENSTEPS 100 //4 * FONTSTEPSBYSIDE * FONTTIMEBETWEENSTEPS = time needed for a round
 
-#define PAGESWITCHTIME 1024
+#define PAGESWITCHTIME 2048 //x * SCREEN_WIDTH
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -17,7 +17,7 @@
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 // The pins for I2C are defined by the Wire-library. 
 // On an arduino NANO:       A4(SDA), A5(SCL)
-#define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -30,6 +30,7 @@ void Graphics::begin()
     for(;;); // Don't proceed, loop forever 
   }
   display.clearDisplay();
+  display.show();
 }
 
 void Graphics::show()
@@ -41,9 +42,9 @@ void Graphics::clear()
   display.clearDisplay();
 }
 
-int Graphics::getLocalTime(long time)
+unsigned int Graphics::getLocalTime(unsigned long time)
 {
-  return (int)((time/FONTTIMEBETWEENSTEPS) % (4*FONTSTEPSBYSIDE));
+  return (unsigned int)((time/FONTTIMEBETWEENSTEPS) % (4*FONTSTEPSBYSIDE));
 }
 
 void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, float relativeY2, byte width, bool alignRight)
@@ -88,12 +89,11 @@ void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight)
 byte curPage = 0;
 byte targetPage = 0;
 byte transitionX = 0;
-int G_lastTime = 0;
-int delta = 0;
+unsigned int G_lastTime = 0;
 
 void Graphics::setPage(byte page)
 {
-  G_lastTime = -1;
+  G_lastTime = (unsigned int)(millis() % 65536);
   targetPage = page;
   transitionX = 0;
 }
@@ -106,38 +106,19 @@ byte Graphics::getTargetPage()
   return targetPage;
 }
 
-void Graphics::refresh(long time)
+void Graphics::refresh()
 {
   if (curPage != targetPage)
   {
-    if (G_lastTime == -1)
-    {
-      G_lastTime = (time % 32768);
-      delta = 0;
-    }
+    unsigned int deltatime = (unsigned int)(millis() % 65536) - G_lastTime;
 
-    //calculate deltatime
-    int deltatime = (int)(time % 32768);
-    if (deltatime < G_lastTime)
-    {
-      G_lastTime = 0 - (32767 - G_lastTime);
-    }
+    transitionX = SCREEN_WIDTH * deltatime / PAGESWITCHTIME;
 
-    deltatime = deltatime - G_lastTime;
-    delta += deltatime;
-
-    G_lastTime = (time % 32768);
-    //calculate deltatime
-
-    transitionX = SCREEN_WIDTH * delta / PAGESWITCHTIME;
-
-    if (delta > PAGESWITCHTIME)
+    if (deltatime > PAGESWITCHTIME)
     {
       if (curPage > targetPage) { curPage--; }
       else { curPage++; }
-
-      G_lastTime = (time % 32768);
-      delta = 0;
+      G_lastTime = (unsigned int)(millis() % 65536);
       transitionX = 0;
     }
   }
@@ -158,21 +139,21 @@ int Graphics::getCurXByPageX(byte page, byte x)
   return curx;
 }
 
-int Graphics::drawText(byte page, long time, byte x, byte y, String text, byte fsize)
+int Graphics::drawText(byte page, byte x, byte y, String text, byte fsize)
 {
   for (int i = 0; i < text.length(); i++)
   {
-    x += drawChar(page, time, x, y, text[i], fsize);
+    x += drawChar(page, x, y, text[i], fsize);
   }
   return x;
 }
-int Graphics::drawChar(byte page, long time, byte x_, byte y_, char c, byte fsize)
+int Graphics::drawChar(byte page, byte x_, byte y_, char c, byte fsize)
 {
   int x = x_;
   int y = y_;
 
-  byte side = getLocalTime(time) / FONTSTEPSBYSIDE;
-  byte step = round((double)(getLocalTime(time)-side * FONTSTEPSBYSIDE) * fsize /FONTSTEPSBYSIDE);
+  byte side = getLocalTime(millis()) / FONTSTEPSBYSIDE;
+  byte step = round((double)(getLocalTime(millis())-side * FONTSTEPSBYSIDE) * fsize / FONTSTEPSBYSIDE);
 
   if (side == 0)
   {
