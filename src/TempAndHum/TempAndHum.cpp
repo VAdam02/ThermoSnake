@@ -22,22 +22,16 @@ void TempAndHum::begin()
     humidity[i] = 0;
   }
   dht.begin();
+
+  DHT_lastTime = (unsigned int)(millis() % 65536);
 }
 
-int DHT_lastTime = 0;
+unsigned int DHT_lastTime = 0;
 void TempAndHum::refresh()
 {
-  //calculate deltatime
-  int deltatime = (int)(millis() % 32768);
-  if (deltatime <= DHT_lastTime)
-  {
-      DHT_lastTime = 0 - (32767 - DHT_lastTime);
-  }
-  deltatime = deltatime - DHT_lastTime;
-
+  unsigned int deltatime = (unsigned int)(millis() % 65536) - DHT_lastTime;
   if (deltatime < COOLDOWN) { return; }
-  DHT_lastTime = millis() % 32768;
-  //calculate deltatime
+  DHT_lastTime += COOLDOWN;
 
   for (int i = 1; i < LENGTH; i++)
   {
