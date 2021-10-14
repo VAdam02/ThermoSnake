@@ -14,7 +14,7 @@ class DelayManager
     void DelayManager::begin();
     void DelayManager::sleepReamingOf(int timeOfExecute);
   private:
-    int Delay_lastTime;
+    unsigned int Delay_lastTime;
 };
 
 #endif
