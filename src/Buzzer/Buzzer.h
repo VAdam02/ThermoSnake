@@ -11,16 +11,16 @@ class Buzzer
 {
   public:
     Buzzer();
-    void begin(byte pin);
-    void refresh(long time);
-    void alarm(int hz, int sound, int silent, int time);
-    void mute();
-    void sayError();
+    void Buzzer::begin(byte pin);
+    void Buzzer::refresh();
+    void Buzzer::alarm(unsigned int hz, unsigned int sound, unsigned int silent, unsigned int time);
+    void Buzzer::mute();
+    void Buzzer::sayError();
   private:
-    int _pin;
+    byte _pin;
     bool taskActive;
     bool taskSound;
-    int task[];
+    unsigned int task[];
 };
 
 #endif

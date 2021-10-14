@@ -3,39 +3,30 @@
 
 Buzzer::Buzzer() {}
 
-int _pin = 2;
+byte _pin = 2;
 bool taskActive = false;
 bool taskSound = false;
-int task[] = {100, 1, 1, 1, 1};
+unsigned int task[] = {100, 1, 1, 1};
 
 void Buzzer::begin(byte pin)
 {
-    Serial.begin(9600);
     _pin = pin;
 
     tone(_pin, 500);
     delay(50);
     noTone(_pin);
+
+    Buzzer_lastTime = (unsigned int)(millis() % 65536);
 }
 
-int lastTime = 0;
-void Buzzer::refresh(long time)
+unsigned int Buzzer_lastTime = 0;
+void Buzzer::refresh()
 {
-    //calculate deltatime
-    int deltatime = (int)(time % 32768);
-    if (deltatime <= lastTime)
-    {
-        lastTime = 0 - (32767 - lastTime);
-    }
-    deltatime = deltatime - lastTime;
-    lastTime = time % 32768;
-    //calculate deltatime
+    unsigned int deltatime = (unsigned int)(millis() % 65536) - Buzzer_lastTime;
 
     if (taskActive)
     {
-        task[4] += deltatime;
-
-        if (task[3] < task[4])
+        if (task[3] < deltatime)
         {
             noTone(_pin);
             taskSound = false;
@@ -43,10 +34,9 @@ void Buzzer::refresh(long time)
         }
         else
         {
-            int cycleTime = task[4] % (task[1] + task[2]);
-            if (taskSound != (cycleTime < task[1]))
+            if (taskSound != ((deltatime % (task[1] + task[2])) < task[1]))
             {
-                if (cycleTime < task[1])
+                if ((deltatime % (task[1] + task[2])) < task[1])
                 {
                     tone(_pin, task[0]);
                     taskSound = true;
@@ -61,14 +51,13 @@ void Buzzer::refresh(long time)
     }
 }
 
-void Buzzer::alarm(int hz, int sound, int silent, int time)
+void Buzzer::alarm(unsigned int hz, unsigned int sound, unsigned int silent, unsigned int time)
 {
-    taskActive = false;
     task[0] = hz;
     task[1] = sound;
     task[2] = silent;
     task[3] = time;
-    task[4] = 0;
+    Buzzer_lastTime = (unsigned int)(millis() % 65536);
     taskActive = true;
 }
 

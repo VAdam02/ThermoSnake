@@ -1,5 +1,0 @@
-begin	KEYWORD0
-refresh KEYWORD1
-alarm   KEYWORD2
-mute    KEYWORD3
-sayError    KEYWORD4
