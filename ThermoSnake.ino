@@ -17,40 +17,46 @@ unsigned int lastTime = 0;
 void loop()
 {
   oled.clear();
-  oled.refresh(time);
-  tempAndHum.refresh(time);
+  oled.refresh();
+  tempAndHum.refresh();
 
-  if ((time % (4*exponentiation(2,12))) < 2*exponentiation(2,12))
+  unsigned int deltatime = (unsigned int)(millis() % exponentiation(2,15)) - lastTime;
+
+  if (deltatime < 4*exponentiation(2,12))
   {
     if (oled.getTargetPage() != 0)
     oled.setPage(0);
   }
-  else if ((time % (4*exponentiation(2,12))) < 3*exponentiation(2,12))
+  else if (deltatime < 6*exponentiation(2,12))
   {
     if (oled.getTargetPage() != 1)
     oled.setPage(1);
   }
-  else
+  else if (deltatime < 8*exponentiation(2,12))
   {
     if (oled.getTargetPage() != 2)
     oled.setPage(2);
   }
+  else
+  {
+    lastTime += exponentiation(2,14);
+  }
   
-  oled.drawText(0, time, 4, 7, numToString(tempAndHum.getTemperature(),1) + "*C", 4);
+  oled.drawText(0, 4, 7, numToString(tempAndHum.getTemperature(),1) + "*C", 4);
   
   int x;
   int fsize = 1;
 
   float range;
   float val = tempAndHum.getTemperature(&range);
-  oled.drawText(1, time, 0, 0, "Temp: " + numToString(tempAndHum.getCurrentTemperature(), 2) + "*C", fsize);
-  oled.drawText(1, time, 0, 0+(fsize*6), "Avg: " + numToString(val, 2) + "*C", fsize);
-  oled.drawText(1, time, 0, 0+2*(fsize*6), "Dif: " + numToString(range, 2), fsize);
+  oled.drawText(1, 0, 0, "Temp: " + numToString(tempAndHum.getCurrentTemperature(), 2) + "*C", fsize);
+  oled.drawText(1, 0, 0+(fsize*6), "Avg: " + numToString(val, 2) + "*C", fsize);
+  oled.drawText(1, 0, 0+2*(fsize*6), "Dif: " + numToString(range, 2), fsize);
 
   val = tempAndHum.getHumidity(&range);
-  oled.drawText(2, time, 0, 0, "Hum: " + numToString(tempAndHum.getCurrentHumidity(), 2) + "%", fsize);
-  oled.drawText(2, time, 0, 0+1*(fsize*6), "Avg: " + numToString(val, 2) + "%", fsize);
-  oled.drawText(2, time, 0, 0+2*(fsize*6), "Dif: " + numToString(range, 2), fsize);
+  oled.drawText(2, 0, 0, "Hum: " + numToString(tempAndHum.getCurrentHumidity(), 2) + "%", fsize);
+  oled.drawText(2, 0, 0+1*(fsize*6), "Avg: " + numToString(val, 2) + "%", fsize);
+  oled.drawText(2, 0, 0+2*(fsize*6), "Dif: " + numToString(range, 2), fsize);
   
   oled.show();
   delayer.sleepReamingOf(50);
