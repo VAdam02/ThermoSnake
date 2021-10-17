@@ -22,18 +22,43 @@ void setup()
   display.clearDisplay();
 }
 
+double presstime = 0;
+double data = 0;
 void loop()
 {
   display.clearDisplay();
-  display.setTextSize(2);      // Normal 1:1 pixel scale
+  display.setTextSize(1);      // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE); // Draw white text
   display.setCursor(0, 0);     // Start at top-left corner
   display.cp437(true);
+
+  double x = analogRead(A1);
+  double y = analogRead(A0);
+  if (abs((y-512)/512) > 0.1)
+  {
+    double deltatime = 50;
+    presstime += deltatime;
+    
+    if ((y-512) > 0)
+    {
+      data -= (presstime/1000) * deltatime / 1000;
+    }
+    else
+    {
+      data += (presstime/1000) * deltatime / 1000;
+    }
+  }
+  else
+  {
+    presstime = 0;
+  }
   
   String asd = "VRX ";
-  asd += String(analogRead(A7));
+  asd += String(x);
   asd += "\nVRY ";
-  asd += String(analogRead(A6));
+  asd += String(y);
+  asd += "\nData ";
+  asd += String(data);
   display.print(asd);
   display.display();
   
