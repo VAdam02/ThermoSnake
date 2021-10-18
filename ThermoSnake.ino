@@ -13,31 +13,56 @@ void setup()
   */
   Serial.print("\n");
   Serial.print("Start");
-  //inicialise(64);
-  /*
+  inicialise(64);
   mem();
+  
   Serial.print("\n");
   allocate('B', 5, 60);
   Serial.print("\n");
   mem();
+  
   Serial.print("\n");
   allocate('B', 4, 240);
   Serial.print("\n");
   mem();
+  
   Serial.print("\n");
   allocate('B', 3, 25);
   Serial.print("\n");
   mem();
+  
   Serial.print("\n");
-  allocate('B', 2, 230);
+  Serial.print(free('B', 3));
   Serial.print("\n");
-  */
   mem();
+
+  /*
+  Serial.print("\n");
+  //allocate('B', 2, 230);
+  Serial.print("\n");
+  mem();
+  */
+  
+  /*
   Serial.print("\n");
   byte data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
   Serial.print(write('B', 3, 10, data, 20));
   Serial.print("\n");
   mem();
+  */
+  /*
+  Serial.print("\n");
+  byte data[20];
+  Serial.print(read('B', 3, 7, data, 20));
+  Serial.print("\n");
+  for (int i = 0; i < 20; i++)
+  {
+    Serial.print(data[i]);
+    Serial.print(" ");
+  }
+  Serial.print("\n");
+  mem();
+  */
 }
 
 void loop()
@@ -49,6 +74,85 @@ void loop()
 }
 
 const char chars[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'};
+
+bool free(char c, byte num)
+{
+  byte a = 0;
+  while (a < 25 && !(c == chars[a])) { a++; }
+  if (a >= 25) { return false; }
+  
+  if (num > 9) { return false; }
+  a = (a*10) + num;
+
+  int i = 1;
+  while (i < getDataEnd()+1 && !(a == EEPROM.read(i*4+3))) { i++; }
+  if (!(i < getDataEnd() + 1)) { return false; }
+
+  int address = EEPROM.read(i*4) * 256 + EEPROM.read(i*4+1);
+  byte size = EEPROM.read(i*4+2);
+  
+  //cleanup header
+  Serial.print("\n");
+  int j = 0;
+  for (j = i*4; j < getDataEnd()*4; j++)
+  {
+    EEPROM.write(j, EEPROM.read(j+4));
+  }
+  dataEnd(-1);
+
+  //register free space
+  //setLazy(i * 4, address >> 8);
+  //setLazy(i * 4+1, address & 0xFF);
+  //EEPROM.read((getHeadSize()-i)*4) * 256 + EEPROM.read((getHeadSize()-i)*4+1); //start address of freespace
+  //EEPROM.read((getHeadSize()-i)*4+2); //size of freespace
+  i = 0;
+  while (i < (getFreeStart()+1) && !(EEPROM.read((getHeadSize()-i)*4) * 256 + EEPROM.read((getHeadSize()-i)*4+1) + EEPROM.read((getHeadSize()-i)*4+2) == address || EEPROM.read((getHeadSize()-i)*4) * 256 + EEPROM.read((getHeadSize()-i)*4+1) == address + size))
+  {
+    i++;
+  }
+  Serial.print("\n");
+  Serial.print("index of free space that should be extended ");
+  Serial.print(i);
+  Serial.print("\n");
+  /*
+  i = 0;
+  while (i < getFreeStart() && !(address + size + 1 == EEPROM.read(i*4) * 256 + EEPROM.read(i*4+1)
+
+  int i = 0;
+  while (i < (getFreeStart()+1) && !(EEPROM.read((getHeadSize()-i)*4+2) == 0 || (EEPROM.read((getHeadSize()-i)*4+2) >= size))) { i++; }
+  if (i >= (getFreeStart()+1)) { return false; }
+  */
+}
+
+bool read(char c, byte num, byte offset, byte data[], byte length)
+{
+  byte a = 0;
+  while (a < 25 && !(c == chars[a])) { a++; }
+  if (a >= 25) { return false; }
+  
+  if (num > 9) { return false; }
+  a = (a*10) + num;
+
+  int i = 1;
+  while (i < getDataEnd()+1 && !(a == EEPROM.read(i*4+3))) { i++; }
+  if (!(i < getDataEnd() + 1)) { return false; }
+
+  int address = EEPROM.read(i*4) * 256 + EEPROM.read(i*4+1);
+  byte size = EEPROM.read(i*4+2);
+
+  i = 0;
+  while (i + offset < size && i < length)
+  {
+    data[i] = EEPROM.read(address + i + offset);
+    i++;
+  }
+  while (i < length)
+  {
+    data[i] = 0;
+    i++;
+  }
+  return true;
+}
 
 bool write(char c, byte num, byte offset, byte data[], byte length)
 {
@@ -128,7 +232,7 @@ bool allocate(char c, byte num, byte size)
 
 void inicialise(byte headSize)
 {
-  for (int i = 0 ; i < EEPROM.length() ; i++)
+  for (int i = 0 ; i < headSize*4 ; i++)
   {
     setLazy(i, 0);
   }
