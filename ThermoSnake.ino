@@ -12,7 +12,8 @@ void setup()
   Serial.print("Start");
   inicialise(64);
   mem();
-  
+
+  /*
   Serial.print("\n");
   Serial.print(allocateSpace('B', 2, 60));
   Serial.print("\n");
@@ -32,17 +33,7 @@ void setup()
   Serial.print(allocateSpace('B', 5, 30));
   Serial.print("\n");
   mem();
-  /*
-  Serial.print("\n");
-  Serial.print(freeUpSpace('B', 4));
-  Serial.print("\n");
-  mem();
 
-  Serial.print("\n");
-  Serial.print(allocateSpace('B', 4, 50));
-  Serial.print("\n");
-  mem();
-  */
   Serial.print("\n");
   Serial.print(freeUpSpace('B', 2));
   Serial.print("\n");
@@ -62,34 +53,38 @@ void setup()
   Serial.print(freeUpSpace('B', 5));
   Serial.print("\n");
   mem();
-  
-  /*
-  Serial.print("\n");
-  //allocateSpace('B', 2, 230);
-  Serial.print("\n");
-  mem();
   */
   
-  /*
   Serial.print("\n");
-  byte data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-  Serial.print(write('B', 3, 0, data, 20));
+  allocateSpace('B', 2, 10);
+  Serial.print("\n");
+  mem();
+  
+  
+  
+  Serial.print("\n");
+  byte data[] = {analogRead(A0), analogRead(A1), analogRead(A2), analogRead(A3), analogRead(A4), analogRead(A5), analogRead(A6), 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+  Serial.print(write('B', 2, 0, data, 20));
+  for (int i = 0; i < 16; i++)
+  {
+    data[i] = 43;
+  }
   Serial.print("\n");
   mem();
   
   
   Serial.print("\n");
-  byte data2[20];
-  Serial.print(read('B', 3, 0, data2, 30));
+  byte asd = 20;
+  byte data2[asd];
+  Serial.print(readBytes('B', 2, 5, asd-1, data2));
   Serial.print("\n");
-  for (int i = 0; i < 30; i++)
+  for (int i = 0; i < asd; i++)
   {
-    Serial.print(data[i]);
+    Serial.print(data2[i]);
     Serial.print(" ");
   }
   Serial.print("\n");
   mem();
-  */
   
 }
 
@@ -283,7 +278,6 @@ byte nameToAllocationNoteIndex(char c, byte num)
   }
   while (i <= dataSize && !(a == name));
   if (!(i <= dataSize)) { return 0; }
-
   return i;
 }
 
@@ -432,41 +426,41 @@ byte allocateSpace(char c, byte num, byte size)
   return returnValue;
 }
 
-
-
-
-
-
-
-
-bool read(char c, byte num, byte offset, byte data[], byte length)
+/*
+ * RETURN VALUE
+ * 0 - success
+ * 1 - not found
+ */
+byte readBytes(char c, byte num, byte first, byte last, byte data[])
 {
-  byte a = 0;
-  while (a < 25 && !(c == chars[a])) { a++; }
-  if (a >= 25) { return false; }
+  byte dataSize = getDataSize();
+  byte index = nameToAllocationNoteIndex(c, num);
   
-  if (num > 9) { return false; }
-  a = (a*10) + num;
-
-  int i = 1;
-  while (i < getDataSize()+1 && !(a == EEPROM.read(i*4+3))) { i++; }
-  if (!(i < getDataSize() + 1)) { return false; }
-
-  int address = EEPROM.read(i*4) * 256 + EEPROM.read(i*4+1);
-  byte size = EEPROM.read(i*4+2);
-
-  i = 0;
-  while (i + offset < size && i < length)
+  unsigned int address = EEPROM.read(index*4) * 256 + EEPROM.read(index*4+1);
+  byte size = EEPROM.read(index*4+2);
+  
+  if (index == 0)
   {
-    data[i] = EEPROM.read(address + i + offset);
+    for (int i = 0; i < (last+1)-first; i++)
+    {
+      data[i] = 0;
+    }
+    return 1;
+  }
+
+  byte i = first;
+  while (i <= last && i < size)
+  {
+    data[i-first] = EEPROM.read(address+i);
     i++;
   }
-  while (i < length)
+  while (i <= last)
   {
-    data[i] = 0;
+    data[i-first] = 0;
     i++;
   }
-  return true;
+
+  return 0;
 }
 
 bool write(char c, byte num, byte offset, byte data[], byte length)
@@ -478,11 +472,11 @@ bool write(char c, byte num, byte offset, byte data[], byte length)
   if (num > 9) { return false; }
   a = (a*10) + num;
 
-  int i = 1;
+  byte i = 1;
   while (i < getDataSize()+1 && !(a == EEPROM.read(i*4+3))) { i++; }
   if (!(i < getDataSize() + 1)) { return false; }
 
-  int address = EEPROM.read(i*4) * 256 + EEPROM.read(i*4+1);
+  unsigned int address = EEPROM.read(i*4) * 256 + EEPROM.read(i*4+1);
   byte size = EEPROM.read(i*4+2);
 
   i = 0;
