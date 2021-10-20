@@ -12,8 +12,8 @@ void setup()
   Serial.print("Start");
   inicialise(64);
   mem();
-
-  /*
+  
+  
   Serial.print("\n");
   Serial.print(allocateSpace('B', 2, 60));
   Serial.print("\n");
@@ -53,18 +53,18 @@ void setup()
   Serial.print(freeUpSpace('B', 5));
   Serial.print("\n");
   mem();
-  */
   
+  /*
   Serial.print("\n");
   allocateSpace('B', 2, 10);
   Serial.print("\n");
   mem();
+  */
   
-  
-  
+  /*
   Serial.print("\n");
   byte data[] = {analogRead(A0), analogRead(A1), analogRead(A2), analogRead(A3), analogRead(A4), analogRead(A5), analogRead(A6), 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-  Serial.print(write('B', 2, 0, data, 20));
+  Serial.print(writeBytes('B', 2, 0, 20, data));
   for (int i = 0; i < 16; i++)
   {
     data[i] = 43;
@@ -85,7 +85,7 @@ void setup()
   }
   Serial.print("\n");
   mem();
-  
+  */
 }
 
 void loop()
@@ -215,6 +215,7 @@ byte insertFreeNote(unsigned int address, byte size)
   //extend
   if (i <= freeSize)
   {
+    //TODO may it will rollover at the size increment so a new note should be added
     //set the new space as the begining of the free space if the next free space is exactly next to it
     if (address + size == taddress)
     {
@@ -429,7 +430,8 @@ byte allocateSpace(char c, byte num, byte size)
 /*
  * RETURN VALUE
  * 0 - success
- * 1 - not found
+ * 1 - succes but it point outside the allocation
+ * 2 - not found
  */
 byte readBytes(char c, byte num, byte first, byte last, byte data[])
 {
@@ -445,9 +447,10 @@ byte readBytes(char c, byte num, byte first, byte last, byte data[])
     {
       data[i] = 0;
     }
-    return 1;
+    return 2;
   }
 
+  byte returnValue = 0;
   byte i = first;
   while (i <= last && i < size)
   {
@@ -458,34 +461,104 @@ byte readBytes(char c, byte num, byte first, byte last, byte data[])
   {
     data[i-first] = 0;
     i++;
+    returnValue = 1;
   }
 
   return 0;
 }
 
-bool write(char c, byte num, byte offset, byte data[], byte length)
+/*
+ * RETURN VALUE
+ * 0 - success
+ * 1 - succes but it point outside the allocation
+ * 2 - not found
+ */
+byte writeBytes(char c, byte num, byte first, byte last, byte data[])
 {
-  byte a = 0;
-  while (a < 25 && !(c == chars[a])) { a++; }
-  if (a >= 25) { return false; }
-  
-  if (num > 9) { return false; }
-  a = (a*10) + num;
+  byte dataSize = getDataSize();
+  byte index = nameToAllocationNoteIndex(c, num);
 
-  byte i = 1;
-  while (i < getDataSize()+1 && !(a == EEPROM.read(i*4+3))) { i++; }
-  if (!(i < getDataSize() + 1)) { return false; }
+  unsigned int address = EEPROM.read(index*4) * 256 + EEPROM.read(index*4+1);
+  byte size = EEPROM.read(index*4+2);
 
-  unsigned int address = EEPROM.read(i*4) * 256 + EEPROM.read(i*4+1);
-  byte size = EEPROM.read(i*4+2);
-
-  i = 0;
-  while (i + offset < size && i < length)
+  if (index == 0)
   {
-    setLazy(address + i + offset, data[i]);
+    for (int i = 0; i < (last+1)-first; i++)
+    {
+      data[i] = 0;
+    }
+    return 2;
+  }
+
+  byte returnValue = 0;
+  byte i = first;
+  while (i <= last && i < size)
+  {
+    setLazy(address+i, data[i-first]);
     i++;
   }
-  return true;
+  while (i <= last)
+  {
+    data[i-first] = 0;
+    i++;
+    returnValue = 1;
+  }
+
+  return 0;
+}
+
+void optimizeStorage()
+{
+  byte freeSize = getFreeSize();
+  byte headSize = getHeadSize();
+  
+  //TODO group free space
+  unsigned address0 = EEPROM.read(headSize*4) * 256 + EEPROM.read(headSize*4+1);
+  byte size0 = EEPROM.read(headSize*4+2);
+  byte type0 = EEPROM.read(headSize*4+3);
+  
+  int i = 0;
+  while (i < freeSize)
+  {
+    unsigned address1 = EEPROM.read((headSize - (i+1))*4) * 256 + EEPROM.read((headSize - (i+1))*4+1);
+    byte size1 = EEPROM.read((headSize - (i+1))*4+2);
+    byte type1 = EEPROM.read((headSize - (i+1))*4+3);
+
+    if (address0 + size0 == address1)
+    {
+      //attach 0 and 1 free space notes beacause they next to each other
+      if (size0+size1 > 255)
+      {
+        //create a full and a small part
+        //full
+        setLazy((headSize - i)*4+2, 255);
+        //not full
+        setLazy((headSize - (i+1))*4+2, size0+size1);
+      }
+      else
+      {
+        //create one big part
+        setLazy((headSize - i)*4+2, size0+size1);
+        setLazy((headSize - i)*4+3, type1);
+        removeFreeNote(i+1);
+        
+        freeSize = getFreeSize();
+        i--;
+        address1 = address0; //keep the smaller address
+        size1 += size0; //keep both of the size
+
+        //TODO there should be a problem due to modify i and freeSize
+      }
+    }
+
+
+
+    address0 = address1;
+    size0 = size1;
+    type0 = type1;
+    i++;
+  }
+  //TODO rearrange allocations
 }
 
 void inicialise(byte headSize)
@@ -496,15 +569,15 @@ void inicialise(byte headSize)
     setLazy(i, 0);
   }
   */
-  
+  /*
   for (int i = 0 ; i < EEPROM.length(); i++)
   {
     setLazy(i, 0);
   }
+  */
   
-
-  setDataEndLazy(0);
-  setFreeStartLazy(0);
+  setLazy(0, 0);
+  setLazy(1, 0);
   setLazy(2, headSize-1);
 
   //rest free space
@@ -516,42 +589,39 @@ void inicialise(byte headSize)
   
 }
 
-bool setFreeStartLazy(byte val)
-{
-  if (getFreeSize() != val)
-  {
-    EEPROM.write(1, val);
-    return true;
-  }
-  return false;
-}
-
-bool setDataEndLazy(byte val)
-{
-  if (getDataSize() != val)
-  {
-    EEPROM.write(0, val);
-    return true;
-  }
-  return false;
-}
-
 
 
 
 void mem()
 {
-  Serial.print("\n");
-  for (int i = 0; i < EEPROM.length()/16; i++)
+  byte width = 32;
+  for (int i = 0; i < EEPROM.length()/width; i++)
   {
+    if (i % 8 == 0)
+    {
+      Serial.print("\n");
+    }
     Serial.print("\n");
     Serial.print(i);
-    Serial.print("\t");
-    for (int j = 0; j < 16; j++)
+    
+    if (i < 10)
     {
-      int a = i*16+j;
-      Serial.print(EEPROM.read(a));
       Serial.print(" ");
+    }
+    
+    for (int j = 0; j < width; j++)
+    {
+      int a = i*width+j;
+      if (a % 8 == 0 && j > 0)
+      {
+        Serial.print("|");
+      }
+
+      byte cur = EEPROM.read(a);
+      if (cur < 100) { Serial.print(" "); }
+      if (cur < 10) { Serial.print(" "); }
+      Serial.print(" ");
+      Serial.print(cur);
     }
   }
   Serial.print("\n");
