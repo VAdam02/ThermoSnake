@@ -15,37 +15,27 @@ void setup()
   
   
   Serial.print("\n");
-  Serial.print(allocateSpace('B', 2, 60));
+  Serial.print(allocateSpace('B', 2, 160));
   Serial.print("\n");
   mem();
   
   Serial.print("\n");
-  Serial.print(allocateSpace('B', 3, 50));
+  Serial.print(allocateSpace('B', 3, 150));
   Serial.print("\n");
   mem();
 
   Serial.print("\n");
-  Serial.print(allocateSpace('B', 4, 40));
+  Serial.print(allocateSpace('B', 4, 140));
   Serial.print("\n");
   mem();
   
   Serial.print("\n");
-  Serial.print(allocateSpace('B', 5, 30));
+  Serial.print(allocateSpace('B', 5, 130));
   Serial.print("\n");
   mem();
 
   Serial.print("\n");
-  Serial.print(freeUpSpace('B', 2));
-  Serial.print("\n");
-  mem();
-  
-  Serial.print("\n");
-  Serial.print(freeUpSpace('B', 3));
-  Serial.print("\n");
-  mem();
-
-  Serial.print("\n");
-  Serial.print(freeUpSpace('B', 4));
+  Serial.print(allocateSpace('B', 6, 160));
   Serial.print("\n");
   mem();
 
@@ -54,6 +44,23 @@ void setup()
   Serial.print("\n");
   mem();
   
+  Serial.print("\n");
+  Serial.print(freeUpSpace('B', 2));
+  Serial.print("\n");
+  mem();
+
+  Serial.print("\n");
+  Serial.print(freeUpSpace('B', 3));
+  Serial.print("\n");
+  mem();
+
+  Serial.print("\n");
+  Serial.print(freeUpSpace('B', 6));
+  Serial.print("\n");
+  mem();
+
+  optimizeStorage();
+  mem();
   /*
   Serial.print("\n");
   allocateSpace('B', 2, 10);
@@ -186,7 +193,7 @@ byte removeFreeNote(byte index)
     returnValue = 1 - moveNote(headSize -freeSize, headSize - (index +1),1);
   }
 
-  addDataSize(-1);
+  addFreeSize(-1);
   return returnValue;
 }
 
@@ -215,7 +222,6 @@ byte insertFreeNote(unsigned int address, byte size)
   //extend
   if (i <= freeSize)
   {
-    //TODO may it will rollover at the size increment so a new note should be added
     //set the new space as the begining of the free space if the next free space is exactly next to it
     if (address + size == taddress)
     {
@@ -225,9 +231,38 @@ byte insertFreeNote(unsigned int address, byte size)
     
     //set the new size
     //if its the reaming part of storage than it should be 0 or 1-255 if the left storage is going to be small
-    if (EEPROM.read((headSize-i)*4+3) == 254 && (tsize + size) > 255)
+    byte ttype = EEPROM.read((headSize-i)*4+3);
+    if (ttype == 254 && (tsize + size) > 255)
     {
       setLazy((headSize-i)*4+2, 0);
+    }
+    else if ((tsize + size) > 255)
+    {
+      setLazy((headSize-i)*4+2, 255);
+
+      /* register a new note
+       * address + 255
+       * size + tsize - 255
+       * ttype
+       */
+      Serial.print("\n");
+      Serial.print(i);
+      Serial.print(" ");
+      Serial.print(taddress);
+      Serial.print(" ");
+      Serial.print(taddress+255);
+      Serial.print("\n");
+      
+      moveNote(headSize-(i+1), headSize-(freeSize+1), -1);
+      
+      setLazy((headSize-(i+1))*4, (taddress + 256) >> 8);
+      setLazy((headSize-(i+1))*4+1, (taddress + 256) & 0xFF);
+      setLazy((headSize-(i+1))*4+2, size + tsize - 255);
+      setLazy((headSize-(i+1))*4+3, ttype);
+
+      addFreeSize(1);
+      //TODO error because rollover
+      //TODO may it will rollover at the size increment so a new note should be added
     }
     else
     {
@@ -246,7 +281,7 @@ byte insertFreeNote(unsigned int address, byte size)
       i++;
       taddress = EEPROM.read((getHeadSize()-i)*4)*256 + EEPROM.read((getHeadSize()-i)*4+1);
     }
-    while (i < freeSize && !(taddress < address));
+    while (i < freeSize && !(taddress > address));
 
     moveNote(headSize-i, headSize-freeSize, -1);
 
@@ -397,7 +432,6 @@ byte allocateSpace(char c, byte num, byte size)
   unsigned int taddress = (headSize-i)*4;
   unsigned int address = EEPROM.read(taddress) * 256 + EEPROM.read(taddress+1);
 
-  
   //remove this note because it's size is 0
   if (tsize == size && ttype != 254) { removeFreeNote(i); }
   else
@@ -410,7 +444,7 @@ byte allocateSpace(char c, byte num, byte size)
     if (ttype == 254)
     {
       //if it's the remaining part of the EEPROM than it should have a special size
-      if (EEPROM.length() - (address + size) < 256) { setLazy(address+2, EEPROM.length() - (address + size)); }
+      if (EEPROM.length() - (address + size) < 256) { setLazy(taddress+2, EEPROM.length() - (address + size)); }
       else { setLazy(taddress+2, 0); }
     }
     else
@@ -423,7 +457,7 @@ byte allocateSpace(char c, byte num, byte size)
   //TODO manage if it want to reallocate with same name
   byte returnValue = 0;
   returnValue = insertAllocationNote(address, size, a);
-  
+
   return returnValue;
 }
 
@@ -516,47 +550,80 @@ void optimizeStorage()
   unsigned address0 = EEPROM.read(headSize*4) * 256 + EEPROM.read(headSize*4+1);
   byte size0 = EEPROM.read(headSize*4+2);
   byte type0 = EEPROM.read(headSize*4+3);
+
+  Serial.print(".0 ");
   
   int i = 0;
   while (i < freeSize)
   {
+    Serial.print(".1 ");
     unsigned address1 = EEPROM.read((headSize - (i+1))*4) * 256 + EEPROM.read((headSize - (i+1))*4+1);
     byte size1 = EEPROM.read((headSize - (i+1))*4+2);
     byte type1 = EEPROM.read((headSize - (i+1))*4+3);
 
+    //TODO 254's size
     if (address0 + size0 == address1)
     {
+      Serial.print(".2 ");
       //attach 0 and 1 free space notes beacause they next to each other
-      if (size0+size1 > 255)
+      if (size0+size1 <= 255 || type1 == 254)
       {
-        //create a full and a small part
-        //full
-        setLazy((headSize - i)*4+2, 255);
-        //not full
-        setLazy((headSize - (i+1))*4+2, size0+size1);
-      }
-      else
-      {
+        Serial.print(".3 ");
         //create one big part
-        setLazy((headSize - i)*4+2, size0+size1);
+        if (type1 == 254 && (size1 == 0 || size0+size1 > 255))
+        {
+          Serial.print(".4 ");
+          //calculate the space specially
+          if ((EEPROM.length() - address0) > 255)
+          {
+            Serial.print(".5 ");
+            setLazy((headSize - i)*4+2, 0);
+          }
+          else
+          {
+            Serial.print(".6 ");
+            setLazy((headSize - i)*4+2, (EEPROM.length() - address0));
+          }
+        }
+        else
+        {
+          Serial.print(".7 ");
+          setLazy((headSize - i)*4+2, size0+size1);
+        }
+        
         setLazy((headSize - i)*4+3, type1);
         removeFreeNote(i+1);
+
         
-        freeSize = getFreeSize();
+        freeSize -= 1;
         i--;
         address1 = address0; //keep the smaller address
         size1 += size0; //keep both of the size
 
         //TODO there should be a problem due to modify i and freeSize
       }
+      else
+      {
+        Serial.print(".8 ");
+        //create a full and a small part
+        //full
+        setLazy((headSize - i)*4+2, 255);
+        //not full
+        setLazy((headSize - (i+1))*4+2, size0+size1);
+      }
     }
-
-
+    Serial.print(".9 ");
 
     address0 = address1;
     size0 = size1;
     type0 = type1;
     i++;
+    Serial.print("\n");
+    Serial.print("\n");
+    Serial.print(i);
+    Serial.print(" round");
+    Serial.print("\n");
+    mem();
   }
   //TODO rearrange allocations
 }
@@ -569,12 +636,12 @@ void inicialise(byte headSize)
     setLazy(i, 0);
   }
   */
-  /*
+  
   for (int i = 0 ; i < EEPROM.length(); i++)
   {
     setLazy(i, 0);
   }
-  */
+  
   
   setLazy(0, 0);
   setLazy(1, 0);
