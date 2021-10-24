@@ -59,8 +59,10 @@ void setup()
   Serial.print("\n");
   mem();
 
+
   optimizeStorage();
   mem();
+
   /*
   Serial.print("\n");
   allocateSpace('B', 2, 10);
@@ -68,6 +70,7 @@ void setup()
   mem();
   */
   
+
   /*
   Serial.print("\n");
   byte data[] = {analogRead(A0), analogRead(A1), analogRead(A2), analogRead(A3), analogRead(A4), analogRead(A5), analogRead(A6), 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
@@ -255,8 +258,8 @@ byte insertFreeNote(unsigned int address, byte size)
       
       moveNote(headSize-(i+1), headSize-(freeSize+1), -1);
       
-      setLazy((headSize-(i+1))*4, (taddress + 256) >> 8);
-      setLazy((headSize-(i+1))*4+1, (taddress + 256) & 0xFF);
+      setLazy((headSize-(i+1))*4, (taddress + 255) >> 8);
+      setLazy((headSize-(i+1))*4+1, (taddress + 255) & 0xFF);
       setLazy((headSize-(i+1))*4+2, size + tsize - 255);
       setLazy((headSize-(i+1))*4+3, ttype);
 
