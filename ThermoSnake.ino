@@ -1,10 +1,12 @@
 #include "src/DelayManager/DelayManager.h"
 #include "src/Graphics/Graphics.h"
 #include "src/TempAndHum/TempAndHum.h"
+#include "src/Backstore/Backstore.h"
 
 DelayManager delayer;
 Graphics oled;
 TempAndHum tempAndHum;
+Backstore store;
 
 void setup()
 {
