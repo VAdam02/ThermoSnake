@@ -24,7 +24,7 @@ class Backstore
     void Backstore::inicialise(byte headSize);
     void Backstore::mem();
   private:
-    const char chars[24];
+    char chars[25] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'};
     byte Backstore::getDataSize();
     void Backstore::addDataSize(int dif);
     byte Backstore::getFreeSize();

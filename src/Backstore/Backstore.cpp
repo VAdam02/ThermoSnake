@@ -4,8 +4,6 @@
 
 Backstore::Backstore() { }
 
-const char chars[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'};
-
 byte Backstore::getDataSize() { return EEPROM.read(0); }
 void Backstore::addDataSize(int dif)
 {
