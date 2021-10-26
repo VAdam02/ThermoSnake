@@ -70,8 +70,7 @@ void loop()
 
     address[0] = address[0] + 1;
     
-    Serial.print(store.writeBytes('A', 0, 0, 0, address));
-    store.mem();
+    store.writeBytes('A', 0, 0, 0, address);
     
     
     lastSave += (900000);
