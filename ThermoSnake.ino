@@ -17,12 +17,12 @@ void setup()
   tempAndHum.begin();
   Serial.begin(9600);
 
-  //store.inicialise(64);
+  //store.inicialise(128);
   byte address[1];
   
   if (store.readBytes('A', 0, 0, 0, address) != 0)
   {
-    store.inicialise(64);
+    store.inicialise(128);
     store.mem();
     Serial.print("\n");
     Serial.print(store.allocateSpace('A', 0, 4));
@@ -71,7 +71,7 @@ void loop()
     address[0] = address[0] + 1;
     
     store.writeBytes('A', 0, 0, 0, address);
-    
+    store.mem();
     
     lastSave += (900000);
   }
