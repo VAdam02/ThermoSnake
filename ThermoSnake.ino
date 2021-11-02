@@ -27,7 +27,7 @@ void setup()
     store.mem();
     Serial.print("\n");
     Serial.print(store.allocateSpace('A', 0, 4));
-    byte asd[] = {10};
+    byte asd[] = {1};
     Serial.print("\n");
     Serial.print(store.writeBytes('A', 0, 0, 0, asd));
     Serial.print("\n");
