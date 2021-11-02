@@ -19,7 +19,7 @@ void Backstore::write(unsigned int address, byte data)
   Wire.write((int)(address & 0xFF));
   Wire.write(data);
   Wire.endTransmission();
-  delay(5);
+  delay(10);
 
   //TODO check back the data is correct
 }
