@@ -11,7 +11,8 @@ class Backstore
 {
   public:
     Backstore();
-    
+    void Backstore::begin();
+
     byte Backstore::freeUpSpace(char c, byte num);
     byte Backstore::allocateSpace(char c, byte num, byte size);
 
@@ -25,6 +26,10 @@ class Backstore
     void Backstore::mem();
   private:
     char chars[25] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'};
+    
+    void Backstore::write(unsigned int address, byte data);
+    byte Backstore::read(unsigned int address);
+
     byte Backstore::getDataSize();
     void Backstore::addDataSize(int dif);
     byte Backstore::getFreeSize();

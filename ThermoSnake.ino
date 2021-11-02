@@ -15,14 +15,15 @@ void setup()
   delayer.begin();
   oled.begin();
   tempAndHum.begin();
+  store.begin();
   Serial.begin(9600);
 
-  //store.inicialise(128);
+  //store.inicialise(256);
   byte address[1];
   
   if (store.readBytes('A', 0, 0, 0, address) != 0)
   {
-    store.inicialise(128);
+    store.inicialise(256);
     store.mem();
     Serial.print("\n");
     Serial.print(store.allocateSpace('A', 0, 4));
