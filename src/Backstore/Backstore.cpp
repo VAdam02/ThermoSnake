@@ -1,24 +1,57 @@
 #include "Backstore.h"
 #include <Arduino.h>
-#include <EEPROM.h>
+#include <Wire.h>
+
+#define EEPROM_SIZE 4096
+#define EEPROM_ADDRESS 0x50
 
 Backstore::Backstore() { }
 
-const char chars[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'};
+void Backstore::begin()
+{
+  Wire.begin();
+}
 
-byte Backstore::getDataSize() { return EEPROM.read(0); }
+void Backstore::write(unsigned int address, byte data)
+{
+  Wire.beginTransmission(EEPROM_ADDRESS);
+  Wire.write((int)(address >> 8));
+  Wire.write((int)(address & 0xFF));
+  Wire.write(data);
+  Wire.endTransmission();
+  delay(5);
+
+  //TODO check back the data is correct
+}
+
+byte Backstore::read(unsigned int address)
+{
+  byte data = 0xFF;
+  Wire.beginTransmission(EEPROM_ADDRESS);
+  Wire.write((int)(address >> 8));
+  Wire.write((int)(address & 0xFF));
+  Wire.endTransmission();
+  Wire.requestFrom(EEPROM_ADDRESS,1);
+  if (Wire.available())
+  {
+    data = Wire.read();
+  }
+  return data;
+}
+
+byte Backstore::getDataSize() { return read(0); }
 void Backstore::addDataSize(int dif)
 {
   setLazy(0, getDataSize() + dif);
 }
 
-byte Backstore::getFreeSize() { return EEPROM.read(1); }
+byte Backstore::getFreeSize() { return read(1); }
 void Backstore::addFreeSize(int dif)
 {
   setLazy(1, getFreeSize() + dif);
 }
 
-byte Backstore::getHeadSize() { return EEPROM.read(2); }
+byte Backstore::getHeadSize() { return read(2); }
 
 /*
  * RETURN VALUE
@@ -50,7 +83,7 @@ byte Backstore::nameToAllocationNoteIndex(char c, byte num)
   do
   {
     i++;
-    name = EEPROM.read(i*4+3);
+    name = read(i*4+3);
   }
   while (i <= dataSize && !(a == name));
   if (!(i <= dataSize)) { return 0; }
@@ -59,9 +92,9 @@ byte Backstore::nameToAllocationNoteIndex(char c, byte num)
 
 bool Backstore::setLazy(unsigned int address, byte value)
 {
-  if (EEPROM.read(address) != value)
+  if (read(address) != value)
   {
-    EEPROM.write(address, value);
+    write(address, value);
     return true;
   }
   return false;
@@ -90,12 +123,12 @@ byte Backstore::moveNote(byte first, byte last, int moveby)
 
   //move first by count than the middle than the last
   int direction = (last-first) / abs(last-first);
-  for (byte i = first; i != last+direction; i += direction)
+  for (byte i = first; i != (byte)(last+direction); i += direction)
   {
-    setLazy((unsigned int)(i+moveby)*4, EEPROM.read(i*4));
-    setLazy((unsigned int)(i+moveby)*4+1, EEPROM.read(i*4+1));
-    setLazy((unsigned int)(i+moveby)*4+2, EEPROM.read(i*4+2));
-    setLazy((unsigned int)(i+moveby)*4+3, EEPROM.read(i*4+3));
+    setLazy((unsigned int)(i+moveby)*4, read(i*4));
+    setLazy((unsigned int)(i+moveby)*4+1, read(i*4+1));
+    setLazy((unsigned int)(i+moveby)*4+2, read(i*4+2));
+    setLazy((unsigned int)(i+moveby)*4+3, read(i*4+3));
   }
   return 0;
 }
@@ -137,8 +170,8 @@ byte Backstore::insertFreeNote(unsigned int address, byte size)
   do
   {
     i++;
-    taddress = EEPROM.read((headSize-i)*4) * 256 + EEPROM.read((headSize-i)*4+1);
-    tsize = EEPROM.read((headSize-i)*4+2);
+    taddress = read((headSize-i)*4) * 256 + read((headSize-i)*4+1);
+    tsize = read((headSize-i)*4+2);
   }
   while (i <= freeSize && !(taddress + tsize == address || taddress == address + size));
 
@@ -154,7 +187,7 @@ byte Backstore::insertFreeNote(unsigned int address, byte size)
     
     //set the new size
     //if its the reaming part of storage than it should be 0 or 1-255 if the left storage is going to be small
-    byte ttype = EEPROM.read((headSize-i)*4+3);
+    byte ttype = read((headSize-i)*4+3);
     if (ttype == 254 && (tsize + size) > 255)
     {
       setLazy((headSize-i)*4+2, 0);
@@ -176,7 +209,6 @@ byte Backstore::insertFreeNote(unsigned int address, byte size)
     {
       setLazy((headSize-i)*4+2, tsize + size);
     }
-
     return 0;
   }
   //insert
@@ -187,7 +219,7 @@ byte Backstore::insertFreeNote(unsigned int address, byte size)
     do
     {
       i++;
-      taddress = EEPROM.read((getHeadSize()-i)*4)*256 + EEPROM.read((getHeadSize()-i)*4+1);
+      taddress = read((getHeadSize()-i)*4)*256 + read((getHeadSize()-i)*4+1);
     }
     while (i < freeSize && !(taddress > address));
 
@@ -238,7 +270,7 @@ byte Backstore::insertAllocationNote(unsigned int address, byte size, byte name)
   do
   {
     i++;
-    tname = EEPROM.read(i*4+3);
+    tname = read(i*4+3);
   }
   while (i <= dataSize && !(name <= tname));
   if (i <= dataSize)
@@ -278,8 +310,8 @@ byte Backstore::freeUpSpace(char c, byte num)
   if (index == 0) { return 30; }
 
   //save the parameters
-  unsigned int address = EEPROM.read(index*4) * 256 + EEPROM.read(index*4+1);
-  byte size = EEPROM.read(index*4+2);
+  unsigned int address = read(index*4) * 256 + read(index*4+1);
+  byte size = read(index*4+2);
 
   byte returnValue = 0;
   //remove allocation from header
@@ -313,14 +345,14 @@ byte Backstore::allocateSpace(char c, byte num, byte size)
   do
   {
     i++;
-    tsize = EEPROM.read((headSize-i)*4+2);
-    ttype = EEPROM.read((headSize-i)*4+3);
+    tsize = read((headSize-i)*4+2);
+    ttype = read((headSize-i)*4+3);
   }
   while (i <= freeSize && !((tsize == 0 && ttype == 254) || (tsize >= size)));
   if (i > freeSize) { return 3; }
 
   unsigned int taddress = (headSize-i)*4;
-  unsigned int address = EEPROM.read(taddress) * 256 + EEPROM.read(taddress+1);
+  unsigned int address = read(taddress) * 256 + read(taddress+1);
 
   //remove this note because it's size is 0
   if (tsize == size && ttype != 254) { removeFreeNote(i); }
@@ -334,7 +366,7 @@ byte Backstore::allocateSpace(char c, byte num, byte size)
     if (ttype == 254)
     {
       //if it's the remaining part of the EEPROM than it should have a special size
-      if (EEPROM.length() - (address + size) < 256) { setLazy(taddress+2, EEPROM.length() - (address + size)); }
+      if (EEPROM_SIZE - (address + size) < 256) { setLazy(taddress+2, EEPROM_SIZE - (address + size)); }
       else { setLazy(taddress+2, 0); }
     }
     else
@@ -362,8 +394,8 @@ byte Backstore::readBytes(char c, byte num, byte first, byte last, byte data[])
   byte dataSize = getDataSize();
   byte index = nameToAllocationNoteIndex(c, num);
   
-  unsigned int address = EEPROM.read(index*4) * 256 + EEPROM.read(index*4+1);
-  byte size = EEPROM.read(index*4+2);
+  unsigned int address = read(index*4) * 256 + read(index*4+1);
+  byte size = read(index*4+2);
   
   if (index == 0)
   {
@@ -378,7 +410,7 @@ byte Backstore::readBytes(char c, byte num, byte first, byte last, byte data[])
   byte i = first;
   while (i <= last && i < size)
   {
-    data[i-first] = EEPROM.read(address+i);
+    data[i-first] = read(address+i);
     i++;
   }
   while (i <= last)
@@ -402,8 +434,8 @@ byte Backstore::writeBytes(char c, byte num, byte first, byte last, byte data[])
   byte dataSize = getDataSize();
   byte index = nameToAllocationNoteIndex(c, num);
 
-  unsigned int address = EEPROM.read(index*4) * 256 + EEPROM.read(index*4+1);
-  byte size = EEPROM.read(index*4+2);
+  unsigned int address = read(index*4) * 256 + read(index*4+1);
+  byte size = read(index*4+2);
 
   if (index == 0)
   {
@@ -437,16 +469,16 @@ void Backstore::regroupFreeSpace()
   byte headSize = getHeadSize();
   
   //group free space
-  unsigned address0 = EEPROM.read(headSize*4) * 256 + EEPROM.read(headSize*4+1);
-  byte size0 = EEPROM.read(headSize*4+2);
-  byte type0 = EEPROM.read(headSize*4+3);
+  unsigned address0 = read(headSize*4) * 256 + read(headSize*4+1);
+  byte size0 = read(headSize*4+2);
+  byte type0 = read(headSize*4+3);
   
   int i = 0;
   while (i < freeSize)
   {
-    unsigned address1 = EEPROM.read((headSize - (i+1))*4) * 256 + EEPROM.read((headSize - (i+1))*4+1);
-    byte size1 = EEPROM.read((headSize - (i+1))*4+2);
-    byte type1 = EEPROM.read((headSize - (i+1))*4+3);
+    unsigned address1 = read((headSize - (i+1))*4) * 256 + read((headSize - (i+1))*4+1);
+    byte size1 = read((headSize - (i+1))*4+2);
+    byte type1 = read((headSize - (i+1))*4+3);
 
     //type 254's size
     if (address0 + size0 == address1)
@@ -458,13 +490,13 @@ void Backstore::regroupFreeSpace()
         if (type1 == 254 && (size1 == 0 || size0+size1 > 255))
         {
           //calculate the space specially
-          if ((EEPROM.length() - address0) > 255)
+          if ((EEPROM_SIZE - address0) > 255)
           {
             setLazy((headSize - i)*4+2, 0);
           }
           else
           {
-            setLazy((headSize - i)*4+2, (EEPROM.length() - address0));
+            setLazy((headSize - i)*4+2, (EEPROM_SIZE - address0));
           }
         }
         else
@@ -509,14 +541,16 @@ void Backstore::defragmentStorage()
 
 void Backstore::inicialise(byte headSize)
 {
+  int headSize_ = headSize;
+  if (headSize == 0) { headSize_ = 256; }
   /*
-  for (int i = 0 ; i < headSize*4 ; i++)
+  for (int i = 0 ; i < headSize_*4 ; i++)
   {
     setLazy(i, 0);
   }
   */
   
-  for (int i = 0 ; i < EEPROM.length(); i++)
+  for (int i = 0 ; i < EEPROM_SIZE; i++)
   {
     setLazy(i, 0);
   }
@@ -524,20 +558,20 @@ void Backstore::inicialise(byte headSize)
   
   setLazy(0, 0);
   setLazy(1, 0);
-  setLazy(2, headSize-1);
+  setLazy(2, headSize_-1);
 
   //rest free space
-  setLazy((headSize-1)*4, (headSize*4) >> 8);
-  setLazy((headSize-1)*4+1, (headSize*4) & 0xFF);
-  if (EEPROM.length() - (headSize*4) < 256) { setLazy((headSize-1)*4+2, EEPROM.length() - (headSize*4)); }
-  else { setLazy((headSize-1)*4+2, 0); }
-  setLazy((headSize-1)*4+3, 254);
+  setLazy((headSize_-1)*4, (headSize_*4) >> 8);
+  setLazy((headSize_-1)*4+1, (headSize_*4) & 0xFF);
+  if (EEPROM_SIZE - (headSize_*4) < 256) { setLazy((headSize_-1)*4+2, EEPROM_SIZE - (headSize_*4)); }
+  else { setLazy((headSize_-1)*4+2, 0); }
+  setLazy((headSize_-1)*4+3, 254);
 }
 
 void Backstore::mem()
 {
-  byte width = 32;
-  for (int i = 0; i < EEPROM.length()/width; i++)
+  byte width = 64;
+  for (int i = 0; i < EEPROM_SIZE/width; i++)
   {
     if (i % 8 == 0)
     {
@@ -559,7 +593,7 @@ void Backstore::mem()
         Serial.print("|");
       }
 
-      byte cur = EEPROM.read(a);
+      byte cur = read(a);
       if (cur < 100) { Serial.print(" "); }
       if (cur < 10) { Serial.print(" "); }
       Serial.print(" ");

@@ -7,29 +7,29 @@ void setup()
   Serial.begin(9600);
   Serial.print("\n");
   Serial.print("Start");
-  store.inicialise(64);
-  store.mem();
+  store.inicialise(256);
+  //store.mem();
   
   
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 2, 160));
   Serial.print("\n");
-  store.mem();
+  //store.mem();
   
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 3, 150));
   Serial.print("\n");
-  store.mem();
+  //store.mem();
 
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 4, 140));
   Serial.print("\n");
-  store.mem();
+  //store.mem();
   
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 5, 130));
   Serial.print("\n");
-  store.mem();
+  //store.mem();
 
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 6, 160));
