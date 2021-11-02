@@ -3,7 +3,7 @@
 #include "DHT.h"
 
 #define DHTTYPE DHT11   // DHT 11 
-#define DHTPIN 17
+#define DHTPIN 12
 #define COOLDOWN 2500
 #define LENGTH 12 //LENGTH * COOLDOWN / 1000 seconds
 
