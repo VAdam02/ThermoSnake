@@ -39,8 +39,8 @@ void TempAndHum::refresh()
     humidity[i-1] = humidity[i];
   }
 
-  humidity[LENGTH-1] = dht.readHumidity();
-  temperature[LENGTH-1] = dht.readTemperature();
+  temperature[LENGTH-1] = (dht.readTemperature() - 0.8);
+  humidity[LENGTH-1] = (dht.readHumidity() + 6.2);
 }
 
 
