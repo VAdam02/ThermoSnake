@@ -3,7 +3,7 @@
 #include "DHT.h"
 
 #define DHTTYPE DHT11   // DHT 11 
-#define DHTPIN 17
+#define DHTPIN 12
 #define COOLDOWN 2500
 #define LENGTH 12 //LENGTH * COOLDOWN / 1000 seconds
 
@@ -39,8 +39,8 @@ void TempAndHum::refresh()
     humidity[i-1] = humidity[i];
   }
 
-  humidity[LENGTH-1] = dht.readHumidity();
-  temperature[LENGTH-1] = dht.readTemperature();
+  temperature[LENGTH-1] = (dht.readTemperature() - 0.8);
+  humidity[LENGTH-1] = (dht.readHumidity() + 6.2);
 }
 
 
