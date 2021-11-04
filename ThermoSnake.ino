@@ -1,14 +1,18 @@
 #include "src/DelayManager/DelayManager.h"
 #include "src/TempAndHum/TempAndHum.h"
+#include "src/Backstore/Backstore.h"
 
 DelayManager delayer;
 TempAndHum tempAndHum;
+Backstore store;
 
 void setup()
 {
   Serial.begin(9600);
   delayer.begin();
   tempAndHum.begin();
+  store.begin();
+  store.mem();
 }
 
 double offLevel = 30.0;
@@ -310,5 +314,4 @@ void loop()
     state = 1;
   }
   
-  delayer.sleepReamingOf(50);
 }
