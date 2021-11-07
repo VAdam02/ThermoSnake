@@ -4,17 +4,15 @@
  * B 1 - for channel 1's variables
  */
 
+#include "TempControl.h"
 #include <Arduino.h>
-
-TempAndHum* sensor0;
-Backstore* store;
 
 TempControl::TempControl() { }
 
-void TempControl::begin(TempAndHum* tempAndHum, Backstore* backstore)
+void TempControl::begin(TempAndHum* _sensor0, Backstore* _store)
 {
-    sensor0 = tempAndHum;
-    store = backstore;
+    sensor0 = _sensor0;
+    store = _store;
 }
 
 /*
@@ -28,12 +26,10 @@ void TempControl::begin(TempAndHum* tempAndHum, Backstore* backstore)
   
  */
 
-byte[] TempControl::getByteFormat(double data)
+void TempControl::getByteFormat(double data, byte returnValue[])
 {
-  byte value[];
-
   unsigned int fullPart = (unsigned int)abs(data);
-  unsigned double otherPart = abs(data) - fullPart;
+  double otherPart = abs(data) - fullPart;
 
   fullPart = fullPart % 128;
   byte current = 128;
@@ -41,7 +37,7 @@ byte[] TempControl::getByteFormat(double data)
   //negativa = 1 positive = 0
   if (data < 0) { cache++; }
   //full part
-  while (current >= 1)
+  while (current >= 2)
   {
     cache *= 2;
     current /= 2;
@@ -52,7 +48,7 @@ byte[] TempControl::getByteFormat(double data)
       fullPart -= current;
     }
   }
-  value[0] = cache;
+  returnValue[0] = cache;
   cache = 0;
 
   //other part
@@ -63,7 +59,7 @@ byte[] TempControl::getByteFormat(double data)
     cache *= 2;
     current2 /= 2;
 
-    if (otherpart >= current2)
+    if (otherPart >= current2)
     {
       cache++;
       otherPart -= current2;
@@ -71,31 +67,36 @@ byte[] TempControl::getByteFormat(double data)
 
     i++;
   }
-  value[1] = cache;
+  returnValue[1] = cache;
 }
 
 void TempControl::readConfig()
 {
     //read channel0's config
     byte mode[1];
-    if (*store.readBytes('B', 0, 0, 0, data) != 0)
+    if (store->readBytes('B', 0, 0, 0, mode) != 0)
     {
-        //error - not found so inicialise to null
-        *store.allocateSpace('B', 0, 1);
-        *store.writeBytes('B', 0, 0, 0, {0});
-        mode[0] = 0;
+      Serial.print("Inicialise\n");
+      //error - not found so inicialise to null mode
+      store->allocateSpace('B', 0, 1);
+      store->writeBytes('B', 0, 0, 0, {0});
+      mode[0] = 0;
     }
     
-    if (mode == 0)
+    Serial.print(mode[0]);
+    if (mode[0] == 0)
     {
+      Serial.print("null\n");
       //do nothing
     }
-    else if (mode == 1)
+    else if (mode[0] == 1)
     {
+      Serial.print("level0\n");
       //read mode1's parameters
     }
-    else if (mode == 2)
+    else if (mode[0] == 2)
     {
+      Serial.print("level1\n");
       //read mode2's parameters
     }
 }
