@@ -79,7 +79,8 @@ void TempControl::readConfig()
       Serial.print("Inicialise\n");
       //error - not found so inicialise to null mode
       store->allocateSpace('B', 0, 1);
-      store->writeBytes('B', 0, 0, 0, {0});
+      byte buffer[] = {0};
+      store->writeBytes('B', 0, 0, 0, buffer);
       mode[0] = 0;
     }
     

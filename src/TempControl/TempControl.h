@@ -14,11 +14,11 @@ class TempControl
   public:
     TempControl();
     void TempControl::begin(TempAndHum* tempAndHum, Backstore* backstore);
-    void TempControl::getByteFormat(double data, byte returnValue[]);
-    void TempControl::readConfig();
   private:
     TempAndHum* sensor0;
     Backstore* store;
+    void TempControl::getByteFormat(double data, byte returnValue[]);
+    void TempControl::readConfig();
 };
 
 #endif

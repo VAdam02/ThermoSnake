@@ -1,10 +1,12 @@
 #include "src/DelayManager/DelayManager.h"
 #include "src/TempAndHum/TempAndHum.h"
 #include "src/Backstore/Backstore.h"
+#include "src/TempControl/TempControl.h"
 
 DelayManager delayer;
 TempAndHum tempAndHum;
 Backstore store;
+TempControl tempControl;
 
 void setup()
 {
@@ -13,6 +15,8 @@ void setup()
   tempAndHum.begin();
   store.begin();
   store.mem();
+
+  tempControl.begin(&tempAndHum, &store);
 }
 
 double offLevel = 30.0;
