@@ -3,15 +3,14 @@
 
 DelayManager::DelayManager() { }
 
-unsigned int Delay_lastTime = 0;
 void DelayManager::begin()
 {
-  Delay_lastTime = (unsigned int)(millis() % 65536);
+  lastTime = (unsigned int)(millis() % 65536);
 }
 
-void DelayManager::sleepReamingOf(int timeOfExecute)
+void DelayManager::sleepReamingOf(unsigned int timeOfExecute)
 {
-  unsigned int deltatime = (unsigned int)(millis() % 65536) - Delay_lastTime;
+  unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
 
   if (deltatime < timeOfExecute)
   {
@@ -20,7 +19,10 @@ void DelayManager::sleepReamingOf(int timeOfExecute)
   else
   {
     //FIXME probably something go really wrong with time consume so manage this
+    Serial.print(" ERROR ");
+    Serial.print(deltatime);
+    Serial.print(" ERROR ");
   }
 
-  Delay_lastTime += timeOfExecute;
+  lastTime = (unsigned int)(millis() % 65536);
 }
