@@ -30,6 +30,8 @@ void setup()
   tempControl.begin(TempSensors, &store);
   //store.mem();
 
+  //Inicialise
+  /*
   store.freeUpSpace('B', 0);
   store.freeUpSpace('B', 1);
   store.allocateSpace('B', 1, 10);
@@ -51,13 +53,14 @@ void setup()
   demo[7] = data[1];
   
   store.writeBytes('B', 1, 0, 9, demo);
-  //store.mem();
+  */
+  store.mem();
 
   lastTime = millis();
 }
 
-float heating = 0.01; //after 1 second
-float cooling = 0.0001; //after 1 second
+float heating = 0.1; //after 1 second
+float cooling = 0.001; //after 1 second
 
 /*
 unsigned int getHeatingTaskTime(byte ID)
@@ -200,7 +203,7 @@ void loop()
   if (deltatime > 1000)
   {
     //Serial.print(tempAndHum.getTemperature(&range));
-    Serial.print(value);
+    Serial.print(value, DEC);
     Serial.print(" - State ");
     Serial.print(tempControl.chanelParams[1][0]);
     Serial.print(" - OnTime ");
