@@ -62,6 +62,7 @@ void TempControl::refresh()
 {
   unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
 
+  
 }
 
 void TempControl::addHeatingTask(byte chanel, unsigned int on_time, unsigned int maxDelay_time)
@@ -133,7 +134,7 @@ bool TempControl::level1(byte chanel, double curLevel, unsigned int deltatime)
   byte data[2];
   data[0] = chanelParams[chanel][LEVELX_COOLDOWN_LEFT];
   data[1] = chanelParams[chanel][LEVELX_COOLDOWN_LEFT2];
-  double cooldownLeft = reverseByteFormat(data);
+  unsigned int cooldownLeft = (int)(data[0]) * 256 + data[1];
 
   data[0] = chanelParams[chanel][LEVEL1_TARGETLEVEL];
   data[1] = chanelParams[chanel][LEVEL1_TARGETLEVEL2];
@@ -163,18 +164,17 @@ bool TempControl::level1(byte chanel, double curLevel, unsigned int deltatime)
     if (cooldownLeft < deltatime)
     {
       cooldownLeft = 0;
-      getByteFormat(cooldownLeft, data);
-      chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = data[0];
-      chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = data[1];
+      chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = 0;
+      chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = 0;
     }
     else
     {
       //DEBUG
       Serial.print("COOLwait - ");
       cooldownLeft -= deltatime;
-      getByteFormat(cooldownLeft, data);
-      chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = data[0];
-      chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = data[1];
+      chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = ((int)(cooldownLeft) >> 8);
+      chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = ((int)(cooldownLeft) & 0xFF);
+
       return false; //nothing to do
     }
   }
@@ -266,9 +266,9 @@ bool TempControl::level1(byte chanel, double curLevel, unsigned int deltatime)
     Serial.print(reaction);
     Serial.print(" - ");
     cooldownLeft = LEVEL1_OFFCOOLDOWN;
-    getByteFormat(cooldownLeft, data);
-    chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = data[0];
-    chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = data[1];
+    chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = ((int)(cooldownLeft) >> 8);
+    chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = ((int)(cooldownLeft) & 0xFF);
+
     chanelParams[chanel][LEVEL1_CURRENTSTATE]++;
   }
 

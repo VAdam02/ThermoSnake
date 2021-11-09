@@ -72,6 +72,7 @@ void loop()
   {
     Serial.print("RON - ");
     tempControl.chanelParams[1][0] = 3;
+    tempControl.chanelParams[1][5] = 0;
   }
   if ((x-512) < -200)
   {
@@ -115,7 +116,6 @@ void loop()
   if (deltatime > 1000)
   {
     float range = 0;
-    tempControl.chanelParams[1][4] = 0;
     
     range = 0;
     //Serial.print(tempAndHum.getTemperature(&range));
@@ -132,6 +132,8 @@ void loop()
     Serial.print(tempControl.chanelParams[1][4]);
     Serial.print(" - Delay ");
     Serial.print(tempControl.chanelParams[1][5]);
+    Serial.print(" - CurrentState ");
+    Serial.print(tempControl.chanelParams[1][14]);
     Serial.print("\n");
 
     lastTime += 1000;
