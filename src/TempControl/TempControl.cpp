@@ -277,12 +277,13 @@ bool TempControl::level1(byte chanel, float curLevel, unsigned int deltatime)
     data[1] = chanelParams[chanel][LEVEL1_SAMPLE_TEMPERATURE2];
     float sampleTemperature = reverseByteFormat(data);
 
-    //TODO
     //TODO reaction = (reaction * 0.5) + ((curLevel - sampleTemperature) / (chanelParams[chanel][LEVEL1_SAMPLE_POWERONTIME] / 10) * 0.5);
     reaction = (reaction * 0.5) + ((curLevel - sampleTemperature) / (chanelParams[chanel][LEVEL1_SAMPLE_POWERONTIME] / 10) * 0.5);
     getByteFormat(reaction, data);
     chanelParams[chanel][LEVEL1_REACTION] = data[0];
     chanelParams[chanel][LEVEL1_REACTION2] = data[1];
+    //TODO make less write sequance
+    store->writeBytes('B', chanel, 6, 7, data);
 
     //DEBUG
     Serial.print(reaction);
