@@ -13,20 +13,21 @@ class TempControl
 {
   public:
     TempControl();
-    void TempControl::begin(TempAndHum* tempAndHum, Backstore* backstore);
+    void TempControl::begin(float *_sensors[], Backstore* _store);
     void TempControl::refresh();
 
     void TempControl::addHeatingTask(byte ID, unsigned int on_time, unsigned int maxDelay_time);
     void TempControl::stopHeatingTask(byte ID);
 
-    bool TempControl::level0(byte channel, double curLevel);
-    bool TempControl::level1(byte channel, double curLevel, unsigned int deltatime);
-    void TempControl::getByteFormat(double data, byte returnValue[]);
-    double TempControl::reverseByteFormat(byte data[]);
-    byte chanelParams[2][18];
+    bool TempControl::level0(byte channel, float curLevel);
+    bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime);
+    void TempControl::getByteFormat(float data, byte returnValue[]);
+    float TempControl::reverseByteFormat(byte data[]);
+    byte chanelParams[2][19];
+    float **sensors;
   private:
-    TempAndHum* sensor0;
-    Backstore* store;
+    
+    Backstore *store;
     unsigned int lastTime = 0;
     
     void TempControl::readConfig();

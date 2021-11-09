@@ -3,10 +3,18 @@
 #include "src/Backstore/Backstore.h"
 #include "src/TempControl/TempControl.h"
 
+#define TEMPSENSORCOUNT 2
+#define HUMSENSORCOUNT 1
+
 DelayManager delayer;
 TempAndHum tempAndHum;
 Backstore store;
 TempControl tempControl;
+
+float *TempSensors[TEMPSENSORCOUNT];
+float *HumSensors[HUMSENSORCOUNT];
+
+float data = 0;
 
 void setup()
 {
@@ -14,32 +22,35 @@ void setup()
   delayer.begin();
   tempAndHum.begin();
   store.begin();
+
+  TempSensors[0] = &tempAndHum.temperature;
+  TempSensors[1] = &data;
+  HumSensors[0] = &tempAndHum.humidity;
+  tempControl.begin(TempSensors, &store);
   //store.mem();
 
-  
+  store.freeUpSpace('B', 0);
   store.freeUpSpace('B', 1);
-  store.allocateSpace('B', 1, 9);
+  store.allocateSpace('B', 1, 10);
   //TODO double -> byte
 
   byte data[2];
-  byte demo[] = { 2, 201, 201, 202, 202, 203, 203, 10, 60 };
+  byte demo[] = { 2, 1, 201, 201, 202, 202, 203, 203, 10, 60 };
   
   tempControl.getByteFormat(30, data);
-  demo[1] = data[0];
-  demo[2] = data[1];
+  demo[2] = data[0];
+  demo[3] = data[1];
 
   tempControl.getByteFormat(10, data);
-  demo[3] = data[0];
-  demo[4] = data[1];
+  demo[4] = data[0];
+  demo[5] = data[1];
 
   tempControl.getByteFormat(1.3, data);
-  demo[5] = data[0];
-  demo[6] = data[1];
+  demo[6] = data[0];
+  demo[7] = data[1];
   
-  store.writeBytes('B', 1, 0, 8, demo);
-  store.mem();
-  tempControl.begin(&tempAndHum, &store);
-  
+  store.writeBytes('B', 1, 0, 9, demo);
+  //store.mem();
 }
 
 /*
@@ -57,14 +68,14 @@ void addHeatingTask (byte ID, unsigned int on_time, unsigned int maxDelay_time)
 }
 */
 
-double presstime = 0;
-double data = 0;
+float presstime = 0;
 unsigned int lastTime = 0;
 void loop()
 {
+  //DEBUG
+  Serial.print("\n");
   tempAndHum.refresh();
   tempControl.refresh();
-
   
   double x = analogRead(A0);
   double y = analogRead(A1);
@@ -72,7 +83,7 @@ void loop()
   {
     Serial.print("RON - ");
     tempControl.chanelParams[1][0] = 3;
-    tempControl.chanelParams[1][5] = 0;
+    tempControl.chanelParams[1][6] = 0;
   }
   if ((x-512) < -200)
   {
@@ -93,13 +104,13 @@ void loop()
     {
       data += (presstime/1000) * deltatime / 1000;
       
-      if (tempControl.chanelParams[1][2] < (presstime/1000) * deltatime/1000)
+      if (tempControl.chanelParams[1][3] < (presstime/1000) * deltatime/1000)
       {
-        tempControl.chanelParams[1][2] = 0;
+        tempControl.chanelParams[1][3] = 0;
       }
       else
       {
-        tempControl.chanelParams[1][2] -= (presstime/1000) * deltatime /1000;
+        tempControl.chanelParams[1][3] -= (presstime/1000) * deltatime /1000;
       }
       
     }
@@ -115,25 +126,20 @@ void loop()
   unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
   if (deltatime > 1000)
   {
-    float range = 0;
-    
-    range = 0;
     //Serial.print(tempAndHum.getTemperature(&range));
     Serial.print(data);
-    Serial.print(" - ");
-    Serial.print(tempControl.level1(1, data, 100));
     Serial.print(" - State ");
     Serial.print(tempControl.chanelParams[1][0]);
     Serial.print(" - OnTime ");
-    Serial.print(tempControl.chanelParams[1][2]);
-    Serial.print(" - Cool ");
     Serial.print(tempControl.chanelParams[1][3]);
-    Serial.print(" ");
+    Serial.print(" - Cool ");
     Serial.print(tempControl.chanelParams[1][4]);
-    Serial.print(" - Delay ");
+    Serial.print(" ");
     Serial.print(tempControl.chanelParams[1][5]);
+    Serial.print(" - Delay ");
+    Serial.print(tempControl.chanelParams[1][6]);
     Serial.print(" - CurrentState ");
-    Serial.print(tempControl.chanelParams[1][14]);
+    Serial.print(tempControl.chanelParams[1][15]);
     Serial.print("\n");
 
     lastTime += 1000;
@@ -149,5 +155,5 @@ void loop()
     digitalWrite(2, LOW);
   }
   
-  delayer.sleepReamingOf(50);
+  delayer.sleepReamingOf(250);
 }
