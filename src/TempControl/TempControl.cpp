@@ -1,36 +1,38 @@
-#define CHANEL_COUNT 2
-#define LEVEL0_MAXDELAYTIME 120
-#define LEVEL1_OFFCOOLDOWN 3000 //max 65535 due to LEVELX_COOLDOWN_LEFT
-#define LEVEL1_COOLSPEED_1C_IN_SECONDS 1200
+#define CHANEL_COUNT 2 //max 255
+#define LEVEL0_MAXDELAYTIME 255 //max 255 sec due to LEVELX_MAXDELAY_LEFT
+#define LEVEL1_OFFCOOLDOWN 120 //max 255 sec due to LEVELX_COOLDOWN_LEFT
+#define LEVEL1_COOLSPEED_1C_IN_SECONDS 1200 //0.1C in 120 seconds -> 1C in 1200 seconds
 
 //GENERAL
 #define LEVELX_STATE 0
 #define LEVELX_MODE 1
 #define LEVELX_SENSOR_ID 2
 #define LEVELX_ONTIME_LEFT 3
-#define LEVELX_COOLDOWN_LEFT 4
-#define LEVELX_COOLDOWN_LEFT2 5
-#define LEVELX_MAXDELAY_LEFT 6
+#define LEVELX_ONTIME_LEFT2 4
+#define LEVELX_COOLDOWN_LEFT 5
+#define LEVELX_COOLDOWN_LEFT2 6
+#define LEVELX_MAXDELAY_LEFT 7
+#define LEVELX_MAXDELAY_LEFT2 8
 
 //LEVEL 0
-#define LEVEL0_OFFLEVEL 7
-#define LEVEL0_OFFLEVEL2 8
-#define LEVEL0_ONLEVEL 9
-#define LEVEL0_ONLEVEL2 10
+#define LEVEL0_OFFLEVEL 9
+#define LEVEL0_OFFLEVEL2 10
+#define LEVEL0_ONLEVEL 11
+#define LEVEL0_ONLEVEL2 12
 
 //LEVEL 1
-#define LEVEL1_TARGETLEVEL 7
-#define LEVEL1_TARGETLEVEL2 8
-#define LEVEL1_DIFFERENCE 9
-#define LEVEL1_DIFFERENCE2 10
-#define LEVEL1_REACTION 11
-#define LEVEL1_REACTION2 12
-#define LEVEL1_MINON 13
-#define LEVEL1_MAXON 14
-#define LEVEL1_CURRENTSTATE 15
-#define LEVEL1_SAMPLE_TEMPERATURE 16
-#define LEVEL1_SAMPLE_TEMPERATURE2 17
-#define LEVEL1_SAMPLE_POWERONTIME 18
+#define LEVEL1_TARGETLEVEL 9
+#define LEVEL1_TARGETLEVEL2 10
+#define LEVEL1_DIFFERENCE 11
+#define LEVEL1_DIFFERENCE2 12
+#define LEVEL1_REACTION 13
+#define LEVEL1_REACTION2 14
+#define LEVEL1_MINON 15
+#define LEVEL1_MAXON 16
+#define LEVEL1_CURRENTSTATE 17
+#define LEVEL1_SAMPLE_TEMPERATURE 18
+#define LEVEL1_SAMPLE_TEMPERATURE2 19
+#define LEVEL1_SAMPLE_POWERONTIME 20
 
 
 /*
@@ -85,22 +87,30 @@ void TempControl::refresh()
   lastTime += deltatime;
 }
 
-void TempControl::addHeatingTask(byte chanel, unsigned int on_time, unsigned int maxDelay_time)
+void TempControl::addHeatingTask(byte chanel, unsigned int on_time, byte maxDelay_time)
 {
-  //TODO if on_time inicialised with 65535 than make it unlimited
+  //TODO if on_time inicialised with 255 than make it unlimited
   chanelParams[chanel][0] = 2;
   chanelParams[chanel][LEVELX_ONTIME_LEFT] = on_time;
 
-  if (chanelParams[chanel][LEVELX_MAXDELAY_LEFT] == 0 || chanelParams[chanel][LEVELX_MAXDELAY_LEFT] > maxDelay_time)
+  byte data[2];
+  data[0] = chanelParams[chanel][LEVELX_MAXDELAY_LEFT];
+  data[1] = chanelParams[chanel][LEVELX_MAXDELAY_LEFT2];
+  float maxDelayLeft = reverseByteFormat(data);
+  if (maxDelayLeft == 0 || maxDelayLeft > maxDelay_time)
   {
-    chanelParams[chanel][LEVELX_MAXDELAY_LEFT] = maxDelay_time;
+    maxDelayLeft = maxDelay_time;
   }
+  getByteFormat(maxDelayLeft, data);
+  chanelParams[chanel][LEVELX_MAXDELAY_LEFT] = data[0];
+  chanelParams[chanel][LEVELX_MAXDELAY_LEFT2] = data[1];
 }
 void TempControl::stopHeatingTask(byte chanel)
 {
   chanelParams[chanel][0] = 0;
   chanelParams[chanel][LEVELX_ONTIME_LEFT] = 0;
   chanelParams[chanel][LEVELX_MAXDELAY_LEFT] = 0;
+  chanelParams[chanel][LEVELX_MAXDELAY_LEFT2] = 0;
 }
 
 /* 
@@ -147,14 +157,14 @@ bool TempControl::level0(byte chanel, float curLevel)
  * 1 on for x seconds and off
  * 1.5 start heating and take sample
  * 2 heating
- * 2.5 take sample and reference with the old samples
+ * 3 take sample and reference with the old samples
  */
 bool TempControl::level1(byte chanel, float curLevel, unsigned int deltatime)
 {
   byte data[2];
   data[0] = chanelParams[chanel][LEVELX_COOLDOWN_LEFT];
   data[1] = chanelParams[chanel][LEVELX_COOLDOWN_LEFT2];
-  unsigned int cooldownLeft = (int)(data[0]) * 256 + data[1];
+  float cooldownLeft = reverseByteFormat(data);
 
   data[0] = chanelParams[chanel][LEVEL1_TARGETLEVEL];
   data[1] = chanelParams[chanel][LEVEL1_TARGETLEVEL2];
@@ -181,7 +191,7 @@ bool TempControl::level1(byte chanel, float curLevel, unsigned int deltatime)
       return false; //nothing to do
     }
 
-    if (cooldownLeft < deltatime)
+    if (cooldownLeft < ((float)(deltatime)/1000))
     {
       cooldownLeft = 0;
       chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = 0;
@@ -191,9 +201,10 @@ bool TempControl::level1(byte chanel, float curLevel, unsigned int deltatime)
     {
       //DEBUG
       Serial.print("COOLwait - ");
-      cooldownLeft -= deltatime;
-      chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = ((int)(cooldownLeft) >> 8);
-      chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = ((int)(cooldownLeft) & 0xFF);
+      cooldownLeft -= ((float)(deltatime)/1000);
+      getByteFormat(cooldownLeft, data);
+      chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = data[0];
+      chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = data[1];
 
       return false; //nothing to do
     }
@@ -250,7 +261,15 @@ bool TempControl::level1(byte chanel, float curLevel, unsigned int deltatime)
       Serial.print(onTime);
       Serial.print(" - ");
 
-      addHeatingTask(1, onTime, (curLevel - (targetLevel - difference))*LEVEL1_COOLSPEED_1C_IN_SECONDS);
+      if ((curLevel - (targetLevel - difference))*LEVEL1_COOLSPEED_1C_IN_SECONDS > 255)
+      {
+        addHeatingTask(1, onTime, 255);
+      }
+      else
+      {
+        addHeatingTask(1, onTime, (curLevel - (targetLevel - difference))*LEVEL1_COOLSPEED_1C_IN_SECONDS);
+      }
+      
       //take sample
       getByteFormat(curLevel, data);
       chanelParams[chanel][LEVEL1_SAMPLE_TEMPERATURE] = data[0];
@@ -265,8 +284,19 @@ bool TempControl::level1(byte chanel, float curLevel, unsigned int deltatime)
 
   //heating in progress
 
-  //heating finished and data analyzing
+  //heating finished
   if (chanelParams[chanel][LEVEL1_CURRENTSTATE] == 2 && chanelParams[chanel][LEVELX_ONTIME_LEFT] == 0 && chanelParams[chanel][LEVELX_STATE] == 1)
+  {
+    cooldownLeft = LEVEL1_OFFCOOLDOWN;
+    getByteFormat(cooldownLeft, data);
+    chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = data[0];
+    chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = data[1];
+
+    chanelParams[chanel][LEVEL1_CURRENTSTATE]++;
+  }
+
+  //data analyzing
+  if (chanelParams[chanel][LEVEL1_CURRENTSTATE] == 3 && cooldownLeft == 0)
   {
     //DEBUG
     Serial.print("sample - ");
@@ -288,14 +318,11 @@ bool TempControl::level1(byte chanel, float curLevel, unsigned int deltatime)
     //DEBUG
     Serial.print(reaction);
     Serial.print(" - ");
-    cooldownLeft = LEVEL1_OFFCOOLDOWN;
-    chanelParams[chanel][LEVELX_COOLDOWN_LEFT] = ((int)(cooldownLeft) >> 8);
-    chanelParams[chanel][LEVELX_COOLDOWN_LEFT2] = ((int)(cooldownLeft) & 0xFF);
 
     chanelParams[chanel][LEVEL1_CURRENTSTATE]++;
   }
 
-  if (chanelParams[chanel][LEVEL1_CURRENTSTATE] >= 3)
+  if (chanelParams[chanel][LEVEL1_CURRENTSTATE] >= 4)
   {
     chanelParams[chanel][LEVEL1_CURRENTSTATE] = 0;
     return false;
@@ -404,21 +431,23 @@ void TempControl::readConfig()
     chanelParams[i][LEVELX_MODE] = fromStore[0];
     chanelParams[i][LEVELX_SENSOR_ID] = fromStore[1];
     chanelParams[i][LEVELX_ONTIME_LEFT] = 0;
+    chanelParams[i][LEVELX_ONTIME_LEFT2] = 0;
     chanelParams[i][LEVELX_COOLDOWN_LEFT] = 0;
     chanelParams[i][LEVELX_COOLDOWN_LEFT2] = 0;
     chanelParams[i][LEVELX_MAXDELAY_LEFT] = 0;
-    chanelParams[i][7] = fromStore[2];
-    chanelParams[i][8] = fromStore[3];
-    chanelParams[i][9] = fromStore[4];
-    chanelParams[i][10] = fromStore[5];
-    chanelParams[i][11] = fromStore[6];
-    chanelParams[i][12] = fromStore[7];
-    chanelParams[i][13] = fromStore[8];
-    chanelParams[i][14] = fromStore[9];
-    chanelParams[i][15] = 0;
-    chanelParams[i][16] = 0;
+    chanelParams[i][LEVELX_MAXDELAY_LEFT2] = 0;
+    chanelParams[i][9] = fromStore[2];
+    chanelParams[i][10] = fromStore[3];
+    chanelParams[i][11] = fromStore[4];
+    chanelParams[i][12] = fromStore[5];
+    chanelParams[i][13] = fromStore[6];
+    chanelParams[i][14] = fromStore[7];
+    chanelParams[i][15] = fromStore[8];
+    chanelParams[i][16] = fromStore[9];
     chanelParams[i][17] = 0;
     chanelParams[i][18] = 0;
+    chanelParams[i][19] = 0;
+    chanelParams[i][20] = 0;
 
     //DEBUG
     Serial.print(chanelParams[i][LEVELX_MODE]);
