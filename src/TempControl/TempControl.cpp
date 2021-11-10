@@ -48,8 +48,8 @@
  * 3 - Turned on
  */
 
-#include "TempControl.h"
 #include <Arduino.h>
+#include "TempControl.h"
 
 TempControl::TempControl() { }
 
@@ -87,14 +87,6 @@ void TempControl::refresh()
   }
 
   lastTime = millis();
-}
-
-void TempControl::getRelayStates(byte count, byte *ptrs[])
-{
-  for (int i = 0; i < count; i++)
-  {
-    ptrs[i] = &channelParams[i][LEVELX_STATE];
-  }
 }
 
 void TempControl::addHeatingTask(byte channel, byte on_time, byte maxDelay_time)

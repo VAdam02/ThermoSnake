@@ -5,7 +5,7 @@
 #ifndef TempControl_h
 #define TempControl_h
 
-#include "Arduino.h"
+#include <Arduino.h>
 #include "../../src/TempAndHum/TempAndHum.h"
 #include "../../src/Backstore/Backstore.h"
 
@@ -15,13 +15,12 @@ class TempControl
     TempControl();
     void TempControl::begin(float *_sensors[], Backstore* _store);
     void TempControl::refresh();
-    void TempControl::getRelayStates(byte count, byte *ptrs[]);
 
     void TempControl::getByteFormat(float data, byte returnValue[]);
     float TempControl::reverseByteFormat(byte data[]);
     void TempControl::getUnsignedByteFormat(float data, byte returnValue[]);
     float TempControl::reverseUnsignedByteFormat(byte data[]);
-    byte channelParams[2][21]; //PRIVATE
+    byte channelParams[2][21];
   private:
     float **sensors;
     Backstore *store;
