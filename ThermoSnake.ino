@@ -10,11 +10,33 @@ void setup()
   oled.begin();
 }
 
+double presstime = 0;
+double data = 0;
 void loop()
 {
   oled.clear();
   oled.refresh();
 
+  double x = analogRead(A1);
+  double y = analogRead(A0);
+  if (abs((y-512)/512) > 0.1)
+  {
+    double deltatime = 50;
+    presstime += deltatime;
+    
+    if ((y-512) > 0)
+    {
+      data -= (presstime/1000) * deltatime / 1000;
+    }
+    else
+    {
+      data += (presstime/1000) * deltatime / 1000;
+    }
+  }
+  else
+  {
+    presstime = 0;
+  }
   
   oled.show();
   delayer.sleepReamingOf(50);
