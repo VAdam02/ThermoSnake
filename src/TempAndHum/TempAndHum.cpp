@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "DHT.h"
 
+#define EMPTY -255
 #define DHTTYPE DHT11   // DHT 11 
 #define DHTPIN 12
 #define COOLDOWN 2500
@@ -18,8 +19,8 @@ void TempAndHum::begin()
 {
   for (int i = 0; i < LENGTH; i++)
   {
-    DHTtemp[i] = 0;
-    DHThum[i] = 0;
+    DHTtemp[i] = EMPTY;
+    DHThum[i] = EMPTY;
   }
   dht.begin();
 
@@ -39,9 +40,27 @@ void TempAndHum::refresh()
   }
 
   DHTtemp[LENGTH-1] = (dht.readTemperature() - 0.8);
+  if (DHTtemp[0] == EMPTY)
+  {
+    int i = 0;
+    while (DHTtemp[i] == EMPTY)
+    {
+      DHTtemp[i] = DHTtemp[LENGTH-1];
+      i++;
+    }
+  }
   temperature = getTemperature(&temperatureRange);
 
   DHThum[LENGTH-1] = (dht.readHumidity() + 6.2);
+  if (DHThum[0] == EMPTY)
+  {
+    int i = 0;
+    while (DHThum[i] == EMPTY)
+    {
+      DHThum[i] = DHThum[LENGTH-1];
+      i++;
+    }
+  }
   humidity = getHumidity(&humidityRange);
 }
 
