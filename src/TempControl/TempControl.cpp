@@ -89,6 +89,14 @@ void TempControl::refresh()
   lastTime = millis();
 }
 
+void TempControl::getRelayStates(byte count, byte *ptrs[])
+{
+  for (int i = 0; i < count; i++)
+  {
+    ptrs[i] = &channelParams[i][LEVELX_STATE];
+  }
+}
+
 void TempControl::addHeatingTask(byte channel, byte on_time, byte maxDelay_time)
 {
   //TODO if on_time inicialised with 255 than make it unlimited

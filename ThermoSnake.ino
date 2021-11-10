@@ -6,6 +6,8 @@
 #define TEMPSENSORCOUNT 3
 #define HUMSENSORCOUNT 1
 
+#define CHANNEL_COUNT 2 //max 255
+
 //GENERAL
 #define LEVELX_STATE 0
 #define LEVELX_MODE 1
@@ -56,6 +58,8 @@ float cooling0 = 0.01; //after 1 second
 float value1 = 30;
 float heating1 = 0.1; //after 1 second
 float cooling1 = 0.01; //after 1 second
+
+byte *relay[CHANNEL_COUNT];
 
 unsigned int lastTime = 0;
 
@@ -109,7 +113,8 @@ void setup()
   demo1[7] = data[1];
   
   store.writeBytes('B', 1, 0, 9, demo1);
-  
+
+  tempControl.getRelayStates(2, relay);
   //store.mem();
 
   tempControl.begin(TempSensors, &store); //TODO inicialise should be earlier than this
@@ -127,7 +132,7 @@ void loop()
   tempAndHum.refresh();
   tempControl.refresh();
 
-  unsigned int delta = 500;
+  unsigned int delta = 50;
   byte data[2];
 
   //maxDelayLeft
@@ -371,7 +376,8 @@ void loop()
     Serial.print(" - CH 0 - ");
     Serial.print(value0, DEC);
     Serial.print(" - State ");
-    Serial.print(tempControl.channelParams[0][LEVELX_STATE]);
+    Serial.print(*relay[0]);
+    //Serial.print(tempControl.channelParams[0][LEVELX_STATE]);
     Serial.print(" - OnTime ");
     Serial.print(tempControl.channelParams[0][LEVELX_ONTIME_LEFT]);
     Serial.print(" ");
@@ -383,7 +389,8 @@ void loop()
     Serial.print(" - CH 1 - ");
     Serial.print(value1, DEC);
     Serial.print(" - State ");
-    Serial.print(tempControl.channelParams[1][LEVELX_STATE]);
+    Serial.print(*relay[1]);
+    //Serial.print(tempControl.channelParams[1][LEVELX_STATE]);
     Serial.print(" - OnTime ");
     Serial.print(tempControl.channelParams[1][LEVELX_ONTIME_LEFT]);
     Serial.print(" ");
