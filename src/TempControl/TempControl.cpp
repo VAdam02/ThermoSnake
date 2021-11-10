@@ -23,8 +23,8 @@
 //LEVEL 1
 #define LEVEL1_TARGETLEVEL 9
 #define LEVEL1_TARGETLEVEL2 10
-#define LEVEL1_DIFFERENCE 11
-#define LEVEL1_DIFFERENCE2 12
+#define LEVEL1_TOLERANCE 11
+#define LEVEL1_TOLERANCE2 12
 #define LEVEL1_REACTION 13
 #define LEVEL1_REACTION2 14
 #define LEVEL1_MINON 15
@@ -181,9 +181,9 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   data[1] = channelParams[channel][LEVEL1_TARGETLEVEL2];
   float targetLevel = reverseUnsignedByteFormat(data);
 
-  data[0] = channelParams[channel][LEVEL1_DIFFERENCE];
-  data[1] = channelParams[channel][LEVEL1_DIFFERENCE2];
-  float difference = reverseUnsignedByteFormat(data) * 0.75;
+  data[0] = channelParams[channel][LEVEL1_TOLERANCE];
+  data[1] = channelParams[channel][LEVEL1_TOLERANCE2];
+  float tolerance = reverseUnsignedByteFormat(data) * 0.75;
 
   data[0] = channelParams[channel][LEVEL1_REACTION];
   data[1] = channelParams[channel][LEVEL1_REACTION2];
@@ -239,18 +239,18 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   {
     //DEBUG
     Serial.print("heat - ");
-    //TODO unsigned int onTime = (targetLevel + difference - curLevel) / reaction * 10;
-    unsigned int onTime = (targetLevel + difference - curLevel) / reaction * 10;
+    //TODO unsigned int onTime = (targetLevel + tolerance - curLevel) / reaction * 10;
+    unsigned int onTime = (targetLevel + tolerance - curLevel) / reaction * 10;
     if (onTime > channelParams[channel][LEVEL1_MAXON]) { onTime = channelParams[channel][LEVEL1_MAXON]; }
 
     //it could happen in some cases when the heat is become ok without activating the relay
-    if (curLevel > (targetLevel + difference))
+    if (curLevel > (targetLevel + tolerance))
     {
       Serial.print("skip - ");
       channelParams[channel][LEVEL1_CURRENTSTATE] += 2;
     }
     //it's going to be cold there
-    else if (curLevel < (targetLevel - difference))
+    else if (curLevel < (targetLevel - tolerance))
     {
       //DEBUG
       Serial.print("SOS: ");
@@ -272,13 +272,13 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
       Serial.print(onTime);
       Serial.print(" - ");
 
-      if ((curLevel - (targetLevel - difference))*LEVEL1_COOLSPEED_1C_IN_SECONDS > 255)
+      if ((curLevel - (targetLevel - tolerance))*LEVEL1_COOLSPEED_1C_IN_SECONDS > 255)
       {
         addHeatingTask(channel, onTime, 255);
       }
       else
       {
-        addHeatingTask(channel, onTime, (curLevel - (targetLevel - difference))*LEVEL1_COOLSPEED_1C_IN_SECONDS);
+        addHeatingTask(channel, onTime, (curLevel - (targetLevel - tolerance))*LEVEL1_COOLSPEED_1C_IN_SECONDS);
       }
       
       //take sample
@@ -323,17 +323,25 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     if (0 < curReaction && curReaction < 128)
     {
       reaction = (reaction * 0.5) + (curReaction * 0.5);
-      getByteFormat(reaction, data);
-      channelParams[channel][LEVEL1_REACTION] = data[0];
-      channelParams[channel][LEVEL1_REACTION2] = data[1];
-      //TODO make less write sequance
-      store->writeBytes('B', channel, 6, 7, data);
     }
     else
     {
+      if (curReaction < 0)
+      {
+        reaction *= 0.75;
+      }
+      else
+      {
+        //bigger than 128 but it not really can happen
+      }
       //DEBUG
       Serial.print(" ERROR_REACTION ");
     }
+    getByteFormat(reaction, data);
+    channelParams[channel][LEVEL1_REACTION] = data[0];
+    channelParams[channel][LEVEL1_REACTION2] = data[1];
+    //TODO make less write sequance
+    store->writeBytes('B', channel, 6, 7, data);
 
     //DEBUG
     Serial.print(reaction, DEC);
@@ -503,8 +511,8 @@ void TempControl::readConfig()
       fromStore[1] = 0; //LEVELX_SENSOR_ID
       fromStore[2] = 0; //LEVEL0_OFFLEVEL   LEVEL1_TARGETLEVEL
       fromStore[3] = 0; //LEVEL0_OFFLEVEL2  LEVEL1_TARGETLEVEL2
-      fromStore[4] = 0; //LEVEL0_ONLEVEL    LEVEL1_DIFFERENCE
-      fromStore[5] = 0; //LEVEL0_ONLEVEL2   LEVEL1_DIFFERENCE2
+      fromStore[4] = 0; //LEVEL0_ONLEVEL    LEVEL1_TOLERANCE
+      fromStore[5] = 0; //LEVEL0_ONLEVEL2   LEVEL1_TOLERANCE2
       fromStore[6] = 0; //-                 LEVEL1_REACTION
       fromStore[7] = 0; //-                 LEVEL1_REACTION2
       fromStore[8] = 0; //-                 LEVEL1_MINON
