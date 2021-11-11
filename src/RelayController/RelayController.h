@@ -19,7 +19,6 @@ class RelayController
     unsigned int combo = 0;
   private:
     TempControl *tempControl;
-    unsigned int lastTime = 0;
     void RelayController::activate(byte channel);
 };
 

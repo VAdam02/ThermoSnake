@@ -24,7 +24,6 @@ class TempControl
   private:
     float **sensors;
     Backstore *store;
-    unsigned int lastTime = 0;
     
     void TempControl::addHeatingTask(byte ID, byte on_time, byte maxDelay_time);
     void TempControl::stopHeatingTask(byte ID);

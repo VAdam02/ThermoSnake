@@ -60,14 +60,10 @@ void TempControl::begin(float *_sensors[], Backstore* _store)
     store = _store;
 
     readConfig();
-
-    lastTime = millis();
 }
 
-void TempControl::refresh()
+void TempControl::refresh(unsigned int deltatime)
 {
-  unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
-
   for (int i = 0; i < CHANNEL_COUNT; i++)
   {
     if (channelParams[i][LEVELX_MODE] == 0)
@@ -86,8 +82,6 @@ void TempControl::refresh()
       level1(i, *sensors[channelParams[i][LEVELX_SENSOR_ID]], deltatime);
     }
   }
-
-  lastTime = millis();
 }
 
 void TempControl::addHeatingTask(byte channel, byte on_time, byte maxDelay_time)
