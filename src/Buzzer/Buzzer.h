@@ -17,10 +17,11 @@ class Buzzer
     void Buzzer::mute();
     void Buzzer::sayError();
   private:
-    byte _pin;
+    unsigned int lastTime = 0;
+    byte pin;
     bool taskActive;
     bool taskSound;
-    unsigned int task[];
+    unsigned int task[4] = {100, 1, 1, 1};
 };
 
 #endif

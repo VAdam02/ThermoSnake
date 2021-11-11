@@ -6,8 +6,11 @@ Buzzer buzzer;
 
 void setup()
 {
+  Serial.begin(9600);
   delayer.begin();
-  buzzer.begin(4);
+  buzzer.begin(7);
+  delay(500);
+  buzzer.sayError();
 }
 
 void loop()

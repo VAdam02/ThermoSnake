@@ -6,29 +6,27 @@ Buzzer::Buzzer() {}
 byte _pin = 2;
 bool taskActive = false;
 bool taskSound = false;
-unsigned int task[] = {100, 1, 1, 1};
-unsigned int Buzzer_lastTime = 0;
 
-void Buzzer::begin(byte pin)
+void Buzzer::begin(byte _pin)
 {
-    _pin = pin;
+    pin = _pin;
 
-    tone(_pin, 500);
+    tone(pin, 500);
     delay(50);
-    noTone(_pin);
+    noTone(pin);
 
-    Buzzer_lastTime = (unsigned int)(millis() % 65536);
+    lastTime = (unsigned int)(millis() % 65536);
 }
 
 void Buzzer::refresh()
 {
-    unsigned int deltatime = (unsigned int)(millis() % 65536) - Buzzer_lastTime;
+    unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
 
     if (taskActive)
     {
         if (task[3] < deltatime)
         {
-            noTone(_pin);
+            noTone(pin);
             taskSound = false;
             taskActive = false;
         }
@@ -38,12 +36,12 @@ void Buzzer::refresh()
             {
                 if ((deltatime % (task[1] + task[2])) < task[1])
                 {
-                    tone(_pin, task[0]);
+                    tone(pin, task[0]);
                     taskSound = true;
                 }
                 else
                 {
-                    noTone(_pin);
+                    noTone(pin);
                     taskSound = false;
                 }
             }
@@ -57,7 +55,7 @@ void Buzzer::alarm(unsigned int hz, unsigned int sound, unsigned int silent, uns
     task[1] = sound;
     task[2] = silent;
     task[3] = time;
-    Buzzer_lastTime = (unsigned int)(millis() % 65536);
+    lastTime = (unsigned int)(millis() % 65536);
     taskActive = true;
 }
 
@@ -68,5 +66,5 @@ void Buzzer::mute()
 
 void Buzzer::sayError()
 {
-    alarm(100, 100, 100, 400);
+    alarm(100, 100, 100, 350);
 }
