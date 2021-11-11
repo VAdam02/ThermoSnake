@@ -1,46 +1,59 @@
 #include "src/DelayManager/DelayManager.h"
 #include "src/Graphics/Graphics.h"
 #include "src/Backstore/Backstore.h"
+#include "src/TempAndHum/TempAndHum.h"
+#include "src/TempControl/TempControl.h"
+#include "src/RelayController/RelayController.h"
+
+#define TEMPSENSORCOUNT 1
+#define HUMSENSORCOUNT 1
+
+#define CHANNEL_COUNT 2 //max 255
 
 DelayManager delayer;
 Graphics oled;
 Backstore store;
+TempControl tempControl;
+TempAndHum tempAndHum;
+RelayController relayController;
+
+float *TempSensors[TEMPSENSORCOUNT];
+float *HumSensors[HUMSENSORCOUNT];
+
+unsigned int lastTime = 0;
 
 void setup()
 {
   Serial.begin(9600);
   delayer.begin();
   oled.begin();
+  store.begin();
+  tempAndHum.begin();
+  relayController.begin(&tempControl);
+
+  TempSensors[0] = &tempAndHum.temperature;
+  HumSensors[0] = &tempAndHum.humidity;
+
+
+  tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
+  //maybe there's an error due to not reading config
+
+  store.mem();
 }
 
-double presstime = 0;
-double data = 0;
 void loop()
 {
   oled.clear();
   oled.refresh();
+  tempAndHum.refresh();
+  tempControl.refresh();
+  relayController.refresh();
 
-  double x = analogRead(A1);
-  double y = analogRead(A0);
-  if (abs((y-512)/512) > 0.1)
-  {
-    double deltatime = 50;
-    presstime += deltatime;
-    
-    if ((y-512) > 0)
-    {
-      data -= (presstime/1000) * deltatime / 1000;
-    }
-    else
-    {
-      data += (presstime/1000) * deltatime / 1000;
-    }
-  }
-  else
-  {
-    presstime = 0;
-  }
-  
+  unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
+  lastTime = millis();
+
+  //CODE GOES HERE
+
   oled.show();
   delayer.sleepReamingOf(50);
 }
