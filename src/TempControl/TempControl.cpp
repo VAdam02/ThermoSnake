@@ -3,6 +3,13 @@
 #define LEVEL1_OFFCOOLDOWN 120 //max 255 sec due to LEVELX_COOLDOWN_LEFT
 #define LEVEL1_COOLSPEED_1C_IN_SECONDS 1200 //0.1C in 120 seconds -> 1C in 1200 seconds
 
+/*
+ * EEPROM allocations:
+ * SAVENAME 0 - for channel 0's mode and variables
+ * SAVENAME 1 - for channel 1's mode and variables
+ */
+#define SAVENAME 'A'
+
 //GENERAL
 #define LEVELX_STATE 0
 #define LEVELX_MODE 1
@@ -34,12 +41,6 @@
 #define LEVEL1_SAMPLE_TEMPERATURE2 19
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
-
-/*
- * EEPROM allocations:
- * B 0 - for channel 0's mode and variables
- * B 1 - for channel 1's mode and variables
- */
 /*
  * RELAY STATES
  * 0 - Turn off
@@ -341,7 +342,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     channelParams[channel][LEVEL1_REACTION] = data[0];
     channelParams[channel][LEVEL1_REACTION2] = data[1];
     //TODO make less write sequance
-    store->writeBytes('B', channel, 6, 7, data);
+    store->writeBytes(SAVENAME, channel, 6, 7, data);
 
     //DEBUG
     Serial.print(reaction, DEC);
@@ -501,12 +502,12 @@ void TempControl::readConfig()
   {
     //read channel0's config
     byte fromStore[10];
-    if (store->readBytes('B', i, 0, 9, fromStore) != 0)
+    if (store->readBytes(SAVENAME, i, 0, 9, fromStore) != 0)
     {
       //DEBUG
       Serial.print("Inicialise\n");
       //error - not found so inicialise to null mode
-      store->allocateSpace('B', i, 10);
+      store->allocateSpace(SAVENAME, i, 10);
       fromStore[0] = 0; //LEVELX_MODE
       fromStore[1] = 0; //LEVELX_SENSOR_ID
       fromStore[2] = 0; //LEVEL0_OFFLEVEL   LEVEL1_TARGETLEVEL
@@ -517,7 +518,7 @@ void TempControl::readConfig()
       fromStore[7] = 0; //-                 LEVEL1_REACTION2
       fromStore[8] = 0; //-                 LEVEL1_MINON
       fromStore[9] = 0; //-                 LEVEL1_MAXON
-      store->writeBytes('B', i, 0, 9, fromStore);
+      store->writeBytes(SAVENAME, i, 0, 9, fromStore);
     }
     
     channelParams[i][LEVELX_STATE] = 0;
