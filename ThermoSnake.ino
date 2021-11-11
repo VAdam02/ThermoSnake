@@ -1,11 +1,14 @@
 #include "src/DelayManager/DelayManager.h"
 #include "src/Graphics/Graphics.h"
+#include "src/Backstore/Backstore.h"
 
 DelayManager delayer;
 Graphics oled;
+Backstore store;
 
 void setup()
 {
+  Serial.begin(9600);
   delayer.begin();
   oled.begin();
 }
