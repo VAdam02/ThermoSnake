@@ -18,7 +18,6 @@ RelayController::RelayController() { }
 
 void RelayController::begin(TempControl* _tempControl)
 {
-  lastTime = millis();
   tempControl = _tempControl;
 }
 
