@@ -22,10 +22,8 @@ void RelayController::begin(TempControl* _tempControl)
   tempControl = _tempControl;
 }
 
-void RelayController::refresh()
+void RelayController::refresh(unsigned int deltatime)
 {
-  unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
-
   byte data[2];
 
   for (int i = 0; i < CHANNEL_COUNT; i++)
@@ -89,8 +87,6 @@ void RelayController::refresh()
     }
     
   }
-
-  lastTime = millis();
 }
 
 void RelayController::activate(byte channel)
