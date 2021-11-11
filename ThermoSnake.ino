@@ -53,7 +53,7 @@ float value0 = 25;
 float heating0 = 0.1; //after 1 second
 float cooling0 = 0.01; //after 1 second
 
-float value1 = 30;
+float value1 = 32;
 float heating1 = 0.1; //after 1 second
 float cooling1 = 0.01; //after 1 second
 
@@ -97,15 +97,15 @@ void setup()
   store.allocateSpace('B', 1, 10);
   byte demo1[] = { 2, 2, 201, 201, 202, 202, 203, 203, 10, 60 };
   
-  tempControl.getByteFormat(32.5, data);
+  tempControl.getByteFormat(32.5, data); //target
   demo1[2] = data[0];
   demo1[3] = data[1];
 
-  tempControl.getUnsignedByteFormat(1, data);
+  tempControl.getUnsignedByteFormat(1, data); //tolerance
   demo1[4] = data[0];
   demo1[5] = data[1];
 
-  tempControl.getByteFormat(5, data);
+  tempControl.getByteFormat(1, data); //reaction
   demo1[6] = data[0];
   demo1[7] = data[1];
   

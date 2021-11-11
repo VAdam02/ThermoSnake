@@ -81,9 +81,13 @@ void RelayController::refresh()
       else
       {
         //this need change only
-        activate(i);
+        if (maxDelayLeft == 0)
+        {
+          activate(i);
+        }
       }
     }
+    
   }
 
   lastTime = millis();

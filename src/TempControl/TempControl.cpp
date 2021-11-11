@@ -280,7 +280,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
       {
         addHeatingTask(channel, onTime, (curLevel - (targetLevel - tolerance))*LEVEL1_COOLSPEED_1C_IN_SECONDS);
       }
-      
+
       //take sample
       getByteFormat(curLevel, data);
       channelParams[channel][LEVEL1_SAMPLE_TEMPERATURE] = data[0];
