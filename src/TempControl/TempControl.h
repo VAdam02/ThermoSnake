@@ -14,7 +14,7 @@ class TempControl
   public:
     TempControl();
     void TempControl::begin(float *_sensors[], Backstore* _store);
-    void TempControl::refresh();
+    void TempControl::refresh(unsigned int deltatime);
 
     void TempControl::getByteFormat(float data, byte returnValue[]);
     float TempControl::reverseByteFormat(byte data[]);
