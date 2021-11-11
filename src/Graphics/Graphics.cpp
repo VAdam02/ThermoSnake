@@ -1,10 +1,5 @@
-#include "Graphics.h"
 #include <Arduino.h>
-
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include "Graphics.h"
 
 #define FONTSTEPSBYSIDE 60
 #define FONTTIMEBETWEENSTEPS 100 //4 * FONTSTEPSBYSIDE * FONTTIMEBETWEENSTEPS = time needed for a round
@@ -86,14 +81,9 @@ void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight)
   display.drawPixel(x+i, y+j, WHITE);
 }
 
-byte curPage = 0;
-byte targetPage = 0;
-byte transitionX = 0;
-unsigned int G_lastTime = 0;
-
 void Graphics::setPage(byte page)
 {
-  G_lastTime = (unsigned int)(millis() % 65536);
+  lastTime = (unsigned int)(millis() % 65536);
   targetPage = page;
   transitionX = 0;
 }
@@ -110,7 +100,7 @@ void Graphics::refresh()
 {
   if (curPage != targetPage)
   {
-    unsigned int deltatime = (unsigned int)(millis() % 65536) - G_lastTime;
+    unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
 
     transitionX = (unsigned long)SCREEN_WIDTH * deltatime / PAGESWITCHTIME;
 
@@ -118,7 +108,7 @@ void Graphics::refresh()
     {
       if (curPage > targetPage) { curPage--; }
       else { curPage++; }
-      G_lastTime = (unsigned int)(millis() % 65536);
+      lastTime = (unsigned int)(millis() % 65536);
       transitionX = 0;
     }
   }

@@ -5,7 +5,11 @@
 #ifndef Graphics_h
 #define Graphics_h
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 class Graphics
 {
@@ -26,10 +30,10 @@ class Graphics
     int Graphics::drawChar(byte page, byte x, byte y, char c, byte fsize);
   private:
     unsigned int Graphics::getLocalTime(unsigned long time);
-    byte curPage;
-    byte targetPage;
-    byte transitionX;
-    unsigned int G_lastTime;
+    byte curPage = 0;
+    byte targetPage = 0;
+    byte transitionX = 0;
+    unsigned int lastTime = 0;
     int Graphics::getCurXByPageX(byte page, byte x);
     int Graphics::roundUp(double a);
     int Graphics::roundDown(double a);
