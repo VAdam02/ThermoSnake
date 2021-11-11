@@ -10,7 +10,8 @@ void DelayManager::begin()
 
 void DelayManager::sleepReamingOf(unsigned int timeOfExecute)
 {
-  unsigned int deltatime = getDeltaTime();
+  unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
+  delta = deltatime;
 
   if (deltatime < timeOfExecute)
   {
@@ -29,5 +30,5 @@ void DelayManager::sleepReamingOf(unsigned int timeOfExecute)
 
 unsigned int DelayManager::getDeltaTime()
 {
-  return (unsigned int)(millis() % 65536) - lastTime;
+  return delta;
 }
