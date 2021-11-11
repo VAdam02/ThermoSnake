@@ -1,9 +1,9 @@
 #include "src/DelayManager/DelayManager.h"
-#include "src/Graphics/Graphics.h"
 #include "src/Backstore/Backstore.h"
 #include "src/TempAndHum/TempAndHum.h"
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
+#include "src/GUI/GUI.h"
 
 #define TEMPSENSORCOUNT 1
 #define HUMSENSORCOUNT 1
@@ -11,11 +11,11 @@
 #define CHANNEL_COUNT 2 //max 255
 
 DelayManager delayer;
-Graphics oled;
 Backstore store;
 TempControl tempControl;
 TempAndHum tempAndHum;
 RelayController relayController;
+GUI gui;
 
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
@@ -26,10 +26,10 @@ void setup()
 {
   Serial.begin(9600);
   delayer.begin();
-  oled.begin();
   store.begin();
   tempAndHum.begin();
   relayController.begin(&tempControl);
+  gui.begin(TempSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
   HumSensors[0] = &tempAndHum.humidity;
@@ -37,24 +37,19 @@ void setup()
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //maybe there's an error due to not reading config
-
-  store.mem();
 }
 
 void loop()
 {
-  oled.clear();
-  oled.refresh();
+  Serial.print("\n");
+  unsigned int deltatime = delayer.getDeltaTime();
   tempAndHum.refresh();
-  tempControl.refresh();
-  relayController.refresh();
-
-  unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
-  lastTime = millis();
+  tempControl.refresh(deltatime);
+  relayController.refresh(deltatime);
+  gui.refresh(deltatime);
 
   //CODE GOES HERE
 
-  oled.show();
+  gui.endrefresh();
   delayer.sleepReamingOf(50);
 }
-
