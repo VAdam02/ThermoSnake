@@ -1,6 +1,5 @@
-#include "Backstore.h"
 #include <Arduino.h>
-#include <Wire.h>
+#include "Backstore.h"
 
 #define EEPROM_SIZE 4096
 #define EEPROM_ADDRESS 0x50
@@ -100,6 +99,14 @@ bool Backstore::setLazy(unsigned int address, byte value)
   return false;
 }
 
+void Backstore::setLazy4(unsigned int address, byte val0, byte val1, byte val2, byte val3)
+{
+  setLazy(address, val0);
+  setLazy(address+1, val1);
+  setLazy(address+2, val2);
+  setLazy(address+3, val3);
+}
+
 /*
  * RETURN VALUE
  * 0 - success
@@ -125,10 +132,7 @@ byte Backstore::moveNote(byte first, byte last, int moveby)
   int direction = (last-first) / abs(last-first);
   for (byte i = first; i != (byte)(last+direction); i += direction)
   {
-    setLazy((unsigned int)(i+moveby)*4, read(i*4));
-    setLazy((unsigned int)(i+moveby)*4+1, read(i*4+1));
-    setLazy((unsigned int)(i+moveby)*4+2, read(i*4+2));
-    setLazy((unsigned int)(i+moveby)*4+3, read(i*4+3));
+    setLazy4((unsigned int)(i+moveby)*4, read(i*4), read(i*4+1), read(i*4+2), read(i*4+3));
   }
   return 0;
 }
@@ -146,7 +150,7 @@ byte Backstore::removeFreeNote(byte index)
   
   if (index < freeSize)
   {
-    returnValue = 1 - moveNote(headSize -freeSize, headSize - (index +1),1);
+    returnValue = 1 - moveNote(headSize - freeSize, headSize - (index +1), 1);
   }
 
   addFreeSize(-1);
@@ -198,10 +202,7 @@ byte Backstore::insertFreeNote(unsigned int address, byte size)
       
       moveNote(headSize-(i+1), headSize-(freeSize+1), -1);
       
-      setLazy((headSize-(i+1))*4, (taddress + 255) >> 8);
-      setLazy((headSize-(i+1))*4+1, (taddress + 255) & 0xFF);
-      setLazy((headSize-(i+1))*4+2, size + tsize - 255);
-      setLazy((headSize-(i+1))*4+3, ttype);
+      setLazy4((headSize-(i+1))*4, (taddress + 255) >> 8, (taddress + 255) & 0xFF, size + tsize - 255, ttype);
 
       addFreeSize(1);
     }
@@ -225,10 +226,7 @@ byte Backstore::insertFreeNote(unsigned int address, byte size)
 
     moveNote(headSize-i, headSize-freeSize, -1);
 
-    setLazy((headSize-i)*4, address >> 8);
-    setLazy((headSize-i)*4+1, address & 0xFF);
-    setLazy((headSize-i)*4+2, size);
-    setLazy((headSize-i)*4+3, 255);
+    setLazy4((headSize-i)*4, address >> 8, address & 0xFF, size, 255);
 
     addFreeSize(1);
     return 1;
@@ -279,10 +277,7 @@ byte Backstore::insertAllocationNote(unsigned int address, byte size, byte name)
   }
 
   //add allocation to table
-  setLazy(i * 4, address >> 8);
-  setLazy(i * 4+1, address & 0xFF);
-  setLazy(i * 4+2, size);
-  setLazy(i * 4+3, name);
+  setLazy4(i * 4, address >> 8, address & 0xFF, size, name);
   addDataSize(1);
   return returnValue;
 }
@@ -527,8 +522,6 @@ void Backstore::regroupFreeSpace()
     size0 = size1;
     type0 = type1;
     i++;
-    //TODO debug
-    mem();
   }
 }
 
@@ -539,66 +532,19 @@ void Backstore::defragmentStorage()
   //TODO rearrange allocations
 }
 
-void Backstore::inicialise(byte headSize)
+void Backstore::inicialise(byte _headSize)
 {
-  int headSize_ = headSize;
-  if (headSize == 0) { headSize_ = 256; }
-  /*
-  for (int i = 0 ; i < headSize_*4 ; i++)
-  {
-    setLazy(i, 0);
-  }
-  */
+  int headSize = _headSize;
+  if (_headSize == 0) { headSize = 256; }
   
   for (int i = 0 ; i < EEPROM_SIZE; i++)
   {
     setLazy(i, 0);
   }
   
-  
-  setLazy(0, 0);
-  setLazy(1, 0);
-  setLazy(2, headSize_-1);
+  setLazy4(0, 0, 0, headSize-1, 0);
 
   //rest free space
-  setLazy((headSize_-1)*4, (headSize_*4) >> 8);
-  setLazy((headSize_-1)*4+1, (headSize_*4) & 0xFF);
-  if (EEPROM_SIZE - (headSize_*4) < 256) { setLazy((headSize_-1)*4+2, EEPROM_SIZE - (headSize_*4)); }
-  else { setLazy((headSize_-1)*4+2, 0); }
-  setLazy((headSize_-1)*4+3, 254);
-}
-
-void Backstore::mem()
-{
-  byte width = 64;
-  for (int i = 0; i < EEPROM_SIZE/width; i++)
-  {
-    if (i % 8 == 0)
-    {
-      Serial.print("\n");
-    }
-    Serial.print("\n");
-    Serial.print(i);
-    
-    if (i < 10)
-    {
-      Serial.print(" ");
-    }
-    
-    for (int j = 0; j < width; j++)
-    {
-      int a = i*width+j;
-      if (a % 8 == 0 && j > 0)
-      {
-        Serial.print("|");
-      }
-
-      byte cur = read(a);
-      if (cur < 100) { Serial.print(" "); }
-      if (cur < 10) { Serial.print(" "); }
-      Serial.print(" ");
-      Serial.print(cur);
-    }
-  }
-  Serial.print("\n");
+  if (EEPROM_SIZE - (headSize*4) < 256) { setLazy4((headSize-1)*4, (headSize*4) >> 8, (headSize*4) & 0xFF, EEPROM_SIZE - (headSize*4), 254); }
+  else { setLazy4((headSize-1)*4, (headSize*4) >> 8, (headSize*4) & 0xFF, 0, 254); }
 }

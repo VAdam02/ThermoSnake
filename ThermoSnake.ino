@@ -8,57 +8,46 @@ void setup()
   Serial.print("\n");
   Serial.print("Start");
   store.inicialise(256);
-  //store.mem();
   
   
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 2, 160));
   Serial.print("\n");
-  //store.mem();
   
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 3, 150));
   Serial.print("\n");
-  //store.mem();
 
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 4, 140));
   Serial.print("\n");
-  //store.mem();
   
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 5, 130));
   Serial.print("\n");
-  //store.mem();
 
   Serial.print("\n");
   Serial.print(store.allocateSpace('B', 6, 160));
   Serial.print("\n");
-  store.mem();
 
   Serial.print("\n");
   Serial.print(store.freeUpSpace('B', 5));
   Serial.print("\n");
-  store.mem();
   
   Serial.print("\n");
   Serial.print(store.freeUpSpace('B', 2));
   Serial.print("\n");
-  store.mem();
 
   Serial.print("\n");
   Serial.print(store.freeUpSpace('B', 3));
   Serial.print("\n");
-  store.mem();
 
   Serial.print("\n");
   Serial.print(store.freeUpSpace('B', 6));
   Serial.print("\n");
-  store.mem();
 
 
   store.defragmentStorage();
-  store.mem();
 
   /*
   Serial.print("\n");
@@ -91,7 +80,6 @@ void setup()
     Serial.print(" ");
   }
   Serial.print("\n");
-  store.mem();
   */
 }
 
