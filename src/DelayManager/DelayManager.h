@@ -5,16 +5,17 @@
 #ifndef DelayManager_h
 #define DelayManager_h
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 class DelayManager
 {
   public:
     DelayManager();
     void DelayManager::begin();
-    void DelayManager::sleepReamingOf(int timeOfExecute);
+    void DelayManager::sleepReamingOf(unsigned int timeOfExecute);
+    unsigned int DelayManager::getDeltaTime();
   private:
-    int Delay_lastTime;
+    unsigned int lastTime;
 };
 
 #endif
