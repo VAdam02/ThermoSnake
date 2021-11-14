@@ -4,6 +4,7 @@
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 #include "src/GUI/GUI.h"
+#include "src/Buzzer/Buzzer.h"
 
 #define TEMPSENSORCOUNT 1
 #define HUMSENSORCOUNT 1
@@ -16,6 +17,7 @@ TempControl tempControl;
 TempAndHum tempAndHum;
 RelayController relayController;
 GUI gui;
+Buzzer buzzer;
 
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
@@ -30,6 +32,7 @@ void setup()
   tempAndHum.begin();
   relayController.begin(&tempControl);
   gui.begin(TempSensors);
+  buzzer.begin(7);
 
   TempSensors[0] = &tempAndHum.temperature;
   HumSensors[0] = &tempAndHum.humidity;
@@ -47,6 +50,7 @@ void loop()
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
   gui.refresh(deltatime);
+  buzzer.refresh();
 
   //CODE GOES HERE
 
