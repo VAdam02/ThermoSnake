@@ -42,7 +42,7 @@ unsigned int Graphics::getLocalTime(unsigned long time)
   return (unsigned int)((time/FONTTIMEBETWEENSTEPS) % (4*FONTSTEPSBYSIDE));
 }
 
-void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, float relativeY2, byte width, bool alignRight)
+void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, byte relativeY2, byte width, bool alignRight)
 {
   for (int j = 0; abs(j) < abs(relativeY2*width)-width; j+=(relativeY2/abs(relativeY2))) //-y
   for (int i = 0; i < width; i++) //x - width
@@ -50,7 +50,7 @@ void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, f
   else { display.drawPixel(absoluteX1 +roundDown(j*relativeX2/relativeY2) + i, absoluteY1 -(j), WHITE); }
 }
 
-void Graphics::drawQuarterCircle(byte x, byte y, byte width, byte direction)
+void Graphics::drawQuarterCircle(byte x, byte y, byte width, int direction)
 {
   for (int i = 1; i <= width; i++)
   for (int j = 1; j <= width; j++)
@@ -62,7 +62,7 @@ void Graphics::drawQuarterCircle(byte x, byte y, byte width, byte direction)
     else { display.drawPixel(x +(width-i), y +(width-j), WHITE); }
   }
 }
-void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, byte direction)
+void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, int direction)
 {
   for (int i = 1; i <= (width/2); i++)
   for (int j = 1; j <= (width/2); j++)
