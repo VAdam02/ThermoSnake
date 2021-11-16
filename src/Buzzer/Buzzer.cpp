@@ -3,17 +3,9 @@
 
 Buzzer::Buzzer() {}
 
-byte _pin = 2;
-bool taskActive = false;
-bool taskSound = false;
-
 void Buzzer::begin(byte _pin)
 {
     pin = _pin;
-
-    tone(pin, 500);
-    delay(50);
-    noTone(pin);
 
     lastTime = (unsigned int)(millis() % 65536);
 }

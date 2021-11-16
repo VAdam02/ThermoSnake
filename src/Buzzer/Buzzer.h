@@ -19,8 +19,8 @@ class Buzzer
   private:
     unsigned int lastTime = 0;
     byte pin;
-    bool taskActive;
-    bool taskSound;
+    bool taskActive = false;
+    bool taskSound = false;
     unsigned int task[4] = {100, 1, 1, 1};
 };
 
