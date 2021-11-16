@@ -1,18 +1,22 @@
 #include <Arduino.h>
 #include "GUI.h"
 
-#define STATE_NOCOMMAND 0
-#define STATE_TEMP2 1
+#define STATE_CHANNEL_SETTINGS 0
+#define STATE_SETTINGS 1
+#define STATE_NOCOMMAND 2
+#define STATE_TEMP2 3
 
 #define MAIN_SENSOR 0
-#define PRESS_PERCENT 0.1
+#define PRESS_PERCENT 0.2
 
 GUI::GUI() { }
 
-void GUI::begin(float *_sensors[])
+void GUI::begin(float *_TempSensors[], float *_HumSensors[])
 {
   oled.begin();
-  sensors = _sensors;
+  TempSensors = _TempSensors;
+  HumSensors = _HumSensors;
+  oled.setPage(STATE_NOCOMMAND);
 }
 
 void GUI::refresh(unsigned int deltatime)
@@ -21,13 +25,6 @@ void GUI::refresh(unsigned int deltatime)
 
   oled.clear();
   oled.refresh();
-
-  if (oled.getTargetPage() != nextState)
-  oled.setPage(nextState);
-  if (oled.getCurPage() == oled.getTargetPage())
-  state = oled.getCurPage();
-
-
   
   if (abs(analogRead(A0) - 512) >= PRESS_PERCENT * 512)
   {
@@ -40,85 +37,158 @@ void GUI::refresh(unsigned int deltatime)
     else { presstime[1] += deltatime; }
   } else { presstime[1] = 0; }
   
+  byte nextPage = oled.getCurPage() + (oled.getCurPage() < oled.getTargetPage() ? 1 : (oled.getCurPage() == oled.getTargetPage() ? 0 : -1));
 
-
-
-  if (state == STATE_NOCOMMAND || nextState == STATE_NOCOMMAND)
+  if (oled.getCurPage() == STATE_NOCOMMAND || nextPage == STATE_NOCOMMAND || oled.getTargetPage() == STATE_NOCOMMAND)
   {
-    //oled.drawText(0, 4, 7, numToString(*sensors[MAIN_SENSOR],1) + "*C", 4);
-    oled.drawText(0, 4, 7, numToString(pageSwitcher,2) + "*C", 4);
+    oled.drawText(STATE_NOCOMMAND, 4, 7, numToString(*TempSensors[MAIN_SENSOR],1) + "*C", 4);
 
     //no switching in progress
-    if (state == nextState)
+    if (oled.getCurPage() == oled.getTargetPage())
     {
-      getJoyStick(deltatime, &pageSwitcher, true);
-      if (pageSwitcher > 0)
-      {
-        setState(1);
-      }
+      getJoyStick(deltatime, &pageVar, true);
+      if (pageVar < 0) { setState(STATE_SETTINGS); }
+      else if (pageVar > 0) { pageVar = 0; }
     }
   }
-  if (state == STATE_TEMP2 || nextState == STATE_TEMP2)
+  if (oled.getCurPage() == STATE_SETTINGS || nextPage == STATE_SETTINGS || oled.getTargetPage() == STATE_SETTINGS)
   {
-    byte fsize = 1;
-    oled.drawText(1, 0, 0, "Temp: " + numToString(2, 2) + "*C", fsize);
-    oled.drawText(1, 0, 0+(fsize*6), "Avg: " + numToString(3, 2) + "*C", fsize);
-    oled.drawText(1, 0, 0+2*(fsize*6), "Dif: " + numToString(4, 2), fsize);
-    oled.drawText(1, 0, 0+3*(fsize*6), String(timeCounter), fsize);
+    oled.drawText(STATE_SETTINGS, 0, 0, "      Settings      .", 1);
+
+    oled.drawText(STATE_SETTINGS, 6, 6, "Channel Settings", 1);
+
+    if (line != 0) { oled.drawText(STATE_SETTINGS, 0, line*6, "-", 1); }
 
     //no switching in progress
-    if (state == nextState)
+    if (oled.getCurPage() == oled.getTargetPage())
+    {
+      if (presstime[1] == 0 && lineVar != 0)
+      {
+        if (lineVar > 0) { line++; }
+        else { line--; }
+        lineVar = 0;
+      }
+
+      Serial.print(lineVar);
+      getJoyStick(deltatime, &lineVar, false);
+      if (line > 4) { line = 2; }
+      else if (line < 0) { line = 0; }
+      
+      getJoyStick(deltatime, &pageVar, true);
+      if (line == 0 && pageVar < 0) { pageVar = 0; }
+      else if (line == 0 && pageVar > 0) { setState(STATE_NOCOMMAND); }
+      else if (line == 1 && pageVar < 0) { setState(STATE_CHANNEL_SETTINGS); }
+    }
+  }
+  if (oled.getCurPage() == STATE_CHANNEL_SETTINGS || nextPage == STATE_CHANNEL_SETTINGS || oled.getTargetPage() == STATE_CHANNEL_SETTINGS)
+  {
+    //oled.drawSquare(122, (32-(32/6*4))*line/6, 5, (32*4/6));
+    oled.drawText(STATE_CHANNEL_SETTINGS, 0, 0, "  Channel Settings  .", 1);
+
+    oled.drawText(STATE_CHANNEL_SETTINGS, 6, 6, "Channel", 1);
+    oled.drawText(STATE_CHANNEL_SETTINGS, 6, 12, "Mode", 1);
+    oled.drawText(STATE_CHANNEL_SETTINGS, 6, 18, "Sensor ID", 1);
+    oled.drawText(STATE_CHANNEL_SETTINGS, 6, 24, "Off Level", 1);
+    oled.drawText(STATE_CHANNEL_SETTINGS, 6, 32, "On Level", 1);
+
+    if (line != 0) { oled.drawText(STATE_CHANNEL_SETTINGS, 0, line*6, "-", 1); }
+
+    //no switching in progress
+    if (oled.getCurPage() == oled.getTargetPage())
+    {
+      if (presstime[1] == 0 && lineVar != 0)
+      {
+        if (lineVar > 0) { line++; }
+        else { line--; }
+        lineVar = 0;
+      }
+
+      Serial.print(lineVar);
+      getJoyStick(deltatime, &lineVar, false);
+      if (line > 4) { line = 4; }
+      else if (line < 0) { line = 0; }
+      
+      getJoyStick(deltatime, &pageVar, true);
+      if (line == 0 && pageVar < 0) { pageVar = 0; }
+      else if (line == 0 && pageVar > 0) { setState(STATE_NOCOMMAND); }
+      else if (line == 1 && pageVar < 0) { setState(STATE_CHANNEL_SETTINGS); }
+    }
+  }
+
+
+  /*
+  if (oled.getCurPage() == STATE_PAGE0 || nextPage == STATE_PAGE0 || oled.getTargetPage() == STATE_PAGE0)
+  {
+    oled.drawText(STATE_PAGE0, 0, 0, "PAGE0 - " + numToString(analogRead(0),0), 1);
+
+    //no switching in progress
+    if (oled.getCurPage() == oled.getTargetPage())
     {
       getJoyStick(deltatime, &pageSwitcher, true);
       if (pageSwitcher < 0)
       {
-        setState(0);
+        setState(STATE_TEMP2);
+      }
+      else if (pageSwitcher > 0)
+      {
+        setState(oled.getCurPage() +1);
       }
     }
   }
-
-  /*
-  Serial.print(deltatime);
-  Serial.print(" - ");
-  Serial.print(timeCounter);
-  if (timeCounter < 4*exponentiation(2,12))
+  if (oled.getCurPage() == STATE_PAGE1 || nextPage == STATE_PAGE1 || oled.getTargetPage() == STATE_PAGE1)
   {
-    if (oled.getTargetPage() != 0)
-    oled.setPage(0);
-  }
-  else if (timeCounter < 6*exponentiation(2,12))
-  {
-    if (oled.getTargetPage() != 1)
-    oled.setPage(1);
-  }
-  else if (timeCounter < 8*exponentiation(2,12))
-  {
-    if (oled.getTargetPage() != 2)
-    oled.setPage(2);
-  }
-  else
-  {
-    timeCounter -= 8*exponentiation(2,12);
-  }
+    oled.drawText(STATE_PAGE1, 0, 6, "PAGE1 - " + numToString(analogRead(1),0), 1);
 
-  oled.drawText(0, 4, 7, numToString(6,1) + "*C", 4);
-  
-  int x;
-  int fsize = 1;
+    //no switching in progress
+    if (oled.getCurPage() == oled.getTargetPage())
+    {
+      getJoyStick(deltatime, &pageSwitcher, true);
+      if (pageSwitcher < 0)
+      {
+        setState(oled.getCurPage() -1);
+      }
+      else if (pageSwitcher > 0)
+      {
+        setState(oled.getCurPage() +1);
+      }
+    }
+  }
+  if (oled.getCurPage() == STATE_NOCOMMAND || nextPage == STATE_NOCOMMAND || oled.getTargetPage() == STATE_NOCOMMAND)
+  {
+    oled.drawText(STATE_NOCOMMAND, 0, 12, "IDLE - " + numToString(analogRead(2),0), 1);
 
-  float range = 0;
-  float val = 1;
-  oled.drawText(1, 0, 0, "Temp: " + numToString(2, 2) + "*C", fsize);
-  oled.drawText(1, 0, 0+(fsize*6), "Avg: " + numToString(val, 2) + "*C", fsize);
-  oled.drawText(1, 0, 0+2*(fsize*6), "Dif: " + numToString(3, 2), fsize);
-  oled.drawText(1, 0, 0+3*(fsize*6), String(timeCounter), fsize);
+    //no switching in progress
+    if (oled.getCurPage() == oled.getTargetPage())
+    {
+      getJoyStick(deltatime, &pageSwitcher, true);
+      if (pageSwitcher < 0)
+      {
+        setState(oled.getCurPage() -1);
+      }
+      else if (pageSwitcher > 0)
+      {
+        setState(oled.getCurPage() +1);
+      }
+    }
+  }
+  if (oled.getCurPage() == STATE_TEMP2 || nextPage == STATE_TEMP2 || oled.getTargetPage() == STATE_TEMP2)
+  {
+    oled.drawText(STATE_TEMP2, 0, 18, "TEMP2 - " + numToString(analogRead(3),0), 1);
 
-  range = 4;
-  val = 5;
-  oled.drawText(2, 0, 0, "Hum: " + numToString(6, 2) + "%", fsize);
-  oled.drawText(2, 0, 0+1*(fsize*6), "Avg: " + numToString(val, 2) + "%", fsize);
-  oled.drawText(2, 0, 0+2*(fsize*6), "Dif: " + numToString(7, 2), fsize);
-  oled.drawText(2, 0, 0+3*(fsize*6), String(timeCounter), fsize);
+    //no switching in progress
+    if (oled.getCurPage() == oled.getTargetPage())
+    {
+      getJoyStick(deltatime, &pageSwitcher, true);
+      if (pageSwitcher < 0)
+      {
+        setState(oled.getCurPage() -1);
+      }
+      else if (pageSwitcher > 0)
+      {
+        setState(STATE_PAGE0);
+      }
+    }
+  }
   */
 }
 
@@ -139,7 +209,7 @@ void GUI::getJoyStick(unsigned int deltatime, float *data, bool horizontal)
   }
   else
   {
-    value = analogRead(A1);
+    value = 1023-analogRead(A1);
     press = presstime[1];
   }
 
@@ -158,12 +228,14 @@ void GUI::getJoyStick(unsigned int deltatime, float *data, bool horizontal)
 
 void GUI::setState(byte newState)
 {
-  if (nextState == newState || state == newState) { return; }
+  if (oled.getTargetPage() == newState || oled.getCurPage() == newState) { return; }
 
   presstime[0] = 0;
   presstime[1] = 0;
-  pageSwitcher = 0;
-  nextState = newState;
+  pageVar = 0;
+  lineVar = 0;
+  line = 0;
+  oled.setPage(newState);
 
   timeCounter = 0;
 }

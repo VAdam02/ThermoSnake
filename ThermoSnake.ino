@@ -31,8 +31,8 @@ void setup()
   store.begin();
   tempAndHum.begin();
   relayController.begin(&tempControl);
-  gui.begin(TempSensors);
-  buzzer.begin(7);
+  buzzer.begin(9);
+  gui.begin(TempSensors, HumSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
   HumSensors[0] = &tempAndHum.humidity;

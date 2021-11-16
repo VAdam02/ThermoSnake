@@ -12,17 +12,19 @@ class GUI
 {
   public:
     GUI();
-    void GUI::begin(float *_sensors[]);
+    void GUI::begin(float *_TempSensors[], float *_HumSensors[]);
     void GUI::refresh(unsigned int deltatime);
     void GUI::endrefresh();
   private:
     Graphics oled;
-    byte state = 0;
-    byte nextState = 0;
     unsigned int timeCounter = 0;
-    float **sensors;
+    float **TempSensors;
+    float **HumSensors;
     unsigned int presstime[2] = {0, 0};
-    float pageSwitcher = 0;
+    float pageVar = 0;
+    float lineVar = 0;
+    byte line = 0;
+    byte chSettings[21];
 
     void GUI::getJoyStick(unsigned int deltatime, float *data, bool horizontal);
     void GUI::setState(byte newState);
