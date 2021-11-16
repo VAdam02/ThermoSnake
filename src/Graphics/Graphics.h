@@ -8,7 +8,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
 class Graphics
@@ -18,9 +17,9 @@ class Graphics
     void Graphics::begin();
     void Graphics::show();
     void Graphics::clear();
-    void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, float relativeY2, byte width, bool alignRight);
-    void Graphics::drawQuarterCircle(byte x, byte y, byte width, byte direction);
-    void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, byte direction);
+    void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, byte relativeY2, byte width, bool alignRight);
+    void Graphics::drawQuarterCircle(byte x, byte y, byte width, int direction);
+    void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, int direction);
     void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight);
     void Graphics::setPage(byte page);
     byte Graphics::getCurPage();
