@@ -7,16 +7,18 @@
 
 #include <Arduino.h>
 #include "../../src/Graphics/Graphics.h"
+#include "../../src/Backstore/Backstore.h"
 
 class GUI
 {
   public:
     GUI();
-    void GUI::begin(float *_TempSensors[], float *_HumSensors[]);
+    void GUI::begin(Backstore *_store, float *_TempSensors[], float *_HumSensors[]);
     void GUI::refresh(unsigned int deltatime);
     void GUI::endrefresh();
   private:
     Graphics oled;
+    Backstore *store;
     unsigned int timeCounter = 0;
     float **TempSensors;
     float **HumSensors;

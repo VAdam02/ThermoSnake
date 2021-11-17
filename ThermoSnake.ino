@@ -32,11 +32,11 @@ void setup()
   tempAndHum.begin();
   relayController.begin(&tempControl);
   buzzer.begin(9);
-  gui.begin(TempSensors, HumSensors);
+  gui.begin(&store, TempSensors, HumSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
   HumSensors[0] = &tempAndHum.humidity;
-
+  
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //maybe there's an error due to not reading config
