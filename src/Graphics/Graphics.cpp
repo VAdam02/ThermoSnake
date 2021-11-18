@@ -26,8 +26,6 @@ void Graphics::begin()
   }
   clear();
   show();
-
-  display.dim(true);
 }
 
 void Graphics::show()

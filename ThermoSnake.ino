@@ -19,8 +19,6 @@ GUI gui;
 
 bool needReload = false;
 
-char charss[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'};
-
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
 
@@ -50,8 +48,7 @@ void loop()
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
   gui.refresh(deltatime);
-  buzzer.refresh();
-
+  
   //CODE GOES HERE
 
   gui.endrefresh();
