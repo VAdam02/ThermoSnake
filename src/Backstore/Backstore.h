@@ -5,7 +5,8 @@
 #ifndef Backstore_h
 #define Backstore_h
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <Wire.h>
 
 class Backstore
 {
@@ -23,7 +24,6 @@ class Backstore
     void Backstore::defragmentStorage();
 
     void Backstore::inicialise(byte headSize);
-    void Backstore::mem();
   private:
     char chars[25] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'};
     
@@ -39,6 +39,7 @@ class Backstore
     byte Backstore::nameToNum(char c, byte num);
     byte Backstore::nameToAllocationNoteIndex(char c, byte num);
     bool Backstore::setLazy(unsigned int address, byte value);
+    void Backstore::setLazy4(unsigned int address, byte val0, byte val1, byte val2, byte val3);
 
     byte Backstore::moveNote(byte first, byte last, int moveby);
     byte Backstore::removeFreeNote(byte index);
