@@ -365,7 +365,7 @@ void TempControl::readConfig()
       fromStore[3] = 0; //LEVEL0_OFFLEVEL2  LEVEL1_TARGETLEVEL2
       fromStore[4] = 0; //LEVEL0_ONLEVEL    LEVEL1_TOLERANCE
       fromStore[5] = 0; //LEVEL0_ONLEVEL2   LEVEL1_TOLERANCE2
-      fromStore[6] = 0; //-                 LEVEL1_REACTION
+      fromStore[6] = 1; //-                 LEVEL1_REACTION
       fromStore[7] = 0; //-                 LEVEL1_REACTION2
       fromStore[8] = 0; //-                 LEVEL1_MINON
       fromStore[9] = 0; //-                 LEVEL1_MAXON
