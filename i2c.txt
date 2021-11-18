@@ -1,0 +1,2 @@
+0x3c screen
+0x50 eeprom

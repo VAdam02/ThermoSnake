@@ -1,8 +1,10 @@
 #include "src/DelayManager/DelayManager.h"
 #include "src/TempAndHum/TempAndHum.h"
+#include "src/Backstore/Backstore.h"
 
 DelayManager delayer;
 TempAndHum tempAndHum;
+Backstore store;
 
 void setup()
 {
