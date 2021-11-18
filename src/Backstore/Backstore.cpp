@@ -548,3 +548,38 @@ void Backstore::inicialise(byte _headSize)
   if (EEPROM_SIZE - (headSize*4) < 256) { setLazy4((headSize-1)*4, (headSize*4) >> 8, (headSize*4) & 0xFF, EEPROM_SIZE - (headSize*4), 254); }
   else { setLazy4((headSize-1)*4, (headSize*4) >> 8, (headSize*4) & 0xFF, 0, 254); }
 }
+
+void Backstore::mem()
+{
+  byte width = 64;
+  for (int i = 0; i < EEPROM_SIZE/width; i++)
+  {
+    if (i % 8 == 0)
+    {
+      Serial.print("\n");
+    }
+    Serial.print("\n");
+    Serial.print(i);
+    
+    if (i < 10)
+    {
+      Serial.print(" ");
+    }
+    
+    for (int j = 0; j < width; j++)
+    {
+      int a = i*width+j;
+      if (a % 8 == 0 && j > 0)
+      {
+        Serial.print("|");
+      }
+
+      byte cur = read(a);
+      if (cur < 100) { Serial.print(" "); }
+      if (cur < 10) { Serial.print(" "); }
+      Serial.print(" ");
+      Serial.print(cur);
+    }
+  }
+  Serial.print("\n");
+}
