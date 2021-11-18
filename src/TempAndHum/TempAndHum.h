@@ -14,15 +14,19 @@ class TempAndHum
     void TempAndHum::begin();
     void TempAndHum::refresh();
     float TempAndHum::getCurrentTemperature();
-    float TempAndHum::getTemperature(float* range);
-    float TempAndHum::getTemperature();
     float TempAndHum::getCurrentHumidity();
-    float TempAndHum::getHumidity(float* range);
-    float TempAndHum::getHumidity();
+
+    float temperature = 0;
+    float temperatureRange = 0;
+    float humidity = 0;
+    float humidityRange = 0;
   private:
-    int DHT_lastTime;
-    float temp[];
-    float hum[];
+    float TempAndHum::getTemperature();
+    float TempAndHum::getTemperature(float* range);
+    float TempAndHum::getHumidity();
+    float TempAndHum::getHumidity(float* range);
+    
+    unsigned int lastTime = 0;
 };
 
 #endif
