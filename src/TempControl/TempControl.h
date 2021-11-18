@@ -16,22 +16,22 @@ class TempControl
     void TempControl::begin(float *_sensors[], Backstore* _store);
     void TempControl::refresh(unsigned int deltatime);
 
-    void TempControl::getByteFormat(float data, byte returnValue[]);
-    float TempControl::reverseByteFormat(byte data[]);
-    void TempControl::getUnsignedByteFormat(float data, byte returnValue[]);
-    float TempControl::reverseUnsignedByteFormat(byte data[]);
+    void TempControl::getByteFormat(float data, byte index, byte array[]);
+    float TempControl::reverseByteFormat(byte index, byte array[]);
+    void TempControl::getUnsignedByteFormat(float data, byte index, byte array[]);
+    float TempControl::reverseUnsignedByteFormat(byte index, byte array[]);
+
+    void TempControl::readConfig();
     byte channelParams[2][21];
   private:
     float **sensors;
     Backstore *store;
-    
+
     void TempControl::addHeatingTask(byte ID, byte on_time, byte maxDelay_time);
     void TempControl::stopHeatingTask(byte ID);
 
     bool TempControl::level0(byte channel, float curLevel);
     bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime);
-
-    void TempControl::readConfig();
 };
 
 #endif
