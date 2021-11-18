@@ -19,6 +19,8 @@ RelayController relayController;
 GUI gui;
 Buzzer buzzer;
 
+bool needReload = false;
+
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
 
@@ -32,7 +34,7 @@ void setup()
   tempAndHum.begin();
   relayController.begin(&tempControl);
   buzzer.begin(9);
-  gui.begin(&store, TempSensors, HumSensors);
+  gui.begin(&needReload, &store, TempSensors, HumSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
   HumSensors[0] = &tempAndHum.humidity;
@@ -45,6 +47,8 @@ void setup()
 void loop()
 {
   Serial.print("\n");
+  checkReload();
+  
   unsigned int deltatime = delayer.getDeltaTime();
   tempAndHum.refresh();
   tempControl.refresh(deltatime);
@@ -56,4 +60,11 @@ void loop()
 
   gui.endrefresh();
   delayer.sleepReamingOf(50);
+}
+
+void checkReload()
+{
+  if (!needReload) { return; }
+
+  tempControl.readConfig();
 }
