@@ -1,10 +1,5 @@
-#include "Graphics.h"
 #include <Arduino.h>
-
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include "Graphics.h"
 
 #define FONTSTEPSBYSIDE 60
 #define FONTTIMEBETWEENSTEPS 100 //4 * FONTSTEPSBYSIDE * FONTTIMEBETWEENSTEPS = time needed for a round
@@ -49,7 +44,7 @@ unsigned int Graphics::getLocalTime(unsigned long time)
   return (unsigned int)((time/FONTTIMEBETWEENSTEPS) % (4*FONTSTEPSBYSIDE));
 }
 
-void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, float relativeY2, byte width, bool alignRight)
+void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, byte relativeY2, byte width, bool alignRight)
 {
   for (int j = 0; abs(j) < abs(relativeY2*width)-width; j+=(relativeY2/abs(relativeY2))) //-y
   for (int i = 0; i < width; i++) //x - width
@@ -57,7 +52,7 @@ void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, f
   else { display.drawPixel(absoluteX1 +roundDown(j*relativeX2/relativeY2) + i, absoluteY1 -(j), WHITE); }
 }
 
-void Graphics::drawQuarterCircle(byte x, byte y, byte width, byte direction)
+void Graphics::drawQuarterCircle(byte x, byte y, byte width, int direction)
 {
   for (int i = 1; i <= width; i++)
   for (int j = 1; j <= width; j++)
@@ -69,7 +64,7 @@ void Graphics::drawQuarterCircle(byte x, byte y, byte width, byte direction)
     else { display.drawPixel(x +(width-i), y +(width-j), WHITE); }
   }
 }
-void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, byte direction)
+void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, int direction)
 {
   for (int i = 1; i <= (width/2); i++)
   for (int j = 1; j <= (width/2); j++)
@@ -88,14 +83,9 @@ void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight)
   display.drawPixel(x+i, y+j, WHITE);
 }
 
-byte curPage = 0;
-byte targetPage = 0;
-byte transitionX = 0;
-unsigned int G_lastTime = 0;
-
 void Graphics::setPage(byte page)
 {
-  G_lastTime = (unsigned int)(millis() % 65536);
+  lastTime = (unsigned int)(millis() % 65536);
   targetPage = page;
   transitionX = 0;
 }
@@ -112,7 +102,7 @@ void Graphics::refresh()
 {
   if (curPage != targetPage)
   {
-    unsigned int deltatime = (unsigned int)(millis() % 65536) - G_lastTime;
+    unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
 
     transitionX = (unsigned long)SCREEN_WIDTH * deltatime / PAGESWITCHTIME;
 
@@ -120,7 +110,7 @@ void Graphics::refresh()
     {
       if (curPage > targetPage) { curPage--; }
       else { curPage++; }
-      G_lastTime = (unsigned int)(millis() % 65536);
+      lastTime = (unsigned int)(millis() % 65536);
       transitionX = 0;
     }
   }
@@ -251,10 +241,10 @@ int Graphics::drawChar(byte page, byte x_, byte y_, char c, byte fsize)
   }
   else if (c == 'G' || c == 'g')
   {
-    
+
     if (fsize > 1) { drawQuarterCircle(x+4*fsize, y, fsize, 0); } //TopRight  round
     else { drawSquare(x+4*fsize, y, fsize, fsize); } //Top line
-    
+
     drawSquare(x+1*fsize, y, 3*fsize, fsize); //Top line
     drawQuarterCircle(x, y, fsize, 3); //TopLeft  round
     drawOuterQuarterCircle(x+fsize, y+fsize, fsize, 3);
@@ -413,9 +403,9 @@ int Graphics::drawChar(byte page, byte x_, byte y_, char c, byte fsize)
     drawSquare(x+1*fsize, y+4*fsize, fsize, fsize); //Bottom line
     drawQuarterCircle(x+2*fsize, y+4*fsize, fsize, 1); //MiddleLeft  round
     drawOuterQuarterCircle(x+fsize, y+3*fsize, fsize, 1);
-    
+
     drawSquare(x+2*fsize, y, fsize, 4*fsize); //Middle pill
-    
+
     drawQuarterCircle(x+2*fsize, y+4*fsize, fsize, 2); //MiddleRight  round
     drawOuterQuarterCircle(x+3*fsize, y+3*fsize, fsize, 2);
     drawSquare(x+3*fsize, y+4*fsize, fsize, fsize); //Bottom line2
@@ -425,7 +415,7 @@ int Graphics::drawChar(byte page, byte x_, byte y_, char c, byte fsize)
   }
   else if (c == 'X' || c == 'x') //TODO
   {
-    
+
   }
   else if (c == 'Y' || c == 'y') //TODO
   {
