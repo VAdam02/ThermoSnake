@@ -5,6 +5,37 @@
 #include "src/RelayController/RelayController.h"
 #include "src/GUI/GUI.h"
 
+//GENERAL
+#define LEVELX_STATE 0
+#define LEVELX_MODE 1
+#define LEVELX_SENSOR_ID 2
+#define LEVELX_ONTIME_LEFT 3
+#define LEVELX_ONTIME_LEFT2 4
+#define LEVELX_COOLDOWN_LEFT 5
+#define LEVELX_COOLDOWN_LEFT2 6
+#define LEVELX_MAXDELAY_LEFT 7
+#define LEVELX_MAXDELAY_LEFT2 8
+
+//LEVEL 0
+#define LEVEL0_OFFLEVEL 9
+#define LEVEL0_OFFLEVEL2 10
+#define LEVEL0_ONLEVEL 11
+#define LEVEL0_ONLEVEL2 12
+
+//LEVEL 1
+#define LEVEL1_TARGETLEVEL 9
+#define LEVEL1_TARGETLEVEL2 10
+#define LEVEL1_TOLERANCE 11
+#define LEVEL1_TOLERANCE2 12
+#define LEVEL1_REACTION 13
+#define LEVEL1_REACTION2 14
+#define LEVEL1_MINON 15
+#define LEVEL1_MAXON 16
+#define LEVEL1_CURRENTSTATE 17
+#define LEVEL1_SAMPLE_TEMPERATURE 18
+#define LEVEL1_SAMPLE_TEMPERATURE2 19
+#define LEVEL1_SAMPLE_POWERONTIME 20
+
 #define TEMPSENSORCOUNT 3
 #define HUMSENSORCOUNT 1
 
@@ -19,8 +50,13 @@ GUI gui;
 
 bool needReload = false;
 
-float value0 = 25;
-float value1 = 25;
+float value0 = 24;
+float heating0 = 0.1; //after 1 second
+float cooling0 = 0.01; //after 1 second
+
+float value1 = 24;
+float heating1 = 0.1; //after 1 second
+float cooling1 = 0.01; //after 1 second
 
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
@@ -36,11 +72,12 @@ void setup()
 
   TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &value0;
-  TempSensors[1] = &value1;
+  TempSensors[2] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
-  lastTime = millis();
+  store.mem();
+  //store.inicialise(256);
 }
 
 void loop()
@@ -123,4 +160,5 @@ void checkReload()
   if (!needReload) { return; }
 
   tempControl.readConfig();
+  needReload = false;
 }
