@@ -88,21 +88,14 @@ void TempControl::addHeatingTask(byte channel, byte on_time, byte maxDelay_time)
 {
   //TODO if on_time inicialised with 255 than make it unlimited
   channelParams[channel][LEVELX_STATE] = 2;
-  byte data[2];
-  getUnsignedByteFormat(on_time, data);
-  channelParams[channel][LEVELX_ONTIME_LEFT] = data[0];
-  channelParams[channel][LEVELX_ONTIME_LEFT2] = data[1];
+  getUnsignedByteFormat(on_time, LEVELX_ONTIME_LEFT, channelParams[channel]);
 
-  data[0] = channelParams[channel][LEVELX_MAXDELAY_LEFT];
-  data[1] = channelParams[channel][LEVELX_MAXDELAY_LEFT2];
-  float maxDelayLeft = reverseUnsignedByteFormat(data);
+  float maxDelayLeft = reverseUnsignedByteFormat(LEVELX_MAXDELAY_LEFT, channelParams[channel]);
   if (maxDelayLeft == 0 || maxDelayLeft > maxDelay_time)
   {
     maxDelayLeft = maxDelay_time;
   }
-  getUnsignedByteFormat(maxDelayLeft, data);
-  channelParams[channel][LEVELX_MAXDELAY_LEFT] = data[0];
-  channelParams[channel][LEVELX_MAXDELAY_LEFT2] = data[1];
+  getUnsignedByteFormat(maxDelayLeft, LEVELX_MAXDELAY_LEFT, channelParams[channel]);
 }
 void TempControl::stopHeatingTask(byte channel)
 {
@@ -120,14 +113,8 @@ void TempControl::stopHeatingTask(byte channel)
  */
 bool TempControl::level0(byte channel, float curLevel)
 {
-  byte data[2];
-  data[0] = channelParams[channel][LEVEL0_ONLEVEL];
-  data[1] = channelParams[channel][LEVEL0_ONLEVEL2];
-  float onLevel = reverseByteFormat(data);
-
-  data[0] = channelParams[channel][LEVEL0_OFFLEVEL];
-  data[1] = channelParams[channel][LEVEL0_OFFLEVEL2];
-  float offLevel = reverseByteFormat(data);
+  float onLevel = reverseByteFormat(LEVEL0_ONLEVEL, channelParams[channel]);
+  float offLevel = reverseByteFormat(LEVEL0_OFFLEVEL, channelParams[channel]);
 
   //TODO cooldown
   //TODO more intelligent maxDelay
@@ -167,22 +154,11 @@ bool TempControl::level0(byte channel, float curLevel)
  */
 bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
 {
-  byte data[2];
-  data[0] = channelParams[channel][LEVELX_COOLDOWN_LEFT];
-  data[1] = channelParams[channel][LEVELX_COOLDOWN_LEFT2];
-  float cooldownLeft = reverseUnsignedByteFormat(data);
+  float cooldownLeft = reverseUnsignedByteFormat(LEVELX_COOLDOWN_LEFT, channelParams[channel]);
+  float targetLevel = reverseUnsignedByteFormat(LEVEL1_TARGETLEVEL, channelParams[channel]);
+  float tolerance = reverseUnsignedByteFormat(LEVEL1_TOLERANCE, channelParams[channel]) * 0.75;
 
-  data[0] = channelParams[channel][LEVEL1_TARGETLEVEL];
-  data[1] = channelParams[channel][LEVEL1_TARGETLEVEL2];
-  float targetLevel = reverseUnsignedByteFormat(data);
-
-  data[0] = channelParams[channel][LEVEL1_TOLERANCE];
-  data[1] = channelParams[channel][LEVEL1_TOLERANCE2];
-  float tolerance = reverseUnsignedByteFormat(data) * 0.75;
-
-  data[0] = channelParams[channel][LEVEL1_REACTION];
-  data[1] = channelParams[channel][LEVEL1_REACTION2];
-  float reaction = reverseByteFormat(data);
+  float reaction = reverseByteFormat(LEVEL1_REACTION, channelParams[channel]);
 
   //float reaction = 1.3; //TODO export from array
 
@@ -208,10 +184,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
       //DEBUG
       Serial.print("COOLwait - ");
       cooldownLeft -= ((float)(deltatime)/1000);
-      getUnsignedByteFormat(cooldownLeft, data);
-      channelParams[channel][LEVELX_COOLDOWN_LEFT] = data[0];
-      channelParams[channel][LEVELX_COOLDOWN_LEFT2] = data[1];
-
+      getUnsignedByteFormat(cooldownLeft, LEVELX_COOLDOWN_LEFT, channelParams[channel]);
       return false; //nothing to do
     }
   }
@@ -254,9 +227,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
       addHeatingTask(channel, onTime, 0);
 
       //take sample
-      getByteFormat(curLevel, data);
-      channelParams[channel][LEVEL1_SAMPLE_TEMPERATURE] = data[0];
-      channelParams[channel][LEVEL1_SAMPLE_TEMPERATURE2] = data[1];
+      getByteFormat(curLevel, LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
       channelParams[channel][LEVEL1_SAMPLE_POWERONTIME] = channelParams[channel][LEVELX_ONTIME_LEFT];
     }
     //it's going to be cold there in a closed time
@@ -277,9 +248,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
       }
 
       //take sample
-      getByteFormat(curLevel, data);
-      channelParams[channel][LEVEL1_SAMPLE_TEMPERATURE] = data[0];
-      channelParams[channel][LEVEL1_SAMPLE_TEMPERATURE2] = data[1];
+      getByteFormat(curLevel, LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
       channelParams[channel][LEVEL1_SAMPLE_POWERONTIME] = channelParams[channel][LEVELX_ONTIME_LEFT];
     }
   }
@@ -294,10 +263,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   if (channelParams[channel][LEVEL1_CURRENTSTATE] == 2 && channelParams[channel][LEVELX_ONTIME_LEFT] == 0 && channelParams[channel][LEVELX_STATE] == 1)
   {
     cooldownLeft = LEVEL1_OFFCOOLDOWN;
-    getUnsignedByteFormat(cooldownLeft, data);
-    channelParams[channel][LEVELX_COOLDOWN_LEFT] = data[0];
-    channelParams[channel][LEVELX_COOLDOWN_LEFT2] = data[1];
-
+    getUnsignedByteFormat(cooldownLeft, LEVELX_COOLDOWN_LEFT, channelParams[channel]);
     channelParams[channel][LEVEL1_CURRENTSTATE]++;
   }
 
@@ -309,9 +275,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     Serial.print("AVG: ");
 
     //calculate the new avg reaction
-    data[0] = channelParams[channel][LEVEL1_SAMPLE_TEMPERATURE];
-    data[1] = channelParams[channel][LEVEL1_SAMPLE_TEMPERATURE2];
-    float sampleTemperature = reverseByteFormat(data);
+    float sampleTemperature = reverseByteFormat(LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
 
     //TODO make better avg calculation
     float curReaction = (curLevel - sampleTemperature) / (channelParams[channel][LEVEL1_SAMPLE_POWERONTIME] / 10);
@@ -332,10 +296,11 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
       //DEBUG
       Serial.print(" ERROR_REACTION ");
     }
-    getByteFormat(reaction, data);
-    channelParams[channel][LEVEL1_REACTION] = data[0];
-    channelParams[channel][LEVEL1_REACTION2] = data[1];
+    getByteFormat(reaction, LEVEL1_REACTION, channelParams[channel]);
     //TODO make less write sequance
+    byte data[2];
+    data[0] = channelParams[channel][LEVEL1_REACTION];
+    data[1] = channelParams[channel][LEVEL1_REACTION2];
     store->writeBytes(SAVENAME, channel, 6, 7, data);
 
     //DEBUG
@@ -354,139 +319,31 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   return true;
 }
 
-void TempControl::getByteFormat(float data, byte returnValue[])
+void TempControl::getByteFormat(float data, byte index, byte array[])
 {
-  unsigned int fullPart = (unsigned int)abs(data);
-  float otherPart = abs(data) - fullPart;
-
-  fullPart = fullPart % 128;
-  byte current = 128;
-  byte cache = 0;
-  //negative = 1 positive = 0
-  if (data < 0) { cache++; }
-  //full part
-  while (current >= 2)
-  {
-    cache *= 2;
-    current /= 2;
-
-    if (fullPart >= current)
-    {
-      cache++;
-      fullPart -= current;
-    }
-  }
-  returnValue[0] = cache;
-  cache = 0;
-
-  //other part
-  int i = 0;
-  float current2 = 1;
-  while (i < 8)
-  {
-    cache *= 2;
-    current2 /= 2;
-
-    if (otherPart >= current2)
-    {
-      cache++;
-      otherPart -= current2;
-    }
-
-    i++;
-  }
-  returnValue[1] = cache;
+  array[index] = ((byte)abs(data) % 128) + (data < 0 ? 128 : 0);
+  array[index+1] = (abs(data) - (int)(abs(data))) * 256;
 }
-float TempControl::reverseByteFormat(byte data[])
+float TempControl::reverseByteFormat(byte index, byte array[])
 {
   float value = 0;
-  byte current = data[0];
+  value += array[index] % 128;
+  value += (float)(array[index+1]) / 256;
+  value *= (array[index] >= 128 ? -1 : 1);
   
-  if (current >= 128) { current -= 128; }
-  value = current;
-
-  current = data[1];
-  float otherPart = 0.5;
-  byte reference = 128;
-  while (current > 0)
-  {
-    if (current >= reference)
-    {
-      current -= reference;
-      value += otherPart;
-    }
-
-    otherPart /= 2;
-    reference /= 2;
-  }
-
-  if (data[0] >= 128) { value *= -1; }
-
   return value;
 }
-void TempControl::getUnsignedByteFormat(float data, byte returnValue[])
+void TempControl::getUnsignedByteFormat(float data, byte index, byte array[])
 {
-  unsigned int fullPart = (unsigned int)abs(data);
-  float otherPart = abs(data) - fullPart;
-
-  fullPart = fullPart % 256;
-  unsigned int current = 256;
-  byte cache = 0;
-  //full part
-  while (current >= 2)
-  {
-    cache *= 2;
-    current /= 2;
-
-    if (fullPart >= current)
-    {
-      cache++;
-      fullPart -= current;
-    }
-  }
-  returnValue[0] = cache;
-  cache = 0;
-
-  //other part
-  int i = 0;
-  float current2 = 1;
-  while (i < 8)
-  {
-    cache *= 2;
-    current2 /= 2;
-
-    if (otherPart >= current2)
-    {
-      cache++;
-      otherPart -= current2;
-    }
-
-    i++;
-  }
-  returnValue[1] = cache;
+  array[index] = ((byte)abs(data) % 256);
+  array[index+1] = (abs(data) - (int)(abs(data))) * 256;
 }
-float TempControl::reverseUnsignedByteFormat(byte data[])
+float TempControl::reverseUnsignedByteFormat(byte index, byte array[])
 {
   float value = 0;
-  byte current = data[0];
+  value += array[index];
+  value += (float)(array[index+1]) / 256;
   
-  value += current;
-
-  current = data[1];
-  float otherPart = 0.5;
-  byte reference = 128;
-  while (current > 0)
-  {
-    if (current >= reference)
-    {
-      current -= reference;
-      value += otherPart;
-    }
-
-    otherPart /= 2;
-    reference /= 2;
-  }
-
   return value;
 }
 
@@ -502,16 +359,16 @@ void TempControl::readConfig()
       Serial.print("Inicialise\n");
       //error - not found so inicialise to null mode
       store->allocateSpace(SAVENAME, i, 10);
-      fromStore[0] = 0; //LEVELX_MODE
-      fromStore[1] = 0; //LEVELX_SENSOR_ID
-      fromStore[2] = 0; //LEVEL0_OFFLEVEL   LEVEL1_TARGETLEVEL
-      fromStore[3] = 0; //LEVEL0_OFFLEVEL2  LEVEL1_TARGETLEVEL2
-      fromStore[4] = 0; //LEVEL0_ONLEVEL    LEVEL1_TOLERANCE
-      fromStore[5] = 0; //LEVEL0_ONLEVEL2   LEVEL1_TOLERANCE2
-      fromStore[6] = 0; //-                 LEVEL1_REACTION
-      fromStore[7] = 0; //-                 LEVEL1_REACTION2
-      fromStore[8] = 0; //-                 LEVEL1_MINON
-      fromStore[9] = 0; //-                 LEVEL1_MAXON
+      fromStore[0] = 0;   //LEVELX_MODE
+      fromStore[1] = 0;   //LEVELX_SENSOR_ID
+      fromStore[2] = 0;   //LEVEL0_OFFLEVEL   LEVEL1_TARGETLEVEL
+      fromStore[3] = 0;   //LEVEL0_OFFLEVEL2  LEVEL1_TARGETLEVEL2
+      fromStore[4] = 0;   //LEVEL0_ONLEVEL    LEVEL1_TOLERANCE
+      fromStore[5] = 0;   //LEVEL0_ONLEVEL2   LEVEL1_TOLERANCE2
+      fromStore[6] = 127; //-                 LEVEL1_REACTION
+      fromStore[7] = 0;   //-                 LEVEL1_REACTION2
+      fromStore[8] = 0;   //-                 LEVEL1_MINON
+      fromStore[9] = 0;   //-                 LEVEL1_MAXON
       store->writeBytes(SAVENAME, i, 0, 9, fromStore);
     }
     
