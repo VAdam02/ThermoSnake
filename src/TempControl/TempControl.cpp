@@ -359,16 +359,16 @@ void TempControl::readConfig()
       Serial.print("Inicialise\n");
       //error - not found so inicialise to null mode
       store->allocateSpace(SAVENAME, i, 10);
-      fromStore[0] = 0; //LEVELX_MODE
-      fromStore[1] = 0; //LEVELX_SENSOR_ID
-      fromStore[2] = 0; //LEVEL0_OFFLEVEL   LEVEL1_TARGETLEVEL
-      fromStore[3] = 0; //LEVEL0_OFFLEVEL2  LEVEL1_TARGETLEVEL2
-      fromStore[4] = 0; //LEVEL0_ONLEVEL    LEVEL1_TOLERANCE
-      fromStore[5] = 0; //LEVEL0_ONLEVEL2   LEVEL1_TOLERANCE2
-      fromStore[6] = 1; //-                 LEVEL1_REACTION
-      fromStore[7] = 0; //-                 LEVEL1_REACTION2
-      fromStore[8] = 0; //-                 LEVEL1_MINON
-      fromStore[9] = 0; //-                 LEVEL1_MAXON
+      fromStore[0] = 0;   //LEVELX_MODE
+      fromStore[1] = 0;   //LEVELX_SENSOR_ID
+      fromStore[2] = 0;   //LEVEL0_OFFLEVEL   LEVEL1_TARGETLEVEL
+      fromStore[3] = 0;   //LEVEL0_OFFLEVEL2  LEVEL1_TARGETLEVEL2
+      fromStore[4] = 0;   //LEVEL0_ONLEVEL    LEVEL1_TOLERANCE
+      fromStore[5] = 0;   //LEVEL0_ONLEVEL2   LEVEL1_TOLERANCE2
+      fromStore[6] = 127; //-                 LEVEL1_REACTION
+      fromStore[7] = 0;   //-                 LEVEL1_REACTION2
+      fromStore[8] = 0;   //-                 LEVEL1_MINON
+      fromStore[9] = 0;   //-                 LEVEL1_MAXON
       store->writeBytes(SAVENAME, i, 0, 9, fromStore);
     }
     
