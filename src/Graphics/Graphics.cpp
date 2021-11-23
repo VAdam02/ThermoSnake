@@ -596,6 +596,14 @@ int Graphics::drawChar(byte page, byte x_, byte y_, char c, byte fsize)
   {
     
   }
+  else if (c == '(') //TODO left arrow
+  {
+    
+  }
+  else if (c == ')') //TODO right arrow
+  {
+    
+  }
   else
   {
     drawSquare(x, y, 5*fsize, 5*fsize);
