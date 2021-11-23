@@ -1,10 +1,11 @@
 #include "src/DelayManager/DelayManager.h"
+#include "src/PT100/PT100.h"
 #include "src/TempAndHum/TempAndHum.h"
 #include "src/Backstore/Backstore.h"
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 
-#define TEMPSENSORCOUNT 3
+#define TEMPSENSORCOUNT 4
 #define HUMSENSORCOUNT 1
 
 #define CHANNEL_COUNT 2 //max 255
@@ -41,6 +42,7 @@
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
 DelayManager delayer;
+PT100 pt100;
 TempAndHum tempAndHum;
 Backstore store;
 TempControl tempControl;
@@ -63,13 +65,15 @@ void setup()
 {
   Serial.begin(9600);
   delayer.begin();
+  pt100.begin();
   tempAndHum.begin();
   store.begin();
   relayController.begin(&tempControl);
 
   TempSensors[0] = &tempAndHum.temperature;
-  TempSensors[1] = &value0;
-  TempSensors[2] = &value1;
+  TempSensors[1] = &pt100.temperature;
+  TempSensors[2] = &value0;
+  TempSensors[3] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
   //store.mem();
 
@@ -124,6 +128,7 @@ void loop()
 {
   //DEBUG
   Serial.print("\n");
+  pt100.refresh();
   tempAndHum.refresh();
   tempControl.refresh();
   relayController.refresh();
@@ -148,56 +153,8 @@ void loop()
     value1 += ((float)(deltatime)/1000)*heating1;
   }
   
-  /*
-  double x = analogRead(A0);
-  double y = analogRead(A1);
-  if ((x-512) > 200)
-  {
-    Serial.print("RON - ");
-    tempControl.channelParams[1][0] = 3;
-    tempControl.channelParams[1][6] = 0;
-  }
-  if ((x-512) < -200)
-  {
-    Serial.print("ROFF - ");
-    tempControl.channelParams[1][0] = 1;
-  }
-  
-  if (abs((y-512)/512) > 0.1)
-  {
-    double deltatime = 50;
-    presstime += deltatime;
-    
-    if ((y-512) > 0)
-    {
-      data -= (presstime/1000) * deltatime / 1000;
-    }
-    else
-    {
-      data += (presstime/1000) * deltatime / 1000;
-      
-      if (tempControl.channelParams[1][3] < (presstime/1000) * deltatime/1000)
-      {
-        tempControl.channelParams[1][3] = 0;
-      }
-      else
-      {
-        tempControl.channelParams[1][3] -= (presstime/1000) * deltatime /1000;
-      }
-      
-    }
-    Serial.print(data);
-    Serial.print("\n");
-  }
-  else
-  {
-    presstime = 0;
-  }
-  */
-  
   if (deltatime > 0) //DEBUG
   {
-    //Serial.print(tempAndHum.getTemperature(&range));
     Serial.print(" - STAT - ");
     Serial.print(relayController.combo);
     Serial.print(" ");
@@ -237,17 +194,5 @@ void loop()
     Serial.print("\n");
   }
 
-  /*
-  //TODO make better debug
-  if (tempControl.channelParams[1][0] == 3)
-  {
-    digitalWrite(2, HIGH);
-  }
-  else if (tempControl.channelParams[1][0] == 1)
-  {
-    digitalWrite(2, LOW);
-  }
-  */
-  lastTime = millis();
   delayer.sleepReamingOf(50);
 }
