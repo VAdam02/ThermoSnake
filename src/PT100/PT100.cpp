@@ -2,16 +2,16 @@
 #include <Arduino.h>
 
 #define EMPTY -255
-#define COOLDOWN 100
-#define LENGTH 30 //LENGTH * COOLDOWN / 1000 seconds
+#define COOLDOWN 500
+#define LENGTH 60 //LENGTH * COOLDOWN / 1000 seconds
 
 #define PIN0 A2
 #define PIN1 A3
 
-#define RESISTANCEATREF1 116
-#define CELSIUSATREF1 24
-#define RESISTANCEATREF0 120
-#define CELSIUSATREF0 34
+#define RESISTANCEATREF0 110.0
+#define CELSIUSATREF0 1
+#define RESISTANCEATREF1 115.0
+#define CELSIUSATREF1 13
 
 float PT100temp[LENGTH];
 
@@ -83,10 +83,5 @@ float PT100::convertValueToCelsius(unsigned int val1, unsigned int val2)
 {
     float voltage = (float)(val1+val2)*5/1024/2;
     float resistance = (voltage*150)/(5-voltage);
-    //DEBUG
-    Serial.print(" - ");
-    Serial.print(resistance, DEC);
-    Serial.print(" - ");
     return (((resistance - RESISTANCEATREF0) / (RESISTANCEATREF1 - RESISTANCEATREF0)) * (CELSIUSATREF1-CELSIUSATREF0)) + CELSIUSATREF0;
-    return 0;
 }
