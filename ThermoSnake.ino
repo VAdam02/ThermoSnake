@@ -106,12 +106,6 @@ void loop()
   {
     value0 += ((float)(deltatime)/1000)*heating0;
   }
-  delayer.begin();
-  store.begin();
-  pt100.begin();
-  tempAndHum.begin();
-  relayController.begin(&tempControl);
-  gui.begin(&needReload, &store, TempSensors, HumSensors);
 
   //ch 1 heat
   if (tempControl.channelParams[1][LEVELX_STATE] == 3)
@@ -163,7 +157,7 @@ void loop()
     Serial.print(tempControl.channelParams[1][LEVEL1_CURRENTSTATE]);
     Serial.print("\n");
   }
-
+  
   gui.endrefresh();
   delayer.sleepReamingOf(50);
 }
