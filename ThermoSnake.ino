@@ -75,11 +75,13 @@ void setup()
 
   TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &pt100.temperature;
+  TempSensors[2] = &value0;
+  TempSensors[3] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
-  store.mem();
   //store.inicialise(256);
+  store.mem();
 }
 
 void loop()
@@ -104,12 +106,21 @@ void loop()
   {
     value0 += ((float)(deltatime)/1000)*heating0;
   }
+  delayer.begin();
+  store.begin();
+  pt100.begin();
+  tempAndHum.begin();
+  relayController.begin(&tempControl);
+  gui.begin(&needReload, &store, TempSensors, HumSensors);
 
   //ch 1 heat
   if (tempControl.channelParams[1][LEVELX_STATE] == 3)
   {
     value1 += ((float)(deltatime)/1000)*heating1;
   }
+  TempSensors[0] = &tempAndHum.temperature;
+  TempSensors[1] = &pt100.temperature;
+  HumSensors[0] = &tempAndHum.humidity;
 
   if (deltatime > 0) //DEBUG
   {
@@ -160,7 +171,31 @@ void loop()
 void checkReload()
 {
   if (!needReload) { return; }
-
+  
   tempControl.readConfig();
   needReload = false;
+}
+
+String numToString(double num, int decimals)
+{
+  String data = "";
+  int greater = num;
+  num -= greater;
+  while (greater > 0)
+  {
+    data = String(greater % 10) + data;
+    greater /= 10;
+  }
+
+  if (decimals > 0) { data += "."; }
+
+  for (int i = 0; i < decimals; i++)
+  {
+    num *= 10;
+    int cache = (int)num;
+    data = data + String(cache);
+    num -= cache;
+  }
+  
+  return data;
 }
