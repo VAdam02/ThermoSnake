@@ -15,6 +15,10 @@ void loop()
   oled.clear();
   oled.refresh();
 
+  oled.drawText(0, 0, 1, "ABCDEFGHIJKLMNOPQRST", 1);
+  oled.drawText(0, 0, 9, "UVWXYZ", 1);
+  oled.drawText(0, 0, 17, "0123456789", 1);
+  oled.drawText(0, 0, 25, ".*%: ()", 1);
   
   oled.show();
   delayer.sleepReamingOf(50);
