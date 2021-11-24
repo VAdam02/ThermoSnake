@@ -7,7 +7,7 @@
 #include "src/GUI/GUI.h"
 #include "src/Buzzer/Buzzer.h"
 
-#define TEMPSENSORCOUNT 4
+#define TEMPSENSORCOUNT 2
 #define HUMSENSORCOUNT 1
 
 #define CHANNEL_COUNT 2 //max 255
@@ -39,9 +39,8 @@ void setup()
   buzzer.begin(9);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
 
+  TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &pt100.temperature;
-  TempSensors[2] = &value0;
-  TempSensors[3] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
 
 
