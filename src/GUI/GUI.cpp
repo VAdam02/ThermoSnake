@@ -33,12 +33,12 @@ void GUI::refresh(unsigned int deltatime)
   oled.clear();
   oled.refresh();
   
-  if (abs(analogRead(A0) - 512) >= PRESS_PERCENT * 512)
+  if (abs(analogRead(A6) - 512) >= PRESS_PERCENT * 512)
   {
     if (presstime[0] > 65535-deltatime) { presstime[0] = 65535; }
     else { presstime[0] += deltatime; }
   } else { presstime[0] = 0; }
-  if (abs(analogRead(A1) - 512) >= PRESS_PERCENT * 512)
+  if (abs(analogRead(A7) - 512) >= PRESS_PERCENT * 512)
   {
     if (presstime[1] > 65535-deltatime) { presstime[1] = 65535; }
     else { presstime[1] += deltatime; }
@@ -212,12 +212,12 @@ void GUI::getJoyStick(unsigned int deltatime, float *data, bool horizontal)
   float delta = deltatime;
   if (horizontal)
   {
-    value = analogRead(A0);
+    value = analogRead(A6);
     press = presstime[0];
   }
   else
   {
-    value = 1023-analogRead(A1);
+    value = 1023-analogRead(A7);
     press = presstime[1];
   }
 

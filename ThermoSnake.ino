@@ -37,7 +37,7 @@
 #define LEVEL1_SAMPLE_TEMPERATURE2 19
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
-#define TEMPSENSORCOUNT 4
+#define TEMPSENSORCOUNT 2
 #define HUMSENSORCOUNT 1
 
 #define CHANNEL_COUNT 2 //max 255
@@ -75,8 +75,6 @@ void setup()
 
   TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &pt100.temperature;
-  TempSensors[2] = &value0;
-  TempSensors[3] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
