@@ -101,7 +101,7 @@ void RelayController::activate(byte channel)
   //on
   if (maxDelayLeft >= 0 && tempControl->channelParams[channel][LEVELX_STATE] == 2)
   {
-    digitalWrite(channel+2, HIGH);
+    digitalWrite(channel+3, HIGH);
     tempControl->channelParams[channel][LEVELX_STATE] = 3;
     
     tempControl->getUnsignedByteFormat(0, LEVELX_MAXDELAY_LEFT, tempControl->channelParams[channel]);
@@ -116,7 +116,7 @@ void RelayController::activate(byte channel)
     if (tempControl->channelParams[channel][LEVELX_STATE] == 0)
     {
       tempControl->channelParams[channel][LEVELX_STATE] = 1;
-      digitalWrite(channel+2, LOW);
+      digitalWrite(channel+3, LOW);
     }
   }
 }
