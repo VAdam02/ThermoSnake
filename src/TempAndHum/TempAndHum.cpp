@@ -4,7 +4,7 @@
 
 #define EMPTY -255
 #define DHTTYPE DHT11   // DHT 11 
-#define DHTPIN 12
+#define DHTPIN 2
 #define COOLDOWN 2500
 #define LENGTH 12 //LENGTH * COOLDOWN / 1000 seconds
 
