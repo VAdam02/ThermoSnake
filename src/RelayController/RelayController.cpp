@@ -56,7 +56,7 @@ void RelayController::refresh(unsigned int deltatime)
     {
       //look for an other channel that want change
       int j = i+1;
-      while (j < CHANNEL_COUNT && !(((tempControl->channelParams[j][LEVELX_MAXDELAY_LEFT] >= 0 || tempControl->channelParams[j][LEVELX_MAXDELAY_LEFT2] >= 0) && tempControl->channelParams[j][LEVELX_STATE] == 2) || ((tempControl->channelParams[j][LEVELX_ONTIME_LEFT] == 0 || tempControl->channelParams[j][LEVELX_ONTIME_LEFT2] == 0) && tempControl->channelParams[j][LEVELX_STATE] != 1))) { j++; }
+      while (j < CHANNEL_COUNT && !(((tempControl->channelParams[j][LEVELX_MAXDELAY_LEFT] >= 0 || tempControl->channelParams[j][LEVELX_MAXDELAY_LEFT2] >= 0) && tempControl->channelParams[j][LEVELX_STATE] == 2) || ((tempControl->channelParams[j][LEVELX_ONTIME_LEFT] == 0) && tempControl->channelParams[j][LEVELX_STATE] != 1))) { j++; }
       if (j < CHANNEL_COUNT)
       {
         //found
@@ -76,7 +76,6 @@ void RelayController::refresh(unsigned int deltatime)
         }
       }
     }
-    
   }
 }
 
@@ -109,7 +108,7 @@ void RelayController::activate(byte channel)
   //off
   else
   {
-    if (onTimeLeft == 0 && tempControl->channelParams[channel][LEVELX_STATE] == 3)
+    if (onTimeLeft < 1 && tempControl->channelParams[channel][LEVELX_STATE] == 3)
     {
       tempControl->channelParams[channel][LEVELX_STATE] = 0;
     }
