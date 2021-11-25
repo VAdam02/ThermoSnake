@@ -89,7 +89,7 @@ void GUI::refresh(unsigned int deltatime)
   }
   if (oled.getCurPage() == STATE_CHANNEL_SETTINGS || nextPage == STATE_CHANNEL_SETTINGS || oled.getTargetPage() == STATE_CHANNEL_SETTINGS)
   {
-    if (nextPage != oled.getCurPage()) { readConfig(channel, chSettings); }
+    if (nextPage != oled.getCurPage() && nextPage == STATE_CHANNEL_SETTINGS) { readConfig(channel, chSettings); }
     lineCount = (chSettings[0] == 0 ? 4 : chSettings[0] == 1 ? 7 : /*mode 2*/ 9);
 
     byte fsize = 1;
@@ -196,8 +196,6 @@ void GUI::refresh(unsigned int deltatime)
       if (needRead) { readConfig(channel, chSettings); }
     }
   }
-
-
 }
 
 void GUI::endrefresh()
@@ -250,11 +248,11 @@ void GUI::setState(byte newState)
 void GUI::readConfig(byte channel, byte value[])
 {
   store->readBytes(SAVENAME, channel, 0, 9, value);
-  *needReload = true;
 }
 void GUI::writeConfig(byte channel, byte value[])
 {
   store->writeBytes(SAVENAME, channel, 0, 9, value);
+  *needReload = true;
 }
 
 void GUI::getByteFormat(float data, byte index, byte array[])
