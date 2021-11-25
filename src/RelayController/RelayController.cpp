@@ -110,6 +110,7 @@ void RelayController::activate(byte channel)
   {
     if (onTimeLeft < 1 && tempControl->channelParams[channel][LEVELX_STATE] == 3)
     {
+      tempControl->getUnsignedByteFormat(0, LEVELX_ONTIME_LEFT, tempControl->channelParams[channel]);
       tempControl->channelParams[channel][LEVELX_STATE] = 0;
     }
     if (tempControl->channelParams[channel][LEVELX_STATE] == 0)
