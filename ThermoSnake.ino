@@ -55,11 +55,9 @@ float value0 = 25;
 float heating0 = 0.1; //after 1 second
 float cooling0 = 0.01; //after 1 second
 
-float value1 = 32;
+float value1 = 31;
 float heating1 = 0.1; //after 1 second
 float cooling1 = 0.01; //after 1 second
-
-unsigned int lastTime = 0;
 
 void setup()
 {
@@ -77,65 +75,24 @@ void setup()
   HumSensors[0] = &tempAndHum.humidity;
   //store.mem();
 
-  //Inicialise
-  store.freeUpSpace('B', 0);
-  store.freeUpSpace('B', 1);
-
-  byte data[2];
-  
-  //channel 0
-  store.allocateSpace('B', 0, 10);
-  byte demo0[] = { 1, 1, 201, 201, 202, 202, 0, 0, 0, 0 };
-  
-  tempControl.getByteFormat(28, data);
-  demo0[2] = data[0];
-  demo0[3] = data[1];
-
-  tempControl.getByteFormat(26, data);
-  demo0[4] = data[0];
-  demo0[5] = data[1];
-  
-  store.writeBytes('B', 0, 0, 9, demo0);
-
-  //channel 1
-  store.allocateSpace('B', 1, 10);
-  byte demo1[] = { 2, 2, 201, 201, 202, 202, 203, 203, 10, 60 };
-  
-  tempControl.getByteFormat(32.5, data); //target
-  demo1[2] = data[0];
-  demo1[3] = data[1];
-
-  tempControl.getUnsignedByteFormat(1, data); //tolerance
-  demo1[4] = data[0];
-  demo1[5] = data[1];
-
-  tempControl.getByteFormat(1, data); //reaction
-  demo1[6] = data[0];
-  demo1[7] = data[1];
-  
-  store.writeBytes('B', 1, 0, 9, demo1);
-
   //store.mem();
 
   tempControl.begin(TempSensors, &store); //TODO inicialise should be earlier than this
   //maybe there's an error due to not reading config
-
-  lastTime = millis();
 }
 
 float presstime = 0;
 void loop()
 {
+  unsigned int deltatime = delayer.getDeltaTime();
+  
   //DEBUG
   Serial.print("\n");
   pt100.refresh();
   tempAndHum.refresh();
-  tempControl.refresh();
-  relayController.refresh();
+  tempControl.refresh(deltatime);
+  relayController.refresh(deltatime);
 
-  unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
-  byte data[2];
-  
   //Temperature cooling
   value0 -= ((float)(deltatime)/1000)*cooling0;
   value1 -= ((float)(deltatime)/1000)*cooling1;
