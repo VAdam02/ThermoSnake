@@ -5,7 +5,6 @@
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 #include "src/GUI/GUI.h"
-#include "src/Buzzer/Buzzer.h"
 
 #define TEMPSENSORCOUNT 2
 #define HUMSENSORCOUNT 1
@@ -19,14 +18,19 @@ PT100 pt100;
 TempAndHum tempAndHum;
 RelayController relayController;
 GUI gui;
-Buzzer buzzer;
 
 bool needReload = false;
 
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
 
-unsigned int lastTime = 0;
+float value0 = 25;
+float heating0 = 0.1; //after 1 second
+float cooling0 = 0.01; //after 1 second
+
+float value1 = 31;
+float heating1 = 0.1; //after 1 second
+float cooling1 = 0.01; //after 1 second
 
 void setup()
 {
@@ -36,13 +40,11 @@ void setup()
   pt100.begin();
   tempAndHum.begin();
   relayController.begin(&tempControl);
-  buzzer.begin(9);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &pt100.temperature;
   HumSensors[0] = &tempAndHum.humidity;
-
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //maybe there's an error due to not reading config
@@ -59,9 +61,24 @@ void loop()
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
   gui.refresh(deltatime);
-  buzzer.refresh();
 
-  //CODE GOES HERE
+
+  //Temperature cooling
+  value0 -= ((float)(deltatime)/1000)*cooling0;
+  value1 -= ((float)(deltatime)/1000)*cooling1;
+  //Temperature cooling
+
+  //ch 0 heat
+  if (tempControl.channelParams[0][LEVELX_STATE] == 3)
+  {
+    value0 += ((float)(deltatime)/1000)*heating0;
+  }
+
+  //ch 1 heat
+  if (tempControl.channelParams[1][LEVELX_STATE] == 3)
+  {
+    value1 += ((float)(deltatime)/1000)*heating1;
+  }
 
   gui.endrefresh();
   delayer.sleepReamingOf(50);

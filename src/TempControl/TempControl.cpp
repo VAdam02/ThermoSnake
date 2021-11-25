@@ -86,7 +86,6 @@ void TempControl::refresh(unsigned int deltatime)
 
 void TempControl::addHeatingTask(byte channel, byte on_time, byte maxDelay_time)
 {
-  //TODO if on_time inicialised with 255 than make it unlimited
   channelParams[channel][LEVELX_STATE] = 2;
   getUnsignedByteFormat(on_time, LEVELX_ONTIME_LEFT, channelParams[channel]);
 
@@ -207,7 +206,9 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   {
     //DEBUG
     Serial.print("heat - ");
-    //TODO unsigned int onTime = (targetLevel + tolerance - curLevel) / reaction * 10;
+
+    //error correction
+    if (reaction == 0) { reaction = 1; }
     unsigned int onTime = (targetLevel + tolerance - curLevel) / reaction * 10;
     if (onTime > channelParams[channel][LEVEL1_MAXON]) { onTime = channelParams[channel][LEVEL1_MAXON]; }
 
