@@ -1,10 +1,15 @@
 #include "src/DelayManager/DelayManager.h"
-#include "src/Backstore/Backstore.h"
 #include "src/PT100/PT100.h"
 #include "src/TempAndHum/TempAndHum.h"
+#include "src/Backstore/Backstore.h"
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 #include "src/GUI/GUI.h"
+
+#define TEMPSENSORCOUNT 4
+#define HUMSENSORCOUNT 1
+
+#define CHANNEL_COUNT 2 //max 255
 
 //GENERAL
 #define LEVELX_STATE 0
@@ -37,31 +42,26 @@
 #define LEVEL1_SAMPLE_TEMPERATURE2 19
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
-#define TEMPSENSORCOUNT 2
-#define HUMSENSORCOUNT 1
-
-#define CHANNEL_COUNT 2 //max 255
-
 DelayManager delayer;
-Backstore store;
-TempControl tempControl;
 PT100 pt100;
 TempAndHum tempAndHum;
+Backstore store;
+TempControl tempControl;
 RelayController relayController;
 GUI gui;
 
 bool needReload = false;
 
-float value0 = 24;
+float *TempSensors[TEMPSENSORCOUNT];
+float *HumSensors[HUMSENSORCOUNT];
+
+float value0 = 24.75;
 float heating0 = 0.1; //after 1 second
 float cooling0 = 0.01; //after 1 second
 
-float value1 = 24;
+float value1 = 31;
 float heating1 = 0.1; //after 1 second
 float cooling1 = 0.01; //after 1 second
-
-float *TempSensors[TEMPSENSORCOUNT];
-float *HumSensors[HUMSENSORCOUNT];
 
 void setup()
 {
@@ -87,9 +87,9 @@ void setup()
 void loop()
 {
   Serial.print("\n");
-  checkReload();
-
   unsigned int deltatime = delayer.getDeltaTime();
+  
+  checkReload();
   pt100.refresh();
   tempAndHum.refresh();
   tempControl.refresh(deltatime);
@@ -112,51 +112,44 @@ void loop()
   {
     value1 += ((float)(deltatime)/1000)*heating1;
   }
-  TempSensors[0] = &tempAndHum.temperature;
-  TempSensors[1] = &pt100.temperature;
-  HumSensors[0] = &tempAndHum.humidity;
 
-  if (deltatime > 0) //DEBUG
-  {
-    //Serial.print(tempAndHum.getTemperature(&range));
-    Serial.print(" - STAT - ");
-    Serial.print(relayController.combo);
-    Serial.print(" ");
-    Serial.print(relayController.ch0);
-    Serial.print(" ");
-    Serial.print(relayController.ch1);
-    Serial.print(" - CH 0 - ");
-    Serial.print(value0, DEC);
-    Serial.print(" - State ");
-    Serial.print(tempControl.channelParams[0][LEVELX_STATE]);
-    Serial.print(" - OnTime ");
-    Serial.print(tempControl.channelParams[0][LEVELX_ONTIME_LEFT]);
-    Serial.print(" ");
-    Serial.print(tempControl.channelParams[0][LEVELX_ONTIME_LEFT2]);
-    Serial.print(" - Delay ");
-    Serial.print(tempControl.channelParams[0][LEVELX_MAXDELAY_LEFT]);
-    Serial.print(" ");
-    Serial.print(tempControl.channelParams[0][LEVELX_MAXDELAY_LEFT2]);
-    Serial.print(" - CH 1 - ");
-    Serial.print(value1, DEC);
-    Serial.print(" - State ");
-    Serial.print(tempControl.channelParams[1][LEVELX_STATE]);
-    Serial.print(" - OnTime ");
-    Serial.print(tempControl.channelParams[1][LEVELX_ONTIME_LEFT]);
-    Serial.print(" ");
-    Serial.print(tempControl.channelParams[1][LEVELX_ONTIME_LEFT2]);
-    Serial.print(" - Cool ");
-    Serial.print(tempControl.channelParams[1][LEVELX_COOLDOWN_LEFT]);
-    Serial.print(" ");
-    Serial.print(tempControl.channelParams[1][LEVELX_COOLDOWN_LEFT2]);
-    Serial.print(" - Delay ");
-    Serial.print(tempControl.channelParams[1][LEVELX_MAXDELAY_LEFT]);
-    Serial.print(" ");
-    Serial.print(tempControl.channelParams[1][LEVELX_MAXDELAY_LEFT2]);
-    Serial.print(" - CurrentState ");
-    Serial.print(tempControl.channelParams[1][LEVEL1_CURRENTSTATE]);
-    Serial.print("\n");
-  }
+  Serial.print(" - STAT - ");
+  Serial.print(relayController.combo);
+  Serial.print(" ");
+  Serial.print(relayController.ch0);
+  Serial.print(" ");
+  Serial.print(relayController.ch1);
+  Serial.print(" - CH 0 - ");
+  Serial.print(value0, DEC);
+  Serial.print(" - State ");
+  Serial.print(tempControl.channelParams[0][LEVELX_STATE]);
+  Serial.print(" - OnTime ");
+  Serial.print(tempControl.channelParams[0][LEVELX_ONTIME_LEFT]);
+  Serial.print(" ");
+  Serial.print(tempControl.channelParams[0][LEVELX_ONTIME_LEFT2]);
+  Serial.print(" - Delay ");
+  Serial.print(tempControl.channelParams[0][LEVELX_MAXDELAY_LEFT]);
+  Serial.print(" ");
+  Serial.print(tempControl.channelParams[0][LEVELX_MAXDELAY_LEFT2]);
+  Serial.print(" - CH 1 - ");
+  Serial.print(value1, DEC);
+  Serial.print(" - State ");
+  Serial.print(tempControl.channelParams[1][LEVELX_STATE]);
+  Serial.print(" - OnTime ");
+  Serial.print(tempControl.channelParams[1][LEVELX_ONTIME_LEFT]);
+  Serial.print(" ");
+  Serial.print(tempControl.channelParams[1][LEVELX_ONTIME_LEFT2]);
+  Serial.print(" - Cool ");
+  Serial.print(tempControl.channelParams[1][LEVELX_COOLDOWN_LEFT]);
+  Serial.print(" ");
+  Serial.print(tempControl.channelParams[1][LEVELX_COOLDOWN_LEFT2]);
+  Serial.print(" - Delay ");
+  Serial.print(tempControl.channelParams[1][LEVELX_MAXDELAY_LEFT]);
+  Serial.print(" ");
+  Serial.print(tempControl.channelParams[1][LEVELX_MAXDELAY_LEFT2]);
+  Serial.print(" - CurrentState ");
+  Serial.print(tempControl.channelParams[1][LEVEL1_CURRENTSTATE]);
+  Serial.print("\n");
   
   gui.endrefresh();
   delayer.sleepReamingOf(50);
@@ -165,7 +158,7 @@ void loop()
 void checkReload()
 {
   if (!needReload) { return; }
-  
+  Serial.print("\nRELOAD\n");
   tempControl.readConfig();
   needReload = false;
 }
