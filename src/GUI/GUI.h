@@ -28,8 +28,8 @@ class GUI
     float lineVar = 0;
     byte line = 0;
     byte lineCount = 1;
+    float afk_time = 0;
 
-    //
     byte chSettings[10];
     byte channel = 0;
 
