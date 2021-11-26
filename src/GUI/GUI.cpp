@@ -14,6 +14,8 @@
 #define MAIN_SENSOR 0
 #define PRESS_PERCENT 0.5
 
+#define MAX_AFK 60000
+
 GUI::GUI() { }
 
 void GUI::begin(bool *_needReload, Backstore *_store, float *_TempSensors[], float *_HumSensors[])
@@ -29,6 +31,11 @@ void GUI::begin(bool *_needReload, Backstore *_store, float *_TempSensors[], flo
 void GUI::refresh(unsigned int deltatime)
 {
   timeCounter += deltatime;
+
+  //AFK
+  if (presstime[0] > 0 || presstime[1] > 0) { afk_time = 0; }
+  else if (afk_time < MAX_AFK) { afk_time += deltatime; }
+  else { setState(STATE_NOCOMMAND); }
 
   oled.clear();
   oled.refresh();
@@ -238,6 +245,7 @@ void GUI::setState(byte newState)
 
   presstime[0] = 0;
   presstime[1] = 0;
+  afk_time = 0;
   lineVar = 0;
   line = 0;
   oled.setPage(newState);
