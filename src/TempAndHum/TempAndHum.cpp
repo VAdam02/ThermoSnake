@@ -39,7 +39,7 @@ void TempAndHum::refresh()
     DHThum[i-1] = DHThum[i];
   }
 
-  DHTtemp[LENGTH-1] = (dht.readTemperature() - 0.8);
+  DHTtemp[LENGTH-1] = (dht.readTemperature() - 0.2);
   if (DHTtemp[0] == EMPTY)
   {
     int i = 0;
