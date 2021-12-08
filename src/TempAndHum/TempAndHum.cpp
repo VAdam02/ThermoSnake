@@ -23,7 +23,7 @@ void TempAndHum::refresh()
 {
   unsigned int deltatime = (unsigned int)(millis() % 65536) - lastTime;
   if (deltatime < COOLDOWN) { return; }
-  lastTime += COOLDOWN;
+  lastTime = (millis() % 65536);
   
   for (int i = 1; i < LENGTH; i++)
   {
