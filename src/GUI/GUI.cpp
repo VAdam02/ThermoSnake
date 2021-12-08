@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "GUI.h"
 
 #define SAVENAME 'A'
@@ -67,9 +66,12 @@ void GUI::refresh(unsigned int deltatime)
   }
   if (oled.getCurPage() == STATE_SETTINGS || nextPage == STATE_SETTINGS || oled.getTargetPage() == STATE_SETTINGS)
   {
+    lineCount = 3;
+
     oled.drawText(STATE_SETTINGS, 0, 0, "      Settings      .", 1);
 
     oled.drawText(STATE_SETTINGS, 6, 6, "Channel Settings", 1);
+    oled.drawText(STATE_SETTINGS, 6, 12, "Factory reset", 1);
 
     oled.drawText(STATE_SETTINGS, 0, line*6, "-", 1);
 
@@ -84,14 +86,16 @@ void GUI::refresh(unsigned int deltatime)
       }
 
       getJoyStick(deltatime, &lineVar, false);
-      if (line == 255) { line = 2; }
-      else if (line >= 2) { line = 0; }
+      if (line == 255) { line = lineCount-1; }
+      else if (line >= lineCount ) { line = 0; }
       
       getJoyStick(deltatime, &pageVar, true);
       if (line == 0 && pageVar < 0) { pageVar = 0; }
       else if (line == 0 && pageVar > 0) { setState(STATE_NOCOMMAND); }
       //CHANNEL SETTINGS
       else if (line == 1 && pageVar < 0) { setState(STATE_CHANNEL_SETTINGS); }
+      //FACTORY RESET
+      else if (line == 2 && pageVar < 0) { message(1,F("Factory reset")); store->inicialise(256); *needReload = true; pageVar = 0; }
     }
   }
   if (oled.getCurPage() == STATE_CHANNEL_SETTINGS || nextPage == STATE_CHANNEL_SETTINGS || oled.getTargetPage() == STATE_CHANNEL_SETTINGS)
@@ -169,8 +173,8 @@ void GUI::refresh(unsigned int deltatime)
       if (line == 2 && pageVar < 0 && presstime[0] == 0) { chSettings[0] = (chSettings[0] > 0 ? chSettings[0]-1 : 0); pageVar = 0; }
       else if (line == 2 && pageVar > 0 && presstime[0] == 0) { chSettings[0] = (chSettings[0] < MODE_COUNT-1 ? chSettings[0]+1 : MODE_COUNT-1); pageVar = 0; }
       //SAVE and REVERT
-      if (line == 3 && pageVar < 0) { writeConfig(channel, chSettings); pageVar = 0; }
-      else if (line == 3 && pageVar > 0) { readConfig(channel, chSettings); pageVar = 0; }
+      if (line == 3 && pageVar < 0) { writeConfig(channel, chSettings); message(1,F("Saved successfully")); pageVar = 0; }
+      else if (line == 3 && pageVar > 0) { readConfig(channel, chSettings); message(1,F("Reverted successfully")); pageVar = 0; }
       //SENSOR
       if (line == 4 && pageVar < 0 && presstime[0] == 0) { chSettings[1] = (chSettings[1] > 0 ? chSettings[1]-1 : 0); pageVar = 0; }
       else if (line == 4 && pageVar > 0 && presstime[0] == 0) { chSettings[1] = (chSettings[1] < TEMP_SENSOR_COUNT-1 ? chSettings[1]+1 : TEMP_SENSOR_COUNT-1); pageVar = 0; }
@@ -323,4 +327,12 @@ String GUI::numToString(double num, int decimals)
   }
   
   return data;
+}
+
+void GUI::message(byte fsize, String message)
+{
+  oled.clear();
+  oled.drawText(oled.getCurPage(), (128-(fsize*6*message.length()))/2, (32-(fsize*6))/2, message, fsize);
+  oled.show();
+  delay(1000);
 }
