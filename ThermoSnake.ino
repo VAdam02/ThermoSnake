@@ -69,7 +69,7 @@ void setup()
   delayer.begin();
   store.begin();
   pt100.begin();
-  tempAndHum.begin();
+  tempAndHum.begin(2);
   relayController.begin(&tempControl);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
 
@@ -78,6 +78,8 @@ void setup()
   TempSensors[2] = &value0;
   TempSensors[3] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
+
+  //store.mem();
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //store.inicialise(256);
