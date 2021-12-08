@@ -1,8 +1,5 @@
 #include "TempAndHum.h"
 
-#define COOLDOWN 2000
-#define LENGTH 15 //LENGTH * COOLDOWN / 1000 seconds
-
 TempAndHum::TempAndHum() { }
 
 void TempAndHum::begin(byte _pin)
