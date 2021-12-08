@@ -7,7 +7,8 @@
 
 #include "Arduino.h"
 
-#define LENGTH 15
+#define COOLDOWN 2000
+#define LENGTH 15 //LENGTH * COOLDOWN / 1000 seconds
 
 class TempAndHum
 {
