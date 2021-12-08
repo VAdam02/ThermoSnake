@@ -6,9 +6,8 @@
 #define Graphics_h
 
 #include <Arduino.h>
-#include <SPI.h>
-#include <Wire.h>
 #include <Adafruit_SSD1306.h>
+#include <EEPROM.h>
 
 class Graphics
 {
@@ -17,7 +16,7 @@ class Graphics
     void Graphics::begin();
     void Graphics::show();
     void Graphics::clear();
-    void Graphics::drawDiagonal(byte absoluteX1, byte absoluteY1, byte relativeX2, byte relativeY2, byte width, bool alignRight);
+    void Graphics::drawDiagonal(byte x, byte y, byte width, byte dir);
     void Graphics::drawQuarterCircle(byte x, byte y, byte width, int direction);
     void Graphics::drawOuterQuarterCircle(byte x, byte y, byte width, int direction);
     void Graphics::drawSquare(byte x, byte y, byte xwidth, byte yheight);
