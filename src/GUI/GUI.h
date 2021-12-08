@@ -28,8 +28,8 @@ class GUI
     float lineVar = 0;
     byte line = 0;
     byte lineCount = 1;
+    float afk_time = 0;
 
-    //
     byte chSettings[10];
     byte channel = 0;
 
@@ -45,6 +45,7 @@ class GUI
     void GUI::getUnsignedByteFormat(float data, byte index, byte array[]);
     float GUI::reverseUnsignedByteFormat(byte index, byte array[]);
 
+    void GUI::message(byte fsize, String message);
     long GUI::exponentiation(long base, long exponent);
     String GUI::numToString(double num, int decimals);
 };

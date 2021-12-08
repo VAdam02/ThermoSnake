@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "GUI.h"
 
 #define SAVENAME 'A'
@@ -13,6 +12,8 @@
 
 #define MAIN_SENSOR 0
 #define PRESS_PERCENT 0.5
+
+#define MAX_AFK 60000
 
 GUI::GUI() { }
 
@@ -30,15 +31,20 @@ void GUI::refresh(unsigned int deltatime)
 {
   timeCounter += deltatime;
 
+  //AFK
+  if (presstime[0] > 0 || presstime[1] > 0) { afk_time = 0; }
+  else if (afk_time < MAX_AFK) { afk_time += deltatime; }
+  else { setState(STATE_NOCOMMAND); }
+
   oled.clear();
   oled.refresh();
   
-  if (abs(analogRead(A0) - 512) >= PRESS_PERCENT * 512)
+  if (abs(analogRead(A6) - 512) >= PRESS_PERCENT * 512)
   {
     if (presstime[0] > 65535-deltatime) { presstime[0] = 65535; }
     else { presstime[0] += deltatime; }
   } else { presstime[0] = 0; }
-  if (abs(analogRead(A1) - 512) >= PRESS_PERCENT * 512)
+  if (abs(analogRead(A7) - 512) >= PRESS_PERCENT * 512)
   {
     if (presstime[1] > 65535-deltatime) { presstime[1] = 65535; }
     else { presstime[1] += deltatime; }
@@ -60,9 +66,12 @@ void GUI::refresh(unsigned int deltatime)
   }
   if (oled.getCurPage() == STATE_SETTINGS || nextPage == STATE_SETTINGS || oled.getTargetPage() == STATE_SETTINGS)
   {
+    lineCount = 3;
+
     oled.drawText(STATE_SETTINGS, 0, 0, "      Settings      .", 1);
 
     oled.drawText(STATE_SETTINGS, 6, 6, "Channel Settings", 1);
+    oled.drawText(STATE_SETTINGS, 6, 12, "Factory reset", 1);
 
     oled.drawText(STATE_SETTINGS, 0, line*6, "-", 1);
 
@@ -77,19 +86,21 @@ void GUI::refresh(unsigned int deltatime)
       }
 
       getJoyStick(deltatime, &lineVar, false);
-      if (line == 255) { line = 2; }
-      else if (line >= 2) { line = 0; }
+      if (line == 255) { line = lineCount-1; }
+      else if (line >= lineCount ) { line = 0; }
       
       getJoyStick(deltatime, &pageVar, true);
       if (line == 0 && pageVar < 0) { pageVar = 0; }
       else if (line == 0 && pageVar > 0) { setState(STATE_NOCOMMAND); }
       //CHANNEL SETTINGS
       else if (line == 1 && pageVar < 0) { setState(STATE_CHANNEL_SETTINGS); }
+      //FACTORY RESET
+      else if (line == 2 && pageVar < 0) { message(1,F("Factory reset")); store->inicialise(256); *needReload = true; pageVar = 0; }
     }
   }
   if (oled.getCurPage() == STATE_CHANNEL_SETTINGS || nextPage == STATE_CHANNEL_SETTINGS || oled.getTargetPage() == STATE_CHANNEL_SETTINGS)
   {
-    if (nextPage != oled.getCurPage()) { readConfig(channel, chSettings); }
+    if (nextPage != oled.getCurPage() && nextPage == STATE_CHANNEL_SETTINGS) { readConfig(channel, chSettings); }
     lineCount = (chSettings[0] == 0 ? 4 : chSettings[0] == 1 ? 7 : /*mode 2*/ 9);
 
     byte fsize = 1;
@@ -162,8 +173,8 @@ void GUI::refresh(unsigned int deltatime)
       if (line == 2 && pageVar < 0 && presstime[0] == 0) { chSettings[0] = (chSettings[0] > 0 ? chSettings[0]-1 : 0); pageVar = 0; }
       else if (line == 2 && pageVar > 0 && presstime[0] == 0) { chSettings[0] = (chSettings[0] < MODE_COUNT-1 ? chSettings[0]+1 : MODE_COUNT-1); pageVar = 0; }
       //SAVE and REVERT
-      if (line == 3 && pageVar < 0) { writeConfig(channel, chSettings); pageVar = 0; }
-      else if (line == 3 && pageVar > 0) { readConfig(channel, chSettings); pageVar = 0; }
+      if (line == 3 && pageVar < 0) { writeConfig(channel, chSettings); message(1,F("Saved successfully")); pageVar = 0; }
+      else if (line == 3 && pageVar > 0) { readConfig(channel, chSettings); message(1,F("Reverted successfully")); pageVar = 0; }
       //SENSOR
       if (line == 4 && pageVar < 0 && presstime[0] == 0) { chSettings[1] = (chSettings[1] > 0 ? chSettings[1]-1 : 0); pageVar = 0; }
       else if (line == 4 && pageVar > 0 && presstime[0] == 0) { chSettings[1] = (chSettings[1] < TEMP_SENSOR_COUNT-1 ? chSettings[1]+1 : TEMP_SENSOR_COUNT-1); pageVar = 0; }
@@ -196,8 +207,6 @@ void GUI::refresh(unsigned int deltatime)
       if (needRead) { readConfig(channel, chSettings); }
     }
   }
-
-
 }
 
 void GUI::endrefresh()
@@ -212,12 +221,12 @@ void GUI::getJoyStick(unsigned int deltatime, float *data, bool horizontal)
   float delta = deltatime;
   if (horizontal)
   {
-    value = analogRead(A0);
+    value = analogRead(A6);
     press = presstime[0];
   }
   else
   {
-    value = 1023-analogRead(A1);
+    value = 1023-analogRead(A7);
     press = presstime[1];
   }
 
@@ -240,6 +249,7 @@ void GUI::setState(byte newState)
 
   presstime[0] = 0;
   presstime[1] = 0;
+  afk_time = 0;
   lineVar = 0;
   line = 0;
   oled.setPage(newState);
@@ -250,11 +260,11 @@ void GUI::setState(byte newState)
 void GUI::readConfig(byte channel, byte value[])
 {
   store->readBytes(SAVENAME, channel, 0, 9, value);
-  *needReload = true;
 }
 void GUI::writeConfig(byte channel, byte value[])
 {
   store->writeBytes(SAVENAME, channel, 0, 9, value);
+  *needReload = true;
 }
 
 void GUI::getByteFormat(float data, byte index, byte array[])
@@ -317,4 +327,12 @@ String GUI::numToString(double num, int decimals)
   }
   
   return data;
+}
+
+void GUI::message(byte fsize, String message)
+{
+  oled.clear();
+  oled.drawText(oled.getCurPage(), (128-(fsize*6*message.length()))/2, (32-(fsize*6))/2, message, fsize);
+  oled.show();
+  delay(1000);
 }
