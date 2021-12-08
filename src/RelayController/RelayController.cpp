@@ -56,7 +56,7 @@ void RelayController::refresh(unsigned int deltatime)
     {
       //look for an other channel that want change
       int j = i+1;
-      while (j < CHANNEL_COUNT && !(((tempControl->channelParams[j][LEVELX_MAXDELAY_LEFT] >= 0 || tempControl->channelParams[j][LEVELX_MAXDELAY_LEFT2] >= 0) && tempControl->channelParams[j][LEVELX_STATE] == 2) || ((tempControl->channelParams[j][LEVELX_ONTIME_LEFT] == 0 || tempControl->channelParams[j][LEVELX_ONTIME_LEFT2] == 0) && tempControl->channelParams[j][LEVELX_STATE] != 1))) { j++; }
+      while (j < CHANNEL_COUNT && !(((tempControl->channelParams[j][LEVELX_MAXDELAY_LEFT] >= 0 || tempControl->channelParams[j][LEVELX_MAXDELAY_LEFT2] >= 0) && tempControl->channelParams[j][LEVELX_STATE] == 2) || ((tempControl->channelParams[j][LEVELX_ONTIME_LEFT] == 0) && tempControl->channelParams[j][LEVELX_STATE] != 1))) { j++; }
       if (j < CHANNEL_COUNT)
       {
         //found
@@ -76,7 +76,6 @@ void RelayController::refresh(unsigned int deltatime)
         }
       }
     }
-    
   }
 }
 
@@ -101,7 +100,7 @@ void RelayController::activate(byte channel)
   //on
   if (maxDelayLeft >= 0 && tempControl->channelParams[channel][LEVELX_STATE] == 2)
   {
-    digitalWrite(channel+2, HIGH);
+    digitalWrite(channel+3, HIGH);
     tempControl->channelParams[channel][LEVELX_STATE] = 3;
     
     tempControl->getUnsignedByteFormat(0, LEVELX_MAXDELAY_LEFT, tempControl->channelParams[channel]);
@@ -109,14 +108,15 @@ void RelayController::activate(byte channel)
   //off
   else
   {
-    if (onTimeLeft == 0 && tempControl->channelParams[channel][LEVELX_STATE] == 3)
+    if (onTimeLeft < 1 && tempControl->channelParams[channel][LEVELX_STATE] == 3)
     {
+      tempControl->getUnsignedByteFormat(0, LEVELX_ONTIME_LEFT, tempControl->channelParams[channel]);
       tempControl->channelParams[channel][LEVELX_STATE] = 0;
     }
     if (tempControl->channelParams[channel][LEVELX_STATE] == 0)
     {
       tempControl->channelParams[channel][LEVELX_STATE] = 1;
-      digitalWrite(channel+2, LOW);
+      digitalWrite(channel+3, LOW);
     }
   }
 }

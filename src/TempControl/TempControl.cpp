@@ -86,7 +86,6 @@ void TempControl::refresh(unsigned int deltatime)
 
 void TempControl::addHeatingTask(byte channel, byte on_time, byte maxDelay_time)
 {
-  //TODO if on_time inicialised with 255 than make it unlimited
   channelParams[channel][LEVELX_STATE] = 2;
   getUnsignedByteFormat(on_time, LEVELX_ONTIME_LEFT, channelParams[channel]);
 
@@ -207,7 +206,9 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   {
     //DEBUG
     Serial.print("heat - ");
-    //TODO unsigned int onTime = (targetLevel + tolerance - curLevel) / reaction * 10;
+
+    //error correction
+    if (reaction == 0) { reaction = 1; }
     unsigned int onTime = (targetLevel + tolerance - curLevel) / reaction * 10;
     if (onTime > channelParams[channel][LEVEL1_MAXON]) { onTime = channelParams[channel][LEVEL1_MAXON]; }
 
@@ -359,16 +360,16 @@ void TempControl::readConfig()
       Serial.print("Inicialise\n");
       //error - not found so inicialise to null mode
       store->allocateSpace(SAVENAME, i, 10);
-      fromStore[0] = 0; //LEVELX_MODE
-      fromStore[1] = 0; //LEVELX_SENSOR_ID
-      fromStore[2] = 0; //LEVEL0_OFFLEVEL   LEVEL1_TARGETLEVEL
-      fromStore[3] = 0; //LEVEL0_OFFLEVEL2  LEVEL1_TARGETLEVEL2
-      fromStore[4] = 0; //LEVEL0_ONLEVEL    LEVEL1_TOLERANCE
-      fromStore[5] = 0; //LEVEL0_ONLEVEL2   LEVEL1_TOLERANCE2
-      fromStore[6] = 0; //-                 LEVEL1_REACTION
-      fromStore[7] = 0; //-                 LEVEL1_REACTION2
-      fromStore[8] = 0; //-                 LEVEL1_MINON
-      fromStore[9] = 0; //-                 LEVEL1_MAXON
+      fromStore[0] = 0;   //LEVELX_MODE
+      fromStore[1] = 0;   //LEVELX_SENSOR_ID
+      fromStore[2] = 0;   //LEVEL0_OFFLEVEL   LEVEL1_TARGETLEVEL
+      fromStore[3] = 0;   //LEVEL0_OFFLEVEL2  LEVEL1_TARGETLEVEL2
+      fromStore[4] = 0;   //LEVEL0_ONLEVEL    LEVEL1_TOLERANCE
+      fromStore[5] = 0;   //LEVEL0_ONLEVEL2   LEVEL1_TOLERANCE2
+      fromStore[6] = 127; //-                 LEVEL1_REACTION
+      fromStore[7] = 0;   //-                 LEVEL1_REACTION2
+      fromStore[8] = 0;   //-                 LEVEL1_MINON
+      fromStore[9] = 0;   //-                 LEVEL1_MAXON
       store->writeBytes(SAVENAME, i, 0, 9, fromStore);
     }
     
