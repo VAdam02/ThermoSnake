@@ -1,6 +1,6 @@
 #include "src/DelayManager/DelayManager.h"
-#include "src/TempAndHum/TempAndHum.h"
 #include "src/Backstore/Backstore.h"
+#include "src/TempAndHum/TempAndHum.h"
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 #include "src/GUI/GUI.h"
