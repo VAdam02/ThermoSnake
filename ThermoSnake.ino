@@ -1,12 +1,11 @@
 #include "src/DelayManager/DelayManager.h"
-#include "src/PT100/PT100.h"
 #include "src/TempAndHum/TempAndHum.h"
 #include "src/Backstore/Backstore.h"
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 #include "src/GUI/GUI.h"
 
-#define TEMPSENSORCOUNT 4
+#define TEMPSENSORCOUNT 3
 #define HUMSENSORCOUNT 1
 
 #define CHANNEL_COUNT 2 //max 255
@@ -43,7 +42,6 @@
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
 DelayManager delayer;
-PT100 pt100;
 TempAndHum tempAndHum;
 Backstore store;
 TempControl tempControl;
@@ -68,15 +66,13 @@ void setup()
   Serial.begin(9600);
   delayer.begin();
   store.begin();
-  pt100.begin();
   tempAndHum.begin(2);
   relayController.begin(&tempControl);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
-  TempSensors[1] = &pt100.temperature;
-  TempSensors[2] = &value0;
-  TempSensors[3] = &value1;
+  TempSensors[1] = &value0;
+  TempSensors[2] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
 
   //store.mem();
@@ -92,7 +88,6 @@ void loop()
   unsigned int deltatime = delayer.getDeltaTime();
   
   checkReload();
-  pt100.refresh();
   tempAndHum.refresh();
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
