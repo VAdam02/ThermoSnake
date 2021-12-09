@@ -455,7 +455,7 @@ byte Backstore::writeBytes(char c, byte num, byte first, byte last, byte data[])
     returnValue = 1;
   }
 
-  return 0;
+  return returnValue;
 }
 
 void Backstore::regroupFreeSpace()
@@ -582,4 +582,32 @@ void Backstore::mem()
     }
   }
   Serial.print("\n");
+}
+
+void Backstore::getByteFormat(float data, byte index, byte array[])
+{
+  array[index] = ((byte)abs(data) % 128) + (data < 0 ? 128 : 0);
+  array[index+1] = (abs(data) - (int)(abs(data))) * 256;
+}
+float Backstore::reverseByteFormat(byte index, byte array[])
+{
+  float value = 0;
+  value += array[index] % 128;
+  value += (float)(array[index+1]) / 256;
+  value *= (array[index] >= 128 ? -1 : 1);
+  
+  return value;
+}
+void Backstore::getUnsignedByteFormat(float data, byte index, byte array[])
+{
+  array[index] = ((byte)abs(data) % 256);
+  array[index+1] = (abs(data) - (int)(abs(data))) * 256;
+}
+float Backstore::reverseUnsignedByteFormat(byte index, byte array[])
+{
+  float value = 0;
+  value += array[index];
+  value += (float)(array[index+1]) / 256;
+  
+  return value;
 }

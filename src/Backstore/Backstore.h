@@ -25,6 +25,11 @@ class Backstore
 
     void Backstore::inicialise(byte headSize);
     void Backstore::mem();
+
+    void Backstore::getByteFormat(float data, byte index, byte array[]);
+    float Backstore::reverseByteFormat(byte index, byte array[]);
+    void Backstore::getUnsignedByteFormat(float data, byte index, byte array[]);
+    float Backstore::reverseUnsignedByteFormat(byte index, byte array[]);
   private:
     char chars[25] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'};
     void Backstore::write(unsigned int address, byte data);
