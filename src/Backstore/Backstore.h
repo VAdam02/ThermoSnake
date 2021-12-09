@@ -46,6 +46,11 @@ class Backstore
     byte Backstore::insertFreeNote(unsigned int address, byte size);
     byte Backstore::removeAllocationNote(byte index);
     byte Backstore::insertAllocationNote(unsigned int address, byte size, byte name);
+
+    void Backstore::getByteFormat(float data, byte index, byte array[]);
+    float Backstore::reverseByteFormat(byte index, byte array[]);
+    void Backstore::getUnsignedByteFormat(float data, byte index, byte array[]);
+    float Backstore::reverseUnsignedByteFormat(byte index, byte array[]);
 };
 
 #endif
