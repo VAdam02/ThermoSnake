@@ -62,7 +62,6 @@ float cooling1 = 0.01; //after 1 second
 void setup()
 {
   Serial.begin(9600);
-  wdog.begin();
   delayer.begin();
   tempAndHum.begin(2);
   store.begin();
@@ -73,10 +72,12 @@ void setup()
   TempSensors[2] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
 
-  //store.mem();
+  store.mem();
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //maybe there's an error due to not reading config
+
+  wdog.begin(&store, TEMPSENSORCOUNT, TempSensors, HUMSENSORCOUNT, HumSensors);
 }
 
 void loop()
