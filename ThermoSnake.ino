@@ -63,7 +63,7 @@ void setup()
   delayer.begin();
   tempAndHum.begin(2);
   store.begin();
-  relayController.begin(&tempControl);
+  relayController.begin(&store, &tempControl);
 
   TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &value0;
