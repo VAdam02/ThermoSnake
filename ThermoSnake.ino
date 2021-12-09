@@ -1,3 +1,4 @@
+#include "src/Watchdog/Watchdog.h"
 #include "src/DelayManager/DelayManager.h"
 #include "src/TempAndHum/TempAndHum.h"
 #include "src/Backstore/Backstore.h"
@@ -40,6 +41,7 @@
 #define LEVEL1_SAMPLE_TEMPERATURE2 19
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
+Watchdog wdog;
 DelayManager delayer;
 TempAndHum tempAndHum;
 Backstore store;
@@ -60,6 +62,7 @@ float cooling1 = 0.01; //after 1 second
 void setup()
 {
   Serial.begin(9600);
+  wdog.begin();
   delayer.begin();
   tempAndHum.begin(2);
   store.begin();
@@ -82,6 +85,7 @@ void loop()
   
   //DEBUG
   Serial.print("\n");
+  wdog.refresh(deltatime);
   tempAndHum.refresh();
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
@@ -141,6 +145,6 @@ void loop()
   Serial.print(" - CurrentState ");
   Serial.print(tempControl.channelParams[1][LEVEL1_CURRENTSTATE]);
   Serial.print("\n");
-
+  
   delayer.sleepReamingOf(50);
 }
