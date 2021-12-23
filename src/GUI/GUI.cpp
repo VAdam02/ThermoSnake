@@ -5,10 +5,11 @@
 #define MODE_COUNT 3
 #define TEMP_SENSOR_COUNT 4
 
-#define STATE_CHANNEL_SETTINGS 0
-#define STATE_SETTINGS 1
-#define STATE_NOCOMMAND 2
-#define STATE_TEMP2 3
+#define STATE_WATCHDOG_SETTINGS 0
+#define STATE_CHANNEL_SETTINGS 1
+#define STATE_SETTINGS 2
+#define STATE_NOCOMMAND 3
+//#define STATE_TEMP2 4
 
 #define MAIN_SENSOR 0
 #define PRESS_PERCENT 0.5
@@ -52,52 +53,6 @@ void GUI::refresh(unsigned int deltatime)
   
   byte nextPage = oled.getCurPage() + (oled.getCurPage() < oled.getTargetPage() ? 1 : (oled.getCurPage() == oled.getTargetPage() ? 0 : -1));
 
-  if (oled.getCurPage() == STATE_NOCOMMAND || nextPage == STATE_NOCOMMAND || oled.getTargetPage() == STATE_NOCOMMAND)
-  {
-    oled.drawText(STATE_NOCOMMAND, 4, 7, numToString(*TempSensors[MAIN_SENSOR],1) + "*C", 4);
-
-    //no switching in progress
-    if (oled.getCurPage() == oled.getTargetPage())
-    {
-      getJoyStick(deltatime, &pageVar, true);
-      if (pageVar < 0) { setState(STATE_SETTINGS); }
-      else if (pageVar > 0) { pageVar = 0; }
-    }
-  }
-  if (oled.getCurPage() == STATE_SETTINGS || nextPage == STATE_SETTINGS || oled.getTargetPage() == STATE_SETTINGS)
-  {
-    lineCount = 3;
-
-    oled.drawText(STATE_SETTINGS, 0, 0, "      Settings      .", 1);
-
-    oled.drawText(STATE_SETTINGS, 6, 6, "Channel Settings", 1);
-    oled.drawText(STATE_SETTINGS, 6, 12, "Factory reset", 1);
-
-    oled.drawText(STATE_SETTINGS, 0, line*6, "-", 1);
-
-    //no switching in progress
-    if (oled.getCurPage() == oled.getTargetPage())
-    {
-      if (presstime[1] == 0 && lineVar != 0)
-      {
-        if (lineVar > 0) { line++; }
-        else { line--; }
-        lineVar = 0;
-      }
-
-      getJoyStick(deltatime, &lineVar, false);
-      if (line == 255) { line = lineCount-1; }
-      else if (line >= lineCount ) { line = 0; }
-      
-      getJoyStick(deltatime, &pageVar, true);
-      if (line == 0 && pageVar < 0) { pageVar = 0; }
-      else if (line == 0 && pageVar > 0) { setState(STATE_NOCOMMAND); }
-      //CHANNEL SETTINGS
-      else if (line == 1 && pageVar < 0) { setState(STATE_CHANNEL_SETTINGS); }
-      //FACTORY RESET
-      else if (line == 2 && pageVar < 0) { message(1,F("Factory reset")); store->inicialise(256); *needReload = true; pageVar = 0; }
-    }
-  }
   if (oled.getCurPage() == STATE_CHANNEL_SETTINGS || nextPage == STATE_CHANNEL_SETTINGS || oled.getTargetPage() == STATE_CHANNEL_SETTINGS)
   {
     if (nextPage != oled.getCurPage() && nextPage == STATE_CHANNEL_SETTINGS) { readConfig(channel, chSettings); }
@@ -205,6 +160,52 @@ void GUI::refresh(unsigned int deltatime)
       }
 
       if (needRead) { readConfig(channel, chSettings); }
+    }
+  }
+  if (oled.getCurPage() == STATE_SETTINGS || nextPage == STATE_SETTINGS || oled.getTargetPage() == STATE_SETTINGS)
+  {
+    lineCount = 3;
+
+    oled.drawText(STATE_SETTINGS, 0, 0, "      Settings      .", 1);
+
+    oled.drawText(STATE_SETTINGS, 6, 6, "Channel Settings", 1);
+    oled.drawText(STATE_SETTINGS, 6, 12, "Factory reset", 1);
+
+    oled.drawText(STATE_SETTINGS, 0, line*6, "-", 1);
+
+    //no switching in progress
+    if (oled.getCurPage() == oled.getTargetPage())
+    {
+      if (presstime[1] == 0 && lineVar != 0)
+      {
+        if (lineVar > 0) { line++; }
+        else { line--; }
+        lineVar = 0;
+      }
+
+      getJoyStick(deltatime, &lineVar, false);
+      if (line == 255) { line = lineCount-1; }
+      else if (line >= lineCount ) { line = 0; }
+      
+      getJoyStick(deltatime, &pageVar, true);
+      if (line == 0 && pageVar < 0) { pageVar = 0; }
+      else if (line == 0 && pageVar > 0) { setState(STATE_NOCOMMAND); }
+      //CHANNEL SETTINGS
+      else if (line == 1 && pageVar < 0) { setState(STATE_CHANNEL_SETTINGS); }
+      //FACTORY RESET
+      else if (line == 2 && pageVar < 0) { message(1,F("Factory reset")); store->inicialise(256); *needReload = true; pageVar = 0; }
+    }
+  }
+  if (oled.getCurPage() == STATE_NOCOMMAND || nextPage == STATE_NOCOMMAND || oled.getTargetPage() == STATE_NOCOMMAND)
+  {
+    oled.drawText(STATE_NOCOMMAND, 4, 7, numToString(*TempSensors[MAIN_SENSOR],1) + "*C", 4);
+
+    //no switching in progress
+    if (oled.getCurPage() == oled.getTargetPage())
+    {
+      getJoyStick(deltatime, &pageVar, true);
+      if (pageVar < 0) { setState(STATE_SETTINGS); }
+      else if (pageVar > 0) { pageVar = 0; }
     }
   }
 }

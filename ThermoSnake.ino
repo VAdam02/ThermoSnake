@@ -1,10 +1,10 @@
+#include "src/Watchdog/Watchdog.h"
 #include "src/DelayManager/DelayManager.h"
 #include "src/TempAndHum/TempAndHum.h"
 #include "src/Backstore/Backstore.h"
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 #include "src/GUI/GUI.h"
-#include "src/Watchdog/Watchdog.h"
 
 #define TEMPSENSORCOUNT 3
 #define HUMSENSORCOUNT 1
@@ -42,13 +42,13 @@
 #define LEVEL1_SAMPLE_TEMPERATURE2 19
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
+Watchdog wdog;
 DelayManager delayer;
 TempAndHum tempAndHum;
 Backstore store;
 TempControl tempControl;
 RelayController relayController;
 GUI gui;
-Watchdog wdog;
 
 bool needReload = false;
 
@@ -71,7 +71,6 @@ void setup()
   tempAndHum.begin(2);
   relayController.begin(&tempControl);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
-  wdog.begin(&store, TEMPSENSORCOUNT, TempSensors, HUMSENSORCOUNT, HumSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &value0;
@@ -82,6 +81,8 @@ void setup()
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //store.inicialise(256);
+
+  wdog.begin(&store, TEMPSENSORCOUNT, TempSensors, HUMSENSORCOUNT, HumSensors);
 }
 
 void loop()
@@ -90,11 +91,11 @@ void loop()
   unsigned int deltatime = delayer.getDeltaTime();
   
   checkReload();
+  wdog.refresh(deltatime);
   tempAndHum.refresh();
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
   gui.refresh(deltatime);
-  wdog.refresh(deltatime);
 
   //Temperature cooling
   value0 -= ((float)(deltatime)/1000)*cooling0;

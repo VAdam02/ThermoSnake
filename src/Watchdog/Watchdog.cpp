@@ -14,8 +14,6 @@ Watchdog::Watchdog() { }
 
 void Watchdog::begin(Backstore* _store, byte _tempCount, float *_TempSensors[], byte _humCount, float *_HumSensors[])
 {
-    wdt_enable(WDTO_8S);
-
     pinMode(A0, OUTPUT);
 
     store = _store;
@@ -59,6 +57,8 @@ void Watchdog::begin(Backstore* _store, byte _tempCount, float *_TempSensors[], 
         HumMax[i] = store->reverseByteFormat(0, readed);
         HumMin[i] = store->reverseByteFormat(2, readed);
     }
+
+    wdt_enable(WDTO_8S);
 }
 
 void Watchdog::refresh(unsigned int deltatime)
@@ -92,8 +92,9 @@ void *Watchdog::allocation(byte size, byte length)
 {
     void *ptr;
     do {
-        Serial.print("Alloc");
+        Serial.print("-Al");
         ptr = malloc(size * length);
     } while (ptr == NULL);
+    Serial.print("loc-");
     return ptr;
 }
