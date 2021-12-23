@@ -4,6 +4,7 @@
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 #include "src/GUI/GUI.h"
+#include "src/Watchdog/Watchdog.h"
 
 #define TEMPSENSORCOUNT 3
 #define HUMSENSORCOUNT 1
@@ -47,6 +48,7 @@ Backstore store;
 TempControl tempControl;
 RelayController relayController;
 GUI gui;
+Watchdog wdog;
 
 bool needReload = false;
 
@@ -69,17 +71,17 @@ void setup()
   tempAndHum.begin(2);
   relayController.begin(&tempControl);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
+  wdog.begin(&store, TEMPSENSORCOUNT, TempSensors, HUMSENSORCOUNT, HumSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &value0;
   TempSensors[2] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
 
-  //store.mem();
+  store.mem();
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //store.inicialise(256);
-  store.mem();
 }
 
 void loop()
@@ -92,6 +94,7 @@ void loop()
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
   gui.refresh(deltatime);
+  wdog.refresh(deltatime);
 
   //Temperature cooling
   value0 -= ((float)(deltatime)/1000)*cooling0;
