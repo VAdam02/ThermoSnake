@@ -17,6 +17,9 @@ RelayController::RelayController() { }
 
 void RelayController::begin(Backstore *_store, TempControl* _tempControl)
 {
+  pinmode(3, OUTPUT);
+  pinmode(4, OUTPUT);
+
   store = _store;
   tempControl = _tempControl;
 }
