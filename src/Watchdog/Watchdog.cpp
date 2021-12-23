@@ -16,6 +16,8 @@ void Watchdog::begin(Backstore* _store, byte _tempCount, float *_TempSensors[], 
 {
     wdt_enable(WDTO_8S);
 
+    pinMode(A0, OUTPUT);
+
     store = _store;
 
     tempCount = _tempCount;
@@ -64,7 +66,7 @@ void Watchdog::refresh(unsigned int deltatime)
     wdt_reset();
 
     timer += deltatime;
-    digitalWrite(A0, (timer > 16383 ? LOW : HIGH));
+    digitalWrite(A0, (timer > 16383 ? HIGH : LOW));
 
     for (byte i = 0; i < tempCount; i++)
     {
