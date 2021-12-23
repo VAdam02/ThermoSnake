@@ -1,3 +1,4 @@
+#include "src/Watchdog/Watchdog.h"
 #include "src/DelayManager/DelayManager.h"
 #include "src/TempAndHum/TempAndHum.h"
 #include "src/Backstore/Backstore.h"
@@ -41,6 +42,7 @@
 #define LEVEL1_SAMPLE_TEMPERATURE2 19
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
+Watchdog wdog;
 DelayManager delayer;
 TempAndHum tempAndHum;
 Backstore store;
@@ -75,10 +77,12 @@ void setup()
   TempSensors[2] = &value1;
   HumSensors[0] = &tempAndHum.humidity;
 
-  //store.mem();
+  store.mem();
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //maybe there's an error due to not reading config
+
+  wdog.begin(&store, TEMPSENSORCOUNT, TempSensors, HUMSENSORCOUNT, HumSensors);
 }
 
 void loop()
@@ -86,6 +90,7 @@ void loop()
   Serial.print("\n");
   unsigned int deltatime = delayer.getDeltaTime();
   checkReload();
+  wdog.refresh(deltatime);
   tempAndHum.refresh();
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
