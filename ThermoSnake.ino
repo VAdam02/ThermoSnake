@@ -1,9 +1,11 @@
 #include "src/DelayManager/DelayManager.h"
 #include "src/TempAndHum/TempAndHum.h"
+#include "src/Backstore/Backstore.h"
 
 DelayManager delayer;
 TempAndHum tempAndHum;
 //TempAndHum tempAndHum2;
+Backstore store;
 
 void setup()
 {
@@ -12,6 +14,7 @@ void setup()
   tempAndHum.begin(2);
   tempAndHum.setDifference(-0.2, 6.2);
   //tempAndHum2.begin(8);
+  store.begin();
 }
 
 void loop()
