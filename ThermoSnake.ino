@@ -8,9 +8,10 @@ void setup()
 {
   Serial.begin(9600);
   delayer.begin();
-  buzzer.begin(7);
+  buzzer.begin(6);
   delay(500);
-  buzzer.sayError();
+  buzzer.alarm(2000, 100, 200, 500);
+  //buzzer.sayError();
 }
 
 void loop()
