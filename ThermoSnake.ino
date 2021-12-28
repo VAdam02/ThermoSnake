@@ -69,6 +69,7 @@ void setup()
   delayer.begin();
   store.begin();
   tempAndHum.begin(2);
+  tempAndHum.setDifference(-0.2, 6.2);
   relayController.begin(&tempControl);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
 

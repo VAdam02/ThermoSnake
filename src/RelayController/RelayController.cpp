@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "RelayController.h"
 
 #define CHANNEL_COUNT 2 //max 255
@@ -16,8 +15,12 @@
 
 RelayController::RelayController() { }
 
-void RelayController::begin(TempControl* _tempControl)
+void RelayController::begin(Backstore *_store, TempControl* _tempControl)
 {
+  pinmode(3, OUTPUT);
+  pinmode(4, OUTPUT);
+
+  store = _store;
   tempControl = _tempControl;
 }
 
@@ -28,17 +31,17 @@ void RelayController::refresh(unsigned int deltatime)
   for (int i = 0; i < CHANNEL_COUNT; i++)
   {
     //maxDelayLeft
-    float maxDelayLeft = tempControl->reverseUnsignedByteFormat(LEVELX_MAXDELAY_LEFT, tempControl->channelParams[i]);
+    float maxDelayLeft = tempControl->store->reverseUnsignedByteFormat(LEVELX_MAXDELAY_LEFT, tempControl->channelParams[i]);
     if (maxDelayLeft > 0 && tempControl->channelParams[i][LEVELX_STATE] == 2)
     {
       if (maxDelayLeft < ((float)(deltatime)/1000)) { maxDelayLeft = 0; }
       else { maxDelayLeft -= ((float)(deltatime)/1000); }
     }
-    tempControl->getUnsignedByteFormat(maxDelayLeft, LEVELX_MAXDELAY_LEFT, tempControl->channelParams[i]);
+    tempControl->store->getUnsignedByteFormat(maxDelayLeft, LEVELX_MAXDELAY_LEFT, tempControl->channelParams[i]);
     //maxDelayLeft
 
     //onTimeLeft
-    float onTimeLeft = tempControl->reverseUnsignedByteFormat(LEVELX_ONTIME_LEFT, tempControl->channelParams[i]);
+    float onTimeLeft = tempControl->store->reverseUnsignedByteFormat(LEVELX_ONTIME_LEFT, tempControl->channelParams[i]);
     
     if (0 < onTimeLeft && tempControl->channelParams[i][LEVELX_STATE] == 3)
     {
@@ -48,7 +51,7 @@ void RelayController::refresh(unsigned int deltatime)
         else { onTimeLeft -= ((float)(deltatime)/1000); }
       }
     }
-    tempControl->getUnsignedByteFormat(onTimeLeft, LEVELX_ONTIME_LEFT, tempControl->channelParams[i]);
+    tempControl->store->getUnsignedByteFormat(onTimeLeft, LEVELX_ONTIME_LEFT, tempControl->channelParams[i]);
     //onTimeLeft
 
     //this need change
@@ -94,8 +97,8 @@ void RelayController::activate(byte channel)
   byte data[2];
 
   //maxDelayLeft
-  float maxDelayLeft = tempControl->reverseUnsignedByteFormat(LEVELX_MAXDELAY_LEFT, tempControl->channelParams[channel]);
-  float onTimeLeft = tempControl->reverseUnsignedByteFormat(LEVELX_ONTIME_LEFT, tempControl->channelParams[channel]);
+  float maxDelayLeft = tempControl->store->reverseUnsignedByteFormat(LEVELX_MAXDELAY_LEFT, tempControl->channelParams[channel]);
+  float onTimeLeft = tempControl->store->reverseUnsignedByteFormat(LEVELX_ONTIME_LEFT, tempControl->channelParams[channel]);
 
   //on
   if (maxDelayLeft >= 0 && tempControl->channelParams[channel][LEVELX_STATE] == 2)
@@ -103,14 +106,14 @@ void RelayController::activate(byte channel)
     digitalWrite(channel+3, HIGH);
     tempControl->channelParams[channel][LEVELX_STATE] = 3;
     
-    tempControl->getUnsignedByteFormat(0, LEVELX_MAXDELAY_LEFT, tempControl->channelParams[channel]);
+    tempControl->store->getUnsignedByteFormat(0, LEVELX_MAXDELAY_LEFT, tempControl->channelParams[channel]);
   }
   //off
   else
   {
     if (onTimeLeft < 1 && tempControl->channelParams[channel][LEVELX_STATE] == 3)
     {
-      tempControl->getUnsignedByteFormat(0, LEVELX_ONTIME_LEFT, tempControl->channelParams[channel]);
+      tempControl->store->getUnsignedByteFormat(0, LEVELX_ONTIME_LEFT, tempControl->channelParams[channel]);
       tempControl->channelParams[channel][LEVELX_STATE] = 0;
     }
     if (tempControl->channelParams[channel][LEVELX_STATE] == 0)

@@ -18,6 +18,7 @@ class TempAndHum
     void TempAndHum::refresh();
     float TempAndHum::getCurrentTemperature();
     float TempAndHum::getCurrentHumidity();
+    void TempAndHum::setDifference(float TempDifference, float HumDifference);
 
     float temperature = NAN;
     float temperatureRange = NAN;
@@ -34,6 +35,8 @@ class TempAndHum
 
     unsigned int lastTime = 0;
     byte pin;
+    float TempDifference = 0;
+    float HumDifference = 0;
 
     void TempAndHum::init();
     bool TempAndHum::read();
