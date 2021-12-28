@@ -18,8 +18,8 @@ class TempControl
 
     void TempControl::readConfig();
     byte channelParams[2][21];
-    Backstore *store;
   private:
+  Backstore *store;
     float **sensors;
 
     void TempControl::addHeatingTask(byte ID, byte on_time, byte maxDelay_time);
