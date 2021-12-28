@@ -46,6 +46,8 @@ Backstore store;
 TempControl tempControl;
 RelayController relayController;
 
+bool needReload = false;
+
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
 
@@ -61,8 +63,7 @@ void setup()
 {
   Serial.begin(9600);
   delayer.begin();
-  tempAndHum.begin(2);
-  tempAndHum.setDifference(-0.2, 6.2);
+  tempAndHum.begin(2, &store);
   store.begin();
   relayController.begin(&store, &tempControl);
 
@@ -84,6 +85,7 @@ void loop()
   
   //DEBUG
   Serial.print("\n");
+  checkReload();
   tempAndHum.refresh();
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
@@ -145,4 +147,12 @@ void loop()
   Serial.print("\n");
 
   delayer.sleepReamingOf(50);
+}
+
+void checkReload()
+{
+  if (!needReload) { return; }
+  Serial.print("\nRELOAD\n");
+  tempAndHum.readConfig();
+  needReload = false;
 }
