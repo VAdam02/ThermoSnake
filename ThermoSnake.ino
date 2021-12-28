@@ -10,6 +10,7 @@ void setup()
   Serial.begin(9600);
   delayer.begin();
   tempAndHum.begin(2);
+  tempAndHum.setDifference(-0.2, 6.2);
   //tempAndHum2.begin(8);
 }
 
