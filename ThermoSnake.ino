@@ -52,8 +52,6 @@ GUI gui;
 
 bool needReload = false;
 
-bool needReload = false;
-
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
 

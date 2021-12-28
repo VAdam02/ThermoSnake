@@ -5,10 +5,11 @@
 #define MODE_COUNT 3
 #define TEMP_SENSOR_COUNT 2
 
-#define STATE_CHANNEL_SETTINGS 0
-#define STATE_SETTINGS 1
-#define STATE_NOCOMMAND 2
-#define STATE_TEMP2 3
+#define STATE_CALIBRATE_SENSOR 0
+#define STATE_CHANNEL_SETTINGS 1
+#define STATE_SETTINGS 2
+#define STATE_NOCOMMAND 3
+#define STATE_TEMP2 4
 
 #define MAIN_SENSOR 0
 #define PRESS_PERCENT 0.5
@@ -71,7 +72,8 @@ void GUI::refresh(unsigned int deltatime)
     oled.drawText(STATE_SETTINGS, 0, 0, "      Settings      .", 1);
 
     oled.drawText(STATE_SETTINGS, 6, 6, "Channel Settings", 1);
-    oled.drawText(STATE_SETTINGS, 6, 12, "Factory reset", 1);
+    oled.drawText(STATE_SETTINGS, 6, 12, "Calibrate Sensor", 1);
+    oled.drawText(STATE_SETTINGS, 6, 18, "Factory reset", 1);
 
     oled.drawText(STATE_SETTINGS, 0, line*6, "-", 1);
 
@@ -94,8 +96,10 @@ void GUI::refresh(unsigned int deltatime)
       else if (line == 0 && pageVar > 0) { setState(STATE_NOCOMMAND); }
       //CHANNEL SETTINGS
       else if (line == 1 && pageVar < 0) { setState(STATE_CHANNEL_SETTINGS); }
+      //CALIBRATE SENSOR
+      else if (line == 2 && pageVar < 0) { setState(STATE_CALIBRATE_SENSOR); }
       //FACTORY RESET
-      else if (line == 2 && pageVar < 0) { message(1,F("Factory reset")); store->inicialise(256); *needReload = true; pageVar = 0; }
+      else if (line == 3 && pageVar < 0) { message(1,F("Factory reset")); store->inicialise(256); *needReload = true; pageVar = 0; }
     }
   }
   if (oled.getCurPage() == STATE_CHANNEL_SETTINGS || nextPage == STATE_CHANNEL_SETTINGS || oled.getTargetPage() == STATE_CHANNEL_SETTINGS)

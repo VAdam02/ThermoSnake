@@ -120,7 +120,7 @@ void TempAndHum::readConfig()
   if (store->readBytes(SAVENAME, pin, 0, 3, fromStore) != 0)
   {
     //DEBUG
-    Serial.print("Inicialise\n");
+    Serial.print("TempAndHum_Inicialise\n");
     //error - not found so inicialise to null mode
     store->allocateSpace(SAVENAME, pin, 4);
     fromStore[0] = 0;   //temp dif 1
