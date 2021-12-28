@@ -7,18 +7,21 @@ TempAndHum tempAndHum;
 //TempAndHum tempAndHum2;
 Backstore store;
 
+bool needReload = false;
+
 void setup()
 {
   Serial.begin(9600);
   delayer.begin();
-  tempAndHum.begin(2);
-  tempAndHum.setDifference(-0.2, 6.2);
+  tempAndHum.begin(2, &store);
   //tempAndHum2.begin(8);
   store.begin();
 }
 
 void loop()
 {
+  checkReload();
+  
   tempAndHum.refresh();
   //tempAndHum2.refresh();
 
@@ -53,4 +56,12 @@ void loop()
   */
   
   delayer.sleepReamingOf(2000);
+}
+
+void checkReload()
+{
+  if (!needReload) { return; }
+  Serial.print("\nRELOAD\n");
+  tempAndHum.readConfig();
+  needReload = false;
 }
