@@ -31,10 +31,10 @@ void TempAndHum::refresh()
   DHThum[LENGTH-1] = NAN;
   read();
 
-  DHTtemp[LENGTH-1] -= 0.2;
+  DHTtemp[LENGTH-1] += TempDifference;
   temperature = getTemperature(&temperatureRange);
 
-  DHThum[LENGTH-1] += 6.2;
+  DHThum[LENGTH-1] += HumDifference;
   humidity = getHumidity(&humidityRange);
 
   //OVERWRITE THE INCORRECT VALUES
@@ -50,6 +50,11 @@ void TempAndHum::refresh()
   }
 }
 
+void TempAndHum::setDifference(float _TempDifference, float _HumDifference)
+{
+  TempDifference = _TempDifference;
+  HumDifference = _HumDifference;
+}
 
 float TempAndHum::getCurrentTemperature()
 {
@@ -104,8 +109,6 @@ float TempAndHum::getHumidity(float* range)
   *range /= LENGTH;
   return avg;
 }
-
-
 
 
 
