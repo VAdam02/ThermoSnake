@@ -52,6 +52,8 @@ GUI gui;
 
 bool needReload = false;
 
+bool needReload = false;
+
 float *TempSensors[TEMPSENSORCOUNT];
 float *HumSensors[HUMSENSORCOUNT];
 
@@ -68,9 +70,8 @@ void setup()
   Serial.begin(9600);
   delayer.begin();
   store.begin();
-  tempAndHum.begin(2);
-  tempAndHum.setDifference(-0.2, 6.2);
-  relayController.begin(&tempControl);
+  tempAndHum.begin(2, &store);
+  relayController.begin(&store, &tempControl);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
 
   TempSensors[0] = &tempAndHum.temperature;
@@ -161,6 +162,7 @@ void checkReload()
 {
   if (!needReload) { return; }
   Serial.print("\nRELOAD\n");
+  tempAndHum.readConfig();
   tempControl.readConfig();
   needReload = false;
 }
