@@ -42,7 +42,7 @@
 #define LEVEL1_SAMPLE_TEMPERATURE2 19
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
-Watchdog wdog;
+//Watchdog wdog;
 DelayManager delayer;
 Backstore store;
 TempAndHum tempAndHum1;
@@ -70,7 +70,7 @@ void setup()
   delayer.begin();
   store.begin();
   tempAndHum1.begin(2, &store);
-  tempAndHum2.begin(8, &store);
+  tempAndHum2.begin(5, &store);
   relayController.begin(&store, &tempControl);
   gui.begin(&needReload, &store, TempSensors, HumSensors);
 
@@ -86,7 +86,7 @@ void setup()
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
   //maybe there's an error due to not reading config
 
-  wdog.begin(&store, TEMPSENSORCOUNT, TempSensors, HUMSENSORCOUNT, HumSensors);
+  //wdog.begin(&store, TEMPSENSORCOUNT, TempSensors, HUMSENSORCOUNT, HumSensors);
 }
 
 void loop()
@@ -94,7 +94,7 @@ void loop()
   Serial.print("\n");
   unsigned int deltatime = delayer.getDeltaTime();
   checkReload();
-  wdog.refresh(deltatime);
+  //wdog.refresh(deltatime);
   tempAndHum1.refresh();
   tempAndHum2.refresh();
   tempControl.refresh(deltatime);

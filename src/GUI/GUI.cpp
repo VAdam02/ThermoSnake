@@ -53,6 +53,22 @@ void GUI::refresh(unsigned int deltatime)
   
   byte nextPage = oled.getCurPage() + (oled.getCurPage() < oled.getTargetPage() ? 1 : (oled.getCurPage() == oled.getTargetPage() ? 0 : -1));
 
+  if (oled.getCurPage() == STATE_TEMP2 || nextPage == STATE_TEMP2 || oled.getTargetPage() == STATE_TEMP2)
+  {
+    oled.drawText(STATE_TEMP2, 0, 0, F("     ALL SENSOR     ."), 1);
+    oled.drawText(STATE_TEMP2, 0, 6, numToString(*TempSensors[0],1) + "*C", 1);
+    oled.drawText(STATE_TEMP2, 0, 12, numToString(*HumSensors[0],1) + "%", 1);
+    oled.drawText(STATE_TEMP2, 0, 18, numToString(*TempSensors[1],1) + "*C", 1);
+    oled.drawText(STATE_TEMP2, 0, 24, numToString(*HumSensors[1],1) + "%", 1);
+
+    //no switching in progress
+    if (oled.getCurPage() == oled.getTargetPage())
+    {
+      getJoyStick(deltatime, &pageVar, true);
+      if (pageVar < 0) { setState(STATE_NOCOMMAND); }
+      else if (pageVar > 0) { pageVar = 0; }
+    }
+  }
   if (oled.getCurPage() == STATE_NOCOMMAND || nextPage == STATE_NOCOMMAND || oled.getTargetPage() == STATE_NOCOMMAND)
   {
     oled.drawText(STATE_NOCOMMAND, 4, 7, numToString(*TempSensors[MAIN_SENSOR],1) + "*C", 4);
@@ -62,18 +78,18 @@ void GUI::refresh(unsigned int deltatime)
     {
       getJoyStick(deltatime, &pageVar, true);
       if (pageVar < 0) { setState(STATE_SETTINGS); }
-      else if (pageVar > 0) { pageVar = 0; }
+      else if (pageVar > 0) { setState(STATE_TEMP2); }
     }
   }
   if (oled.getCurPage() == STATE_SETTINGS || nextPage == STATE_SETTINGS || oled.getTargetPage() == STATE_SETTINGS)
   {
-    lineCount = 3;
+    lineCount = 4;
 
-    oled.drawText(STATE_SETTINGS, 0, 0, "      Settings      .", 1);
+    oled.drawText(STATE_SETTINGS, 0, 0, F("      Settings      ."), 1);
 
-    oled.drawText(STATE_SETTINGS, 6, 6, "Channel Settings", 1);
-    oled.drawText(STATE_SETTINGS, 6, 12, "Calibrate Sensor", 1);
-    oled.drawText(STATE_SETTINGS, 6, 18, "Factory reset", 1);
+    oled.drawText(STATE_SETTINGS, 6, 6, F("Channel Settings"), 1);
+    oled.drawText(STATE_SETTINGS, 6, 12, F("Calibrate Sensor"), 1);
+    oled.drawText(STATE_SETTINGS, 6, 18, F("Factory reset"), 1);
 
     oled.drawText(STATE_SETTINGS, 0, line*6, "-", 1);
 
@@ -230,7 +246,7 @@ void GUI::getJoyStick(unsigned int deltatime, float *data, bool horizontal)
   }
   else
   {
-    value = 1023-analogRead(A7);
+    value = analogRead(A7);
     press = presstime[1];
   }
 
@@ -256,6 +272,7 @@ void GUI::setState(byte newState)
   afk_time = 0;
   lineVar = 0;
   line = 0;
+  pageVar = 0;
   oled.setPage(newState);
 
   timeCounter = 0;
