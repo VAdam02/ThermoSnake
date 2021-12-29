@@ -4,8 +4,8 @@
 #include "src/TempControl/TempControl.h"
 #include "src/RelayController/RelayController.h"
 
-#define TEMPSENSORCOUNT 3
-#define HUMSENSORCOUNT 1
+#define TEMPSENSORCOUNT 4
+#define HUMSENSORCOUNT 2
 
 #define CHANNEL_COUNT 2 //max 255
 
@@ -41,7 +41,8 @@
 #define LEVEL1_SAMPLE_POWERONTIME 20
 
 DelayManager delayer;
-TempAndHum tempAndHum;
+TempAndHum tempAndHum1;
+TempAndHum tempAndHum2;
 Backstore store;
 TempControl tempControl;
 RelayController relayController;
@@ -63,14 +64,17 @@ void setup()
 {
   Serial.begin(9600);
   delayer.begin();
-  tempAndHum.begin(2, &store);
+  tempAndHum1.begin(2, &store);
+  tempAndHum2.begin(8, &store);
   store.begin();
   relayController.begin(&store, &tempControl);
 
-  TempSensors[0] = &tempAndHum.temperature;
-  TempSensors[1] = &value0;
-  TempSensors[2] = &value1;
-  HumSensors[0] = &tempAndHum.humidity;
+  TempSensors[0] = &tempAndHum1.temperature;
+  TempSensors[1] = &tempAndHum2.temperature;
+  TempSensors[2] = &value0;
+  TempSensors[3] = &value1;
+  HumSensors[0] = &tempAndHum1.humidity;
+  HumSensors[1] = &tempAndHum2.humidity;
 
   //store.mem();
 
@@ -86,7 +90,8 @@ void loop()
   //DEBUG
   Serial.print("\n");
   checkReload();
-  tempAndHum.refresh();
+  tempAndHum1.refresh();
+  tempAndHum2.refresh();
   tempControl.refresh(deltatime);
   relayController.refresh(deltatime);
 
@@ -153,6 +158,7 @@ void checkReload()
 {
   if (!needReload) { return; }
   Serial.print("\nRELOAD\n");
-  tempAndHum.readConfig();
+  tempAndHum1.readConfig();
+  tempAndHum2.readConfig();
   needReload = false;
 }
