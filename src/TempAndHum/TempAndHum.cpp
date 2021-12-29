@@ -4,7 +4,7 @@
  * EEPROM allocations:
  * SAVENAME PIN - for sensor pin's difference
  */
-#define SAVENAME 'C'
+#define SAVENAME 'D'
 
 TempAndHum::TempAndHum() { }
 
