@@ -1,15 +1,25 @@
 #include "TempAndHum.h"
 
+/*
+ * EEPROM allocations:
+ * SAVENAME PIN - for sensor pin's difference
+ */
+#define SAVENAME 'D'
+
 TempAndHum::TempAndHum() { }
 
-void TempAndHum::begin(byte _pin)
+void TempAndHum::begin(byte _pin, Backstore* _store)
 {
   pin = _pin;
+  store = _store;
+
   for (int i = 0; i < LENGTH; i++)
   {
     DHTtemp[i] = NAN;
     DHThum[i] = NAN;
   }
+
+  readConfig();
 
   init();
   
@@ -31,10 +41,10 @@ void TempAndHum::refresh()
   DHThum[LENGTH-1] = NAN;
   read();
 
-  DHTtemp[LENGTH-1] -= 0.2;
+  DHTtemp[LENGTH-1] += TempDifference;
   temperature = getTemperature(&temperatureRange);
 
-  DHThum[LENGTH-1] += 6.2;
+  DHThum[LENGTH-1] += HumDifference;
   humidity = getHumidity(&humidityRange);
 
   //OVERWRITE THE INCORRECT VALUES
@@ -49,7 +59,6 @@ void TempAndHum::refresh()
     }
   }
 }
-
 
 float TempAndHum::getCurrentTemperature()
 {
@@ -105,9 +114,25 @@ float TempAndHum::getHumidity(float* range)
   return avg;
 }
 
-
-
-
+void TempAndHum::readConfig()
+{ 
+  byte fromStore[4];
+  if (store->readBytes(SAVENAME, pin, 0, 3, fromStore) != 0)
+  {
+    //DEBUG
+    Serial.print("TempAndHum_Inicialise\n");
+    //error - not found so inicialise to null mode
+    store->allocateSpace(SAVENAME, pin, 4);
+    fromStore[0] = 0;   //temp dif 1
+    fromStore[1] = 0;   //temp dif 2
+    fromStore[2] = 0;   //hum dif 1
+    fromStore[3] = 0;   //hum dif 2
+    store->writeBytes(SAVENAME, pin, 0, 3, fromStore);
+  }
+  
+  TempDifference = store->reverseByteFormat(0, fromStore);
+  HumDifference = store->reverseByteFormat(2, fromStore);
+}
 
 
 

@@ -6,24 +6,28 @@
 #define TempAndHum_h
 
 #include "Arduino.h"
+#include "../../src/Backstore/Backstore.h"
 
 #define COOLDOWN 2000
-#define LENGTH 15 //LENGTH * COOLDOWN / 1000 seconds
+#define LENGTH 1 //LENGTH * COOLDOWN / 1000 seconds
 
 class TempAndHum
 {
   public:
     TempAndHum();
-    void TempAndHum::begin(byte pin);
+    void TempAndHum::begin(byte pin, Backstore* _store);
     void TempAndHum::refresh();
     float TempAndHum::getCurrentTemperature();
     float TempAndHum::getCurrentHumidity();
+    void TempAndHum::readConfig();
 
     float temperature = NAN;
     float temperatureRange = NAN;
     float humidity = NAN;
     float humidityRange = NAN;
   private:
+    Backstore *store;
+
     float TempAndHum::getTemperature();
     float TempAndHum::getTemperature(float* range);
     float TempAndHum::getHumidity();
@@ -34,6 +38,8 @@ class TempAndHum
 
     unsigned int lastTime = 0;
     byte pin;
+    float TempDifference = 0;
+    float HumDifference = 0;
 
     void TempAndHum::init();
     bool TempAndHum::read();

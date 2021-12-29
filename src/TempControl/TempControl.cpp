@@ -49,7 +49,6 @@
  * 3 - Turned on
  */
 
-#include <Arduino.h>
 #include "TempControl.h"
 
 TempControl::TempControl() { }
@@ -81,14 +80,14 @@ void TempControl::refresh(unsigned int deltatime)
 void TempControl::addHeatingTask(byte channel, byte on_time, byte maxDelay_time)
 {
   channelParams[channel][LEVELX_STATE] = 2;
-  getUnsignedByteFormat(on_time, LEVELX_ONTIME_LEFT, channelParams[channel]);
+  store->getUnsignedByteFormat(on_time, LEVELX_ONTIME_LEFT, channelParams[channel]);
 
-  float maxDelayLeft = reverseUnsignedByteFormat(LEVELX_MAXDELAY_LEFT, channelParams[channel]);
+  float maxDelayLeft = store->reverseUnsignedByteFormat(LEVELX_MAXDELAY_LEFT, channelParams[channel]);
   if (maxDelayLeft == 0 || maxDelayLeft > maxDelay_time)
   {
     maxDelayLeft = maxDelay_time;
   }
-  getUnsignedByteFormat(maxDelayLeft, LEVELX_MAXDELAY_LEFT, channelParams[channel]);
+  store->getUnsignedByteFormat(maxDelayLeft, LEVELX_MAXDELAY_LEFT, channelParams[channel]);
 }
 void TempControl::stopHeatingTask(byte channel)
 {
@@ -106,8 +105,8 @@ void TempControl::stopHeatingTask(byte channel)
  */
 bool TempControl::level0(byte channel, float curLevel)
 {
-  float onLevel = reverseByteFormat(LEVEL0_ONLEVEL, channelParams[channel]);
-  float offLevel = reverseByteFormat(LEVEL0_OFFLEVEL, channelParams[channel]);
+  float onLevel = store->reverseByteFormat(LEVEL0_ONLEVEL, channelParams[channel]);
+  float offLevel = store->reverseByteFormat(LEVEL0_OFFLEVEL, channelParams[channel]);
 
   //TODO cooldown
   //TODO more intelligent maxDelay
@@ -143,11 +142,11 @@ bool TempControl::level0(byte channel, float curLevel)
  */
 bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
 {
-  float cooldownLeft = reverseUnsignedByteFormat(LEVELX_COOLDOWN_LEFT, channelParams[channel]);
-  float targetLevel = reverseUnsignedByteFormat(LEVEL1_TARGETLEVEL, channelParams[channel]);
-  float tolerance = reverseUnsignedByteFormat(LEVEL1_TOLERANCE, channelParams[channel]) * 0.75;
+  float cooldownLeft = store->reverseUnsignedByteFormat(LEVELX_COOLDOWN_LEFT, channelParams[channel]);
+  float targetLevel = store->reverseUnsignedByteFormat(LEVEL1_TARGETLEVEL, channelParams[channel]);
+  float tolerance = store->reverseUnsignedByteFormat(LEVEL1_TOLERANCE, channelParams[channel]) * 0.75;
 
-  float reaction = reverseByteFormat(LEVEL1_REACTION, channelParams[channel]);
+  float reaction = store->reverseByteFormat(LEVEL1_REACTION, channelParams[channel]);
 
   //cooldown or heating in progress
   if (cooldownLeft > 0 || (channelParams[channel][LEVELX_ONTIME_LEFT] > 0 && channelParams[channel][LEVELX_STATE] == 3))
@@ -167,7 +166,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     else
     {
       cooldownLeft -= ((float)(deltatime)/1000);
-      getUnsignedByteFormat(cooldownLeft, LEVELX_COOLDOWN_LEFT, channelParams[channel]);
+      store->getUnsignedByteFormat(cooldownLeft, LEVELX_COOLDOWN_LEFT, channelParams[channel]);
       return false; //nothing to do
     }
   }
@@ -201,7 +200,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
       addHeatingTask(channel, onTime, 0);
 
       //take sample
-      getByteFormat(curLevel, LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
+      store->getByteFormat(curLevel, LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
       channelParams[channel][LEVEL1_SAMPLE_POWERONTIME] = channelParams[channel][LEVELX_ONTIME_LEFT];
     }
     //it's going to be cold there in a closed time
@@ -217,7 +216,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
       }
 
       //take sample
-      getByteFormat(curLevel, LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
+      store->getByteFormat(curLevel, LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
       channelParams[channel][LEVEL1_SAMPLE_POWERONTIME] = channelParams[channel][LEVELX_ONTIME_LEFT];
     }
   }
@@ -232,7 +231,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   if (channelParams[channel][LEVEL1_CURRENTSTATE] == 2 && channelParams[channel][LEVELX_ONTIME_LEFT] == 0 && channelParams[channel][LEVELX_STATE] == 1)
   {
     cooldownLeft = LEVEL1_OFFCOOLDOWN;
-    getUnsignedByteFormat(cooldownLeft, LEVELX_COOLDOWN_LEFT, channelParams[channel]);
+    store->getUnsignedByteFormat(cooldownLeft, LEVELX_COOLDOWN_LEFT, channelParams[channel]);
     channelParams[channel][LEVEL1_CURRENTSTATE]++;
   }
 
@@ -240,7 +239,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   if (channelParams[channel][LEVEL1_CURRENTSTATE] == 3 && cooldownLeft == 0)
   {
     //calculate the new avg reaction
-    float sampleTemperature = reverseByteFormat(LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
+    float sampleTemperature = store->reverseByteFormat(LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
 
     //TODO make better avg calculation
     float curReaction = (curLevel - sampleTemperature) / (channelParams[channel][LEVEL1_SAMPLE_POWERONTIME] / 10);
@@ -259,7 +258,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
         //bigger than 128 but it not really can happen
       }
     }
-    getByteFormat(reaction, LEVEL1_REACTION, channelParams[channel]);
+    store->getByteFormat(reaction, LEVEL1_REACTION, channelParams[channel]);
     //TODO make less write sequance
     byte data[2];
     data[0] = channelParams[channel][LEVEL1_REACTION];
@@ -276,34 +275,6 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   }
 
   return true;
-}
-
-void TempControl::getByteFormat(float data, byte index, byte array[])
-{
-  array[index] = ((byte)abs(data) % 128) + (data < 0 ? 128 : 0);
-  array[index+1] = (abs(data) - (int)(abs(data))) * 256;
-}
-float TempControl::reverseByteFormat(byte index, byte array[])
-{
-  float value = 0;
-  value += array[index] % 128;
-  value += (float)(array[index+1]) / 256;
-  value *= (array[index] >= 128 ? -1 : 1);
-  
-  return value;
-}
-void TempControl::getUnsignedByteFormat(float data, byte index, byte array[])
-{
-  array[index] = ((byte)abs(data) % 256);
-  array[index+1] = (abs(data) - (int)(abs(data))) * 256;
-}
-float TempControl::reverseUnsignedByteFormat(byte index, byte array[])
-{
-  float value = 0;
-  value += array[index];
-  value += (float)(array[index+1]) / 256;
-  
-  return value;
 }
 
 void TempControl::readConfig()
