@@ -72,7 +72,6 @@ void setup()
   tempAndHum1.begin(2, &store);
   tempAndHum2.begin(5, &store);
   relayController.begin(&store, &tempControl);
-  gui.begin(&needReload, &store, TempSensors, HumSensors);
 
   TempSensors[0] = &tempAndHum1.temperature;
   TempSensors[1] = &tempAndHum2.temperature;
@@ -84,7 +83,7 @@ void setup()
   store.mem();
 
   tempControl.begin(TempSensors, &store); //inicialise should be earlier than this
-  //maybe there's an error due to not reading config
+  gui.begin(&needReload, &tempControl, &store, TempSensors, HumSensors); //should be inicialised after tempControl.begin()
 
   //wdog.begin(&store, TEMPSENSORCOUNT, TempSensors, HUMSENSORCOUNT, HumSensors);
 }

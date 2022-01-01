@@ -8,18 +8,20 @@
 #include <Arduino.h>
 #include "../../src/Graphics/Graphics.h"
 #include "../../src/Backstore/Backstore.h"
+#include "../../src/TempControl/TempControl.h"
 
 class GUI
 {
   public:
     GUI();
-    void GUI::begin(bool *_needReload, Backstore *_store, float *_TempSensors[], float *_HumSensors[]);
+    void GUI::begin(bool *_needReload, TempControl *tempControl, Backstore *_store, float *_TempSensors[], float *_HumSensors[]);
     void GUI::refresh(unsigned int deltatime);
     void GUI::endrefresh();
   private:
     bool *needReload;
     Graphics oled;
     Backstore *store;
+    TempControl *tempControl;
     unsigned int timeCounter = 0;
     float **TempSensors;
     float **HumSensors;

@@ -11,18 +11,19 @@
 #define STATE_NOCOMMAND 3
 #define STATE_TEMP2 4
 
-#define MAIN_SENSOR 0
+#define MAIN_SENSOR 1
 #define PRESS_PERCENT 0.5
 
 #define MAX_AFK 60000
 
 GUI::GUI() { }
 
-void GUI::begin(bool *_needReload, Backstore *_store, float *_TempSensors[], float *_HumSensors[])
+void GUI::begin(bool *_needReload, TempControl *_tempControl, Backstore *_store, float *_TempSensors[], float *_HumSensors[])
 {
   oled.begin();
   needReload = _needReload;
   store = _store;
+  tempControl = _tempControl;
   TempSensors = _TempSensors;
   HumSensors = _HumSensors;
   oled.setPage(STATE_NOCOMMAND);
@@ -72,6 +73,9 @@ void GUI::refresh(unsigned int deltatime)
   if (oled.getCurPage() == STATE_NOCOMMAND || nextPage == STATE_NOCOMMAND || oled.getTargetPage() == STATE_NOCOMMAND)
   {
     oled.drawText(STATE_NOCOMMAND, 4, 7, numToString(*TempSensors[MAIN_SENSOR],1) + "*C", 4);
+    
+    oled.drawText(STATE_NOCOMMAND, 121, 0, numToString(tempControl->channelParams[0][0], 0), 1);
+    oled.drawText(STATE_NOCOMMAND, 121, 25, numToString(tempControl->channelParams[1][0], 0), 1);
 
     //no switching in progress
     if (oled.getCurPage() == oled.getTargetPage())
