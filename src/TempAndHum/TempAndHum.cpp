@@ -119,8 +119,6 @@ void TempAndHum::readConfig()
   byte fromStore[4];
   if (store->readBytes(SAVENAME, pin, 0, 3, fromStore) != 0)
   {
-    //DEBUG
-    Serial.print("Inicialise\n");
     //error - not found so inicialise to null mode
     store->allocateSpace(SAVENAME, pin, 4);
     fromStore[0] = 0;   //temp dif 1
@@ -132,6 +130,12 @@ void TempAndHum::readConfig()
   
   TempDifference = store->reverseByteFormat(0, fromStore);
   HumDifference = store->reverseByteFormat(2, fromStore);
+
+  for (int i = 0; i < LENGTH; i++)
+  {
+    DHTtemp[i] = NAN;
+    DHThum[i] = NAN;
+  }
 }
 
 

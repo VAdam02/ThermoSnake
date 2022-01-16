@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "DelayManager.h"
 
 DelayManager::DelayManager() { }

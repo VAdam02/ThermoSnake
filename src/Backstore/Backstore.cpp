@@ -1,8 +1,4 @@
-#include <Arduino.h>
 #include "Backstore.h"
-
-#define EEPROM_SIZE 4096
-#define EEPROM_ADDRESS 0x50
 
 Backstore::Backstore() { }
 
