@@ -6,6 +6,8 @@ Graphics oled;
 
 void setup()
 {
+  Serial.begin(9600);
+  
   delayer.begin();
   oled.begin();
 }
