@@ -5,6 +5,7 @@ Backstore store;
 void setup()
 {
   Serial.begin(9600);
+  
   Serial.print("\n");
   Serial.print("Start");
   store.inicialise(256);
@@ -48,7 +49,7 @@ void setup()
 
 
   store.defragmentStorage();
-
+  
   /*
   Serial.print("\n");
   store.allocateSpace('B', 2, 10);
