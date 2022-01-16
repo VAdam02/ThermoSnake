@@ -1,5 +1,7 @@
+#include "src/DelayManager/DelayManager.h"
 #include "src/Backstore/Backstore.h"
 
+DelayManager delayer;
 Backstore store;
 
 void setup()
@@ -82,9 +84,11 @@ void setup()
   }
   Serial.print("\n");
   */
+
+  delayer.begin();
 }
 
 void loop()
 {
-  
+  delayer.sleepReamingOf(50);
 }
