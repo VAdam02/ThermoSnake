@@ -9,7 +9,7 @@
 #include "../../src/Backstore/Backstore.h"
 
 #define COOLDOWN 2000
-#define LENGTH 5 //LENGTH * COOLDOWN / 1000 seconds
+#define LENGTH 20 //LENGTH * COOLDOWN / 1000 seconds
 
 class TempAndHum
 {
