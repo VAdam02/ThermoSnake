@@ -8,6 +8,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#define EEPROM_SIZE 4096
+#define EEPROM_ADDRESS 0x50
+
 class Backstore
 {
   public:
