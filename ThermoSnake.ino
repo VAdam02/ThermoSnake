@@ -26,12 +26,6 @@ RelayController relayController;
 #define LEVELX_MAXDELAY_LEFT 7
 #define LEVELX_MAXDELAY_LEFT2 8
 
-//LEVEL 0
-#define LEVEL0_OFFLEVEL 9
-#define LEVEL0_OFFLEVEL2 10
-#define LEVEL0_ONLEVEL 11
-#define LEVEL0_ONLEVEL2 12
-
 //LEVEL 1
 #define LEVEL1_TARGETLEVEL 9
 #define LEVEL1_TARGETLEVEL2 10
@@ -59,9 +53,9 @@ void setup()
   tempAndHum.begin(2, &store);
   tempAndHum2.begin(8, &store);
 
-  TempSensors[0] = &tempAndHum1.temperature;
+  TempSensors[0] = &tempAndHum.temperature;
   TempSensors[1] = &tempAndHum2.temperature;
-  HumSensors[0] = &tempAndHum1.humidity;
+  HumSensors[0] = &tempAndHum.humidity;
   HumSensors[1] = &tempAndHum2.humidity;
 
   tempControl.begin(TempSensors, &store);
@@ -91,7 +85,7 @@ void loop()
   Serial.print(" ");
   Serial.print(relayController.ch1);
   Serial.print(" - CH 0 - ");
-  Serial.print(TempSensors[0], DEC);
+  Serial.print(*TempSensors[0], DEC);
   Serial.print(" - State ");
   Serial.print(tempControl.channelParams[0][LEVELX_STATE]);
   Serial.print(" - OnTime ");
@@ -103,7 +97,7 @@ void loop()
   Serial.print(" ");
   Serial.print(tempControl.channelParams[0][LEVELX_MAXDELAY_LEFT2]);
   Serial.print(" - CH 1 - ");
-  Serial.print(TempSensors[1], DEC);
+  Serial.print(*TempSensors[1], DEC);
   Serial.print(" - State ");
   Serial.print(tempControl.channelParams[1][LEVELX_STATE]);
   Serial.print(" - OnTime ");

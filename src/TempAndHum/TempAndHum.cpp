@@ -119,7 +119,7 @@ void TempAndHum::readConfig()
   byte fromStore[4];
   if (store->readBytes(SAVENAME, pin, 0, 3, fromStore) != 0)
   {
-    //error - not found so inicialise to null mode
+    //not found so inicialise to null mode
     store->allocateSpace(SAVENAME, pin, 4);
     fromStore[0] = 0;   //temp dif 1
     fromStore[1] = 0;   //temp dif 2
@@ -265,6 +265,7 @@ bool TempAndHum::read() {
 
   if (!result)
   {
+    //DEBUG
     Serial.print("ERROR DHT11 ERROR");
     return result;
   }

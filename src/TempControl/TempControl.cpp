@@ -1,4 +1,3 @@
-#define CHANNEL_COUNT 2 //max 255
 #define LEVEL0_MAXDELAYTIME 255 //max 255 sec due to LEVELX_MAXDELAY_LEFT
 #define LEVEL1_OFFCOOLDOWN 120 //max 255 sec due to LEVELX_COOLDOWN_LEFT
 #define LEVEL1_COOLSPEED_1C_IN_SECONDS 1200 //0.1C in 120 seconds -> 1C in 1200 seconds
@@ -67,17 +66,14 @@ void TempControl::refresh(unsigned int deltatime)
   {
     if (channelParams[i][LEVELX_MODE] == 0)
     {
-      //not used
-      //Serial.print(" LEVELX ");
+
     }
     else if (channelParams[i][LEVELX_MODE] == 1)
     {
-      Serial.print(" LEVEL0 ");
       level0(i, *sensors[channelParams[i][LEVELX_SENSOR_ID]]);
     }
     else if (channelParams[i][LEVELX_MODE] == 2)
     {
-      Serial.print(" LEVEL1 ");
       level1(i, *sensors[channelParams[i][LEVELX_SENSOR_ID]], deltatime);
     }
   }
@@ -118,20 +114,16 @@ bool TempControl::level0(byte channel, float curLevel)
   //TODO more intelligent maxDelay
   if (curLevel < onLevel)
   {
-    //DEBUG
-    Serial.print("ON - ");
     //power on
     if (channelParams[channel][LEVELX_STATE] == 0 || channelParams[channel][LEVELX_STATE] == 1)
     {
-      addHeatingTask(channel, 65535, LEVEL0_MAXDELAYTIME);
+      addHeatingTask(channel, 255, LEVEL0_MAXDELAYTIME);
       return true;
     }
     return false;
   }
   else if (offLevel < curLevel)
   {
-    //DEBUG
-    Serial.print("OFF - ");
     //power off
     if (channelParams[channel][LEVELX_STATE] == 2 || channelParams[channel][LEVELX_STATE] == 3)
     {
@@ -155,10 +147,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   float cooldownLeft = store->reverseUnsignedByteFormat(LEVELX_COOLDOWN_LEFT, channelParams[channel]);
   float targetLevel = store->reverseUnsignedByteFormat(LEVEL1_TARGETLEVEL, channelParams[channel]);
   float tolerance = store->reverseUnsignedByteFormat(LEVEL1_TOLERANCE, channelParams[channel]) * 0.75;
-
   float reaction = store->reverseByteFormat(LEVEL1_REACTION, channelParams[channel]);
-
-  //float reaction = 1.3; //TODO export from array
 
   //cooldown or heating in progress
   if (cooldownLeft > 0 || (channelParams[channel][LEVELX_ONTIME_LEFT] > 0 && channelParams[channel][LEVELX_STATE] == 3))
@@ -166,8 +155,6 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     //decrease the left variables
     if (channelParams[channel][LEVELX_ONTIME_LEFT] > 0 && channelParams[channel][LEVELX_STATE] == 3)
     {
-      //DEBUG
-      Serial.print("ONwait - ");
       return false; //nothing to do
     }
 
@@ -179,8 +166,6 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     }
     else
     {
-      //DEBUG
-      Serial.print("COOLwait - ");
       cooldownLeft -= ((float)(deltatime)/1000);
       store->getUnsignedByteFormat(cooldownLeft, LEVELX_COOLDOWN_LEFT, channelParams[channel]);
       return false; //nothing to do
@@ -190,40 +175,28 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   //cooling
   if (channelParams[channel][LEVEL1_CURRENTSTATE] == 0)
   {
-    //DEBUG
-    Serial.print("cooling - ");
     //hot
     if (curLevel > targetLevel) { return false; } //still hot enough so nothing to do
     //cold
-    //DEBUG
-    Serial.print("cold - ");
     channelParams[channel][LEVEL1_CURRENTSTATE]++;
   }
 
   //on for x seconds
   if (channelParams[channel][LEVEL1_CURRENTSTATE] == 1 && channelParams[channel][LEVELX_STATE] != 3)
   {
-    //DEBUG
-    Serial.print("heat - ");
-
     //error correction
-    if (reaction == 0) { reaction = 1; }
-    unsigned int onTime = (targetLevel + tolerance - curLevel) / reaction * 10;
+    if (reaction == 0) { reaction = (float)(1)/(float)(256); }
+    unsigned int onTime = (targetLevel + tolerance - curLevel) * 10 / reaction;
     if (onTime > channelParams[channel][LEVEL1_MAXON]) { onTime = channelParams[channel][LEVEL1_MAXON]; }
 
     //it could happen in some cases when the heat is become ok without activating the relay
     if (curLevel > (targetLevel + tolerance))
     {
-      Serial.print("skip - ");
       channelParams[channel][LEVEL1_CURRENTSTATE] += 2;
     }
     //it's going to be cold there
     else if (curLevel < (targetLevel - tolerance))
     {
-      //DEBUG
-      Serial.print("SOS: ");
-      Serial.print(onTime);
-      Serial.print(" - ");
       addHeatingTask(channel, onTime, 0);
 
       //take sample
@@ -233,11 +206,6 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     //it's going to be cold there in a closed time
     else if (onTime > channelParams[channel][LEVEL1_MINON])
     {
-      //DEBUG
-      Serial.print("OK: ");
-      Serial.print(onTime);
-      Serial.print(" - ");
-
       if ((curLevel - (targetLevel - tolerance))*LEVEL1_COOLSPEED_1C_IN_SECONDS > 255)
       {
         addHeatingTask(channel, onTime, 255);
@@ -270,10 +238,6 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
   //data analyzing
   if (channelParams[channel][LEVEL1_CURRENTSTATE] == 3 && cooldownLeft == 0)
   {
-    //DEBUG
-    Serial.print("sample - ");
-    Serial.print("AVG: ");
-
     //calculate the new avg reaction
     float sampleTemperature = store->reverseByteFormat(LEVEL1_SAMPLE_TEMPERATURE, channelParams[channel]);
 
@@ -285,7 +249,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     }
     else
     {
-      if (curReaction < 0)
+      if (curReaction <= 0)
       {
         reaction *= 0.75;
       }
@@ -294,7 +258,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
         //bigger than 128 but it not really can happen
       }
       //DEBUG
-      Serial.print(" ERROR_REACTION ");
+      Serial.print("ERROR REACTION ERROR");
     }
     store->getByteFormat(reaction, LEVEL1_REACTION, channelParams[channel]);
     //TODO make less write sequance
@@ -304,6 +268,7 @@ bool TempControl::level1(byte channel, float curLevel, unsigned int deltatime)
     store->writeBytes(SAVENAME, channel, 6, 7, data);
 
     //DEBUG
+    Serial.print("AVG: ");
     Serial.print(reaction, DEC);
     Serial.print(" - ");
 
@@ -327,9 +292,7 @@ void TempControl::readConfig()
     byte fromStore[10];
     if (store->readBytes(SAVENAME, i, 0, 9, fromStore) != 0)
     {
-      //DEBUG
-      Serial.print("Inicialise\n");
-      //error - not found so inicialise to null mode
+      //not found so inicialise to null mode
       store->allocateSpace(SAVENAME, i, 10);
       fromStore[0] = 0;   //LEVELX_MODE
       fromStore[1] = 0;   //LEVELX_SENSOR_ID
@@ -365,8 +328,5 @@ void TempControl::readConfig()
     channelParams[i][18] = 0;
     channelParams[i][19] = 0;
     channelParams[i][20] = 0;
-
-    //DEBUG
-    Serial.print(channelParams[i][LEVELX_MODE]);
   }
 }

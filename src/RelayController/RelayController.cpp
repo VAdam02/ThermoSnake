@@ -63,8 +63,6 @@ void RelayController::refresh(unsigned int deltatime)
       if (j < CHANNEL_COUNT)
       {
         //found
-        //DEBUG
-        Serial.print(" _ COMBO _ ");
         combo++;
 
         activate(i);

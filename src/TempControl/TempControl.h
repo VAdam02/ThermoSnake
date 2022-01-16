@@ -6,8 +6,9 @@
 #define TempControl_h
 
 #include <Arduino.h>
-#include "../../src/TempAndHum/TempAndHum.h"
 #include "../../src/Backstore/Backstore.h"
+
+#define CHANNEL_COUNT 2 //max 255
 
 class TempControl
 {
@@ -17,7 +18,7 @@ class TempControl
     void TempControl::refresh(unsigned int deltatime);
 
     void TempControl::readConfig();
-    byte channelParams[2][21];
+    byte channelParams[CHANNEL_COUNT][21];
   private:
   Backstore *store;
     float **sensors;
